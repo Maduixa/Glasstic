@@ -211,10 +211,7 @@ struct ContentView: View {
     }
 }
 
-// MARK: - Supporting Views & Enums
-enum FastingState: String {
-    case idle, fasting
-}
+// MARK: - Supporting Views
 
 struct FastingZoneInfoView: View {
     let elapsedTime: TimeInterval
