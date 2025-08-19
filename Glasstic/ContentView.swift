@@ -1,6 +1,7 @@
 import SwiftUI
 import ActivityKit
 import Combine
+import UIKit
 
 // MARK: - Fasting Manager
 class FastingManager: ObservableObject {
@@ -57,12 +58,8 @@ class FastingManager: ObservableObject {
         elapsedTime = 0
         startTimer()
         
-        let hours = Int(goal / 3600)
-        NotificationManager.shared.scheduleNotification(
-            title: "Fasting Complete!",
-            body: "You've completed your \(hours)-hour fast. Great job!",
-            timeInterval: goal
-        )
+        // Schedule AI-generated notification
+        NotificationManager.shared.scheduleAINotification(for: goal)
 
         // Start Live Activity
         let attributes = FastingActivityAttributes(fastingGoal: goal)
@@ -136,6 +133,21 @@ class FastingManager: ObservableObject {
     func getFastingGoal() -> TimeInterval {
         return fastingGoal
     }
+    
+    func getStartDate() -> Date {
+        return Date(timeIntervalSince1970: fastingStartDate)
+    }
+    
+    func updateStartTime(to newStartTime: Date) {
+        fastingStartDate = newStartTime.timeIntervalSince1970
+        
+        // Recalculate elapsed time
+        self.elapsedTime = Date().timeIntervalSince(newStartTime)
+        
+        // Update live activity and watch
+        updateLiveActivity()
+        sendContextToWatch()
+    }
 }
 
 // MARK: - Main Content View
@@ -146,6 +158,7 @@ struct ContentView: View {
     @State private var isShowingCalendar = false
     @State private var isShowingPlanSelector = false
     @State private var isShowingProfile = false
+    @State private var isShowingStartTimeEditor = false
 
     var body: some View {
         ZStack {
@@ -170,6 +183,10 @@ struct ContentView: View {
                 .environmentObject(fastingManager)
         }
         .sheet(isPresented: $isShowingProfile) { ProfileView() }
+        .sheet(isPresented: $isShowingStartTimeEditor) {
+            StartTimeEditorView()
+                .environmentObject(fastingManager)
+        }
         .fullScreenCover(isPresented: .constant(!hasCompletedOnboarding)) {
             OnboardingView(hasCompletedOnboarding: $hasCompletedOnboarding)
         }
@@ -198,17 +215,47 @@ struct ContentView: View {
         if fastingManager.fastingState == .idle {
             glassButton(title: "Choose Fasting Plan", action: { isShowingPlanSelector.toggle() })
         } else {
-            glassButton(title: "End Fast", action: fastingManager.endFasting)
+            VStack(spacing: 15) {
+                HStack(spacing: 15) {
+                    glassButton(title: "Edit Start Time", action: { isShowingStartTimeEditor.toggle() })
+                        .frame(maxWidth: .infinity)
+                    glassButton(title: "End Fast", action: fastingManager.endFasting)
+                        .frame(maxWidth: .infinity)
+                }
+            }
         }
     }
 
     private func glassButton(title: String, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
+        Button(action: {
+            let impactFeedback = UIImpactFeedbackGenerator(style: .medium)
+            impactFeedback.impactOccurred()
+            action()
+        }) {
             Text(title)
                 .font(.headline).foregroundColor(.white).padding()
-                .frame(minWidth: 250)
-                .background(.ultraThinMaterial).cornerRadius(20).shadow(radius: 5)
+                .frame(minWidth: 120)
+                .background(
+                    RoundedRectangle(cornerRadius: 20)
+                        .fill(.ultraThinMaterial)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 20)
+                                .stroke(LinearGradient(colors: [.white.opacity(0.5), .white.opacity(0.1)], 
+                                                     startPoint: .topLeading, endPoint: .bottomTrailing), lineWidth: 1)
+                        )
+                )
+                .shadow(color: .black.opacity(0.2), radius: 5, x: 0, y: 3)
+                .scaleEffect(1.0)
         }
+        .buttonStyle(PressedButtonStyle())
+    }
+}
+
+struct PressedButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed ? 0.95 : 1.0)
+            .animation(.easeInOut(duration: 0.1), value: configuration.isPressed)
     }
 }
 
@@ -216,21 +263,109 @@ struct ContentView: View {
 
 struct FastingZoneInfoView: View {
     let elapsedTime: TimeInterval
+    @State private var currentMessage: String = ""
+    @State private var messageTimer: Timer?
+    @State private var messageType: Int = 0
 
     private var currentZone: FastingZone {
         return FastingZone.allZones.filter { elapsedTime >= $0.duration }.last ?? .anabolic
     }
+    
+    private var timeInCurrentZone: TimeInterval {
+        let previousZone = FastingZone.allZones.filter { $0.duration < currentZone.duration }.last
+        let startTime = previousZone?.duration ?? 0
+        return elapsedTime - startTime
+    }
 
     var body: some View {
-        VStack(spacing: 10) {
-            Text(currentZone.name)
-                .font(.largeTitle).fontWeight(.bold).foregroundColor(currentZone.color)
+        VStack(spacing: 15) {
+            HStack {
+                Text(currentZone.emoji)
+                    .font(.title)
+                    .scaleEffect(1.2)
+                    .shadow(color: currentZone.color.opacity(0.5), radius: 3, x: 0, y: 2)
+                Text(currentZone.name)
+                    .font(.largeTitle).fontWeight(.bold)
+                    .foregroundStyle(
+                        LinearGradient(colors: [currentZone.color, currentZone.color.opacity(0.7)], 
+                                     startPoint: .topLeading, endPoint: .bottomTrailing)
+                    )
+            }
+            
+            // Zone duration indicator
+            if timeInCurrentZone > 0 {
+                Text("In this zone for \(formatDuration(timeInCurrentZone))")
+                    .font(.caption)
+                    .foregroundColor(.white.opacity(0.6))
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 4)
+                    .background(.ultraThinMaterial)
+                    .cornerRadius(12)
+            }
 
-            Text(currentZone.trivia.randomElement() ?? "")
-                .font(.subheadline).foregroundColor(.white.opacity(0.8))
+            Text(currentMessage)
+                .font(.subheadline).foregroundColor(.white.opacity(0.85))
                 .multilineTextAlignment(.center).padding(.horizontal)
+                .animation(.easeInOut(duration: 0.5), value: currentMessage)
         }
-        .padding().background(.ultraThinMaterial).cornerRadius(20).padding(.horizontal, 20)
+        .padding(.vertical, 20)
+        .padding(.horizontal, 16)
+        .background(
+            RoundedRectangle(cornerRadius: 20)
+                .fill(.ultraThinMaterial)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 20)
+                        .stroke(LinearGradient(colors: [currentZone.color.opacity(0.3), .clear], 
+                                             startPoint: .topLeading, endPoint: .bottomTrailing), lineWidth: 1)
+                )
+        )
+        .padding(.horizontal, 20)
+        .onAppear {
+            updateMessage()
+            startMessageTimer()
+        }
+        .onDisappear {
+            messageTimer?.invalidate()
+        }
+        .onChange(of: currentZone.id) { _, _ in
+            updateMessage()
+        }
+    }
+    
+    private func updateMessage() {
+        // Add haptic feedback for zone changes
+        let impactFeedback = UIImpactFeedbackGenerator(style: .light)
+        impactFeedback.impactOccurred()
+        
+        switch messageType % 3 {
+        case 0:
+            currentMessage = AIMessageManager.shared.generateFastingMessage(for: currentZone, messageType: .motivational)
+        case 1:
+            currentMessage = AIMessageManager.shared.generateFastingMessage(for: currentZone, messageType: .educational)
+        case 2:
+            currentMessage = AIMessageManager.shared.generateContextualMessage(for: currentZone, timeInZone: timeInCurrentZone)
+        default:
+            currentMessage = AIMessageManager.shared.generateFastingMessage(for: currentZone, messageType: .motivational)
+        }
+        messageType += 1
+    }
+    
+    private func startMessageTimer() {
+        messageTimer?.invalidate()
+        messageTimer = Timer.scheduledTimer(withTimeInterval: 30, repeats: true) { _ in
+            updateMessage()
+        }
+    }
+    
+    private func formatDuration(_ duration: TimeInterval) -> String {
+        let hours = Int(duration) / 3600
+        let minutes = Int(duration) % 3600 / 60
+        
+        if hours > 0 {
+            return "\(hours)h \(minutes)m"
+        } else {
+            return "\(minutes)m"
+        }
     }
 }
 

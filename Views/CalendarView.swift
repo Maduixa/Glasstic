@@ -2,10 +2,18 @@
 import SwiftUI
 
 // Dummy data model for logged fasts. This would eventually come from HealthKit.
-struct FastingLog: Identifiable {
+struct FastingLog: Identifiable, Codable {
     let id = UUID()
-    let date: Date
-    let duration: TimeInterval
+    var date: Date
+    var duration: TimeInterval
+    var startTime: Date
+    
+    init(date: Date, duration: TimeInterval, startTime: Date? = nil) {
+        self.id = UUID()
+        self.date = date
+        self.duration = duration
+        self.startTime = startTime ?? Calendar.current.date(byAdding: .second, value: -Int(duration), to: date) ?? date
+    }
 }
 
 struct CalendarView: View {
@@ -17,6 +25,8 @@ struct CalendarView: View {
         FastingLog(date: Calendar.current.date(byAdding: .day, value: -7, to: Date())!, duration: 20 * 3600),
         FastingLog(date: Calendar.current.date(byAdding: .day, value: -8, to: Date())!, duration: 16 * 3600)
     ]
+    @State private var selectedFast: FastingLog?
+    @State private var isShowingFastEditor = false
 
     var body: some View {
         ZStack {
@@ -31,6 +41,16 @@ struct CalendarView: View {
             .padding()
         }
         .preferredColorScheme(.dark)
+        .sheet(isPresented: $isShowingFastEditor) {
+            if let selectedFast = selectedFast {
+                FastEditView(fast: selectedFast) { updatedFast in
+                    if let index = loggedFasts.firstIndex(where: { $0.id == selectedFast.id }) {
+                        loggedFasts[index] = updatedFast
+                    }
+                    isShowingFastEditor = false
+                }
+            }
+        }
     }
 
     private var headerView: some View {
@@ -94,7 +114,8 @@ struct CalendarView: View {
     }
 
     private func dayCell(for day: Date) -> some View {
-        let isLogged = loggedFasts.contains { Calendar.current.isDate($0.date, inSameDayAs: day) }
+        let dayFast = loggedFasts.first { Calendar.current.isDate($0.date, inSameDayAs: day) }
+        let isLogged = dayFast != nil
 
         return ZStack {
             if isLogged {
@@ -112,6 +133,12 @@ struct CalendarView: View {
                     isToday(day) ? .white.opacity(0.9) : .clear
                 )
                 .clipShape(Circle())
+        }
+        .onTapGesture {
+            if let fast = dayFast {
+                selectedFast = fast
+                isShowingFastEditor = true
+            }
         }
     }
 
