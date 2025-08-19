@@ -46,6 +46,28 @@ class AIMessageManager {
         return (title: title, body: body)
     }
     
+    func generateContextualMessage(for zone: FastingZone, timeInZone: TimeInterval) -> String {
+        let timeHours = Int(timeInZone / 3600)
+        let timeMinutes = Int(timeInZone.truncatingRemainder(dividingBy: 3600) / 60)
+        
+        let contextualTemplates = [
+            "You've been in \(zone.name) for \(timeHours)h \(timeMinutes)m. \(zone.emoji) {encouragement}",
+            "\(zone.emoji) \(timeHours) hours and \(timeMinutes) minutes into \(zone.name) - {encouragement}",
+            "Your body has been enjoying \(zone.name) benefits for \(timeHours)h \(timeMinutes)m. {encouragement}"
+        ]
+        
+        let encouragements = [
+            "Your cellular health is thanking you!",
+            "Keep up this incredible journey!",
+            "You're unlocking amazing metabolic benefits!",
+            "Your future self will be grateful for this dedication!",
+            "This commitment to wellness is inspiring!"
+        ]
+        
+        let template = contextualTemplates.randomElement()!
+        return template.replacingOccurrences(of: "{encouragement}", with: encouragements.randomElement()!)
+    }
+    
     private func getTemplates(for messageType: MessageType) -> [String] {
         switch messageType {
         case .motivational:

@@ -73,15 +73,28 @@ struct ZoneEmojiView: View {
                 let isCompleted = elapsedTime >= zone.duration
                 let isActive = isCurrentZone(zone: zone)
                 
-                Text(zone.emoji)
-                    .font(.title2)
-                    .opacity(isCompleted ? 1.0 : 0.3)
-                    .scaleEffect(isActive ? 1.3 : 1.0)
-                    .animation(.easeInOut(duration: 0.5), value: isActive)
-                    .position(
-                        x: 150 + 120 * cos(angle.radians),
-                        y: 150 + 120 * sin(angle.radians)
-                    )
+                ZStack {
+                    // Glow effect for active/completed zones
+                    if isCompleted {
+                        Circle()
+                            .fill(zone.color.opacity(0.3))
+                            .frame(width: 35, height: 35)
+                            .blur(radius: isActive ? 8 : 4)
+                            .scaleEffect(isActive ? 1.2 : 1.0)
+                    }
+                    
+                    Text(zone.emoji)
+                        .font(.title2)
+                        .scaleEffect(isActive ? 1.4 : (isCompleted ? 1.1 : 0.8))
+                        .opacity(isCompleted ? 1.0 : 0.3)
+                        .shadow(color: isCompleted ? zone.color.opacity(0.8) : .clear, radius: 3, x: 0, y: 2)
+                        .animation(.easeInOut(duration: 0.5), value: isActive)
+                        .animation(.easeInOut(duration: 0.3), value: isCompleted)
+                }
+                .position(
+                    x: 150 + 120 * cos(angle.radians),
+                    y: 150 + 120 * sin(angle.radians)
+                )
             }
         }
         .frame(width: 300, height: 300)
