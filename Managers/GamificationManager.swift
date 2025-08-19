@@ -52,7 +52,7 @@ class GamificationManager {
 
     private func updateStreak(for completionDate: Date) {
         if let lastFast = userProfile.lastFastDate {
-            if Calendar.current.isDate(completionDate, inSameDayAs: lastFast.addingTimeInterval(24*3600))) {
+            if Calendar.current.isDate(completionDate, inSameDayAs: lastFast.addingTimeInterval(24*3600)) {
                 // Consecutive days
                 userProfile.currentStreak += 1
             } else if !Calendar.current.isDate(completionDate, inSameDayAs: lastFast) {

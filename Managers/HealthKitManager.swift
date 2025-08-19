@@ -15,11 +15,11 @@ class HealthKitManager {
         }
 
         let typesToShare: Set = [
-            HKObjectType.categoryType(forIdentifier: .intermittentFasting)!
+            HKObjectType.categoryType(forIdentifier: .sleepAnalysis)!
         ]
 
         let typesToRead: Set = [
-            HKObjectType.categoryType(forIdentifier: .intermittentFasting)!,
+            HKObjectType.categoryType(forIdentifier: .sleepAnalysis)!,
             HKObjectType.quantityType(forIdentifier: .bodyMass)!,
             HKObjectType.quantityType(forIdentifier: .heartRate)!
         ]
@@ -28,7 +28,7 @@ class HealthKitManager {
     }
 
     func saveFast(startDate: Date, endDate: Date, completion: @escaping (Bool, Error?) -> Void) {
-        let fasting = HKCategorySample(type: HKObjectType.categoryType(forIdentifier: .intermittentFasting)!,
+        let fasting = HKCategorySample(type: HKObjectType.categoryType(forIdentifier: .sleepAnalysis)!,
                                        value: 0, // Value is not used for intermittent fasting
                                        start: startDate,
                                        end: endDate)

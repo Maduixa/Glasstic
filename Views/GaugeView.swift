@@ -76,10 +76,10 @@ struct WaveShape: Shape {
     var offset: Angle
     var percent: CGFloat
 
-    var animatableData: AnimatablePair<Angle.AnimatableData, CGFloat> {
-        get { AnimatablePair(offset.animatableData, percent) }
+    var animatableData: AnimatablePair<Double, CGFloat> {
+        get { AnimatablePair(offset.degrees, percent) }
         set { 
-            offset.animatableData = newValue.first
+            offset = Angle(degrees: newValue.first)
             percent = newValue.second
         }
     }

@@ -126,9 +126,6 @@ struct BadgeDetailView: View {
 
 struct ProfileView_Previews: PreviewProvider {
     static var previews: some View {
-        // Manually unlock some badges for preview
-        let manager = GamificationManager.shared
-        // This is a simplified way for preview. In real app, you'd have a better mock system.
         ProfileView()
     }
 }
