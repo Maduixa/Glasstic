@@ -8,6 +8,10 @@ struct GaugeView: View {
     private var progress: CGFloat {
         return CGFloat(elapsedTime / fastingGoal)
     }
+    
+    private var completedZones: [FastingZone] {
+        return FastingZone.allZones.filter { elapsedTime >= $0.duration }
+    }
 
     var body: some View {
         ZStack {
@@ -19,6 +23,9 @@ struct GaugeView: View {
             // Progress Wave
             WaveView(progress: progress, color: .blue)
                 .clipShape(Circle())
+
+            // Zone Emojis positioned around the gauge
+            ZoneEmojiView(elapsedTime: elapsedTime, fastingGoal: fastingGoal)
 
             // Border
             Circle()
@@ -50,6 +57,39 @@ struct GaugeView: View {
         let minutes = Int(timeInterval) / 60 % 60
         let seconds = Int(timeInterval) % 60
         return String(format: "%02i:%02i:%02i", hours, minutes, seconds)
+    }
+}
+
+struct ZoneEmojiView: View {
+    let elapsedTime: TimeInterval
+    let fastingGoal: TimeInterval
+    
+    var body: some View {
+        ZStack {
+            ForEach(FastingZone.allZones.indices, id: \.self) { index in
+                let zone = FastingZone.allZones[index]
+                let zoneProgress = min(zone.duration / fastingGoal, 1.0)
+                let angle = Angle.degrees(360 * zoneProgress - 90) // Start from top
+                let isCompleted = elapsedTime >= zone.duration
+                let isActive = isCurrentZone(zone: zone)
+                
+                Text(zone.emoji)
+                    .font(.title2)
+                    .opacity(isCompleted ? 1.0 : 0.3)
+                    .scaleEffect(isActive ? 1.3 : 1.0)
+                    .animation(.easeInOut(duration: 0.5), value: isActive)
+                    .position(
+                        x: 150 + 120 * cos(angle.radians),
+                        y: 150 + 120 * sin(angle.radians)
+                    )
+            }
+        }
+        .frame(width: 300, height: 300)
+    }
+    
+    private func isCurrentZone(zone: FastingZone) -> Bool {
+        let currentZone = FastingZone.allZones.filter { elapsedTime >= $0.duration }.last ?? .anabolic
+        return currentZone.id == zone.id
     }
 }
 

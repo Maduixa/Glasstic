@@ -57,12 +57,8 @@ class FastingManager: ObservableObject {
         elapsedTime = 0
         startTimer()
         
-        let hours = Int(goal / 3600)
-        NotificationManager.shared.scheduleNotification(
-            title: "Fasting Complete!",
-            body: "You've completed your \(hours)-hour fast. Great job!",
-            timeInterval: goal
-        )
+        // Schedule AI-generated notification
+        NotificationManager.shared.scheduleAINotification(for: goal)
 
         // Start Live Activity
         let attributes = FastingActivityAttributes(fastingGoal: goal)
@@ -136,6 +132,21 @@ class FastingManager: ObservableObject {
     func getFastingGoal() -> TimeInterval {
         return fastingGoal
     }
+    
+    func getStartDate() -> Date {
+        return Date(timeIntervalSince1970: fastingStartDate)
+    }
+    
+    func updateStartTime(to newStartTime: Date) {
+        fastingStartDate = newStartTime.timeIntervalSince1970
+        
+        // Recalculate elapsed time
+        self.elapsedTime = Date().timeIntervalSince(newStartTime)
+        
+        // Update live activity and watch
+        updateLiveActivity()
+        sendContextToWatch()
+    }
 }
 
 // MARK: - Main Content View
@@ -146,6 +157,7 @@ struct ContentView: View {
     @State private var isShowingCalendar = false
     @State private var isShowingPlanSelector = false
     @State private var isShowingProfile = false
+    @State private var isShowingStartTimeEditor = false
 
     var body: some View {
         ZStack {
@@ -170,6 +182,10 @@ struct ContentView: View {
                 .environmentObject(fastingManager)
         }
         .sheet(isPresented: $isShowingProfile) { ProfileView() }
+        .sheet(isPresented: $isShowingStartTimeEditor) {
+            StartTimeEditorView()
+                .environmentObject(fastingManager)
+        }
         .fullScreenCover(isPresented: .constant(!hasCompletedOnboarding)) {
             OnboardingView(hasCompletedOnboarding: $hasCompletedOnboarding)
         }
@@ -198,7 +214,14 @@ struct ContentView: View {
         if fastingManager.fastingState == .idle {
             glassButton(title: "Choose Fasting Plan", action: { isShowingPlanSelector.toggle() })
         } else {
-            glassButton(title: "End Fast", action: fastingManager.endFasting)
+            VStack(spacing: 15) {
+                HStack(spacing: 15) {
+                    glassButton(title: "Edit Start Time", action: { isShowingStartTimeEditor.toggle() })
+                        .frame(maxWidth: .infinity)
+                    glassButton(title: "End Fast", action: fastingManager.endFasting)
+                        .frame(maxWidth: .infinity)
+                }
+            }
         }
     }
 
@@ -216,6 +239,8 @@ struct ContentView: View {
 
 struct FastingZoneInfoView: View {
     let elapsedTime: TimeInterval
+    @State private var currentMessage: String = ""
+    @State private var messageTimer: Timer?
 
     private var currentZone: FastingZone {
         return FastingZone.allZones.filter { elapsedTime >= $0.duration }.last ?? .anabolic
@@ -223,14 +248,41 @@ struct FastingZoneInfoView: View {
 
     var body: some View {
         VStack(spacing: 10) {
-            Text(currentZone.name)
-                .font(.largeTitle).fontWeight(.bold).foregroundColor(currentZone.color)
+            HStack {
+                Text(currentZone.emoji)
+                    .font(.title2)
+                Text(currentZone.name)
+                    .font(.largeTitle).fontWeight(.bold).foregroundColor(currentZone.color)
+            }
 
-            Text(currentZone.trivia.randomElement() ?? "")
+            Text(currentMessage)
                 .font(.subheadline).foregroundColor(.white.opacity(0.8))
                 .multilineTextAlignment(.center).padding(.horizontal)
+                .animation(.easeInOut(duration: 0.5), value: currentMessage)
         }
         .padding().background(.ultraThinMaterial).cornerRadius(20).padding(.horizontal, 20)
+        .onAppear {
+            updateMessage()
+            startMessageTimer()
+        }
+        .onDisappear {
+            messageTimer?.invalidate()
+        }
+        .onChange(of: currentZone.id) { _, _ in
+            updateMessage()
+        }
+    }
+    
+    private func updateMessage() {
+        let messageType: MessageType = Bool.random() ? .motivational : .educational
+        currentMessage = AIMessageManager.shared.generateFastingMessage(for: currentZone, messageType: messageType)
+    }
+    
+    private func startMessageTimer() {
+        messageTimer?.invalidate()
+        messageTimer = Timer.scheduledTimer(withTimeInterval: 30, repeats: true) { _ in
+            updateMessage()
+        }
     }
 }
 

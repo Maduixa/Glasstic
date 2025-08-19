@@ -27,4 +27,9 @@ class NotificationManager {
 
         UNUserNotificationCenter.current().add(request)
     }
+    
+    func scheduleAINotification(for duration: TimeInterval) {
+        let (title, body) = AIMessageManager.shared.generateNotificationMessage(for: duration)
+        scheduleNotification(title: title, body: body, timeInterval: duration)
+    }
 }
