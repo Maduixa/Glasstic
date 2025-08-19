@@ -1,5 +1,6 @@
 import SwiftUI
 import ActivityKit
+import Combine
 
 // MARK: - Fasting Manager
 class FastingManager: ObservableObject {

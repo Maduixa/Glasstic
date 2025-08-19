@@ -1,6 +1,7 @@
 
 import Foundation
 import WatchConnectivity
+import Combine
 
 // This class is designed to be a singleton, shared between the iOS and watchOS targets.
 class WatchConnectivityManager: NSObject, WCSessionDelegate, ObservableObject {
