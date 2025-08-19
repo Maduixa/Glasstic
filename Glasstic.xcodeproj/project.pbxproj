@@ -15,27 +15,23 @@
 		2B7CA67A2E55258D00F68A9A /* WatchConnectivityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchConnectivityManager.swift; sourceTree = "<group>"; };
 		2B7CA67B2E55258D00F68A9B /* NotificationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationManager.swift; sourceTree = "<group>"; };
 		2B7CA67C2E55258D00F68A9C /* GamificationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GamificationManager.swift; sourceTree = "<group>"; };
-				2B7CA6A02E55258D00F68AC0 /* AIMessageManager.swift */,
 		2B7CA67D2E55258D00F68A9D /* FastingActivityAttributes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FastingActivityAttributes.swift; sourceTree = "<group>"; };
 		2B7CA67E2E55258D00F68A9E /* FastingPlan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FastingPlan.swift; sourceTree = "<group>"; };
 		2B7CA67F2E55258D00F68A9F /* FastingState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FastingState.swift; sourceTree = "<group>"; };
 		2B7CA6802E55258D00F68AA0 /* FastingZone.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FastingZone.swift; sourceTree = "<group>"; };
 		2B7CA6812E55258D00F68AA1 /* UserProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserProfile.swift; sourceTree = "<group>"; };
 		2B7CA6822E55258D00F68AA2 /* Badge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Badge.swift; sourceTree = "<group>"; };
+		2B7CA6A02E55258D00F68AC0 /* AIMessageManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIMessageManager.swift; sourceTree = "<group>"; };
+		2B7CA6A12E55258D00F68AC1 /* StartTimeEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StartTimeEditorView.swift; sourceTree = "<group>"; };
+		2B7CA6A22E55258D00F68AC2 /* FastEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FastEditView.swift; sourceTree = "<group>"; };
 		2B7CA6832E55258D00F68AA3 /* GaugeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GaugeView.swift; sourceTree = "<group>"; };
 		2B7CA6842E55258D00F68AA4 /* PlanSelectorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanSelectorView.swift; sourceTree = "<group>"; };
 		2B7CA6852E55258D00F68AA5 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 		2B7CA6862E55258D00F68AA6 /* CalendarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarView.swift; sourceTree = "<group>"; };
 		2B7CA6872E55258D00F68AA7 /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
-				2B7CA6A12E55258D00F68AC1 /* StartTimeEditorView.swift */,
-				2B7CA6A22E55258D00F68AC2 /* FastEditView.swift */,
-		2B7CA6A02E55258D00F68AC0 /* AIMessageManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIMessageManager.swift; sourceTree = "<group>"; };
-		2B7CA6A12E55258D00F68AC1 /* StartTimeEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StartTimeEditorView.swift; sourceTree = "<group>"; };
-		2B7CA6A22E55258D00F68AC2 /* FastEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FastEditView.swift; sourceTree = "<group>"; };
 		2B7CA69B2E55258D00F68ABB /* HealthKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = HealthKit.framework; path = System/Library/Frameworks/HealthKit.framework; sourceTree = SDKROOT; };
 		2B7CA69D2E55258D00F68ABD /* WatchConnectivity.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WatchConnectivity.framework; path = System/Library/Frameworks/WatchConnectivity.framework; sourceTree = SDKROOT; };
 		2B7CA69F2E55258D00F68ABF /* ActivityKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ActivityKit.framework; path = System/Library/Frameworks/ActivityKit.framework; sourceTree = SDKROOT; };
-				2B7CA6A62E55258D00F68AC6 /* NaturalLanguage.framework */,
 		2B7CA6A62E55258D00F68AC6 /* NaturalLanguage.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = NaturalLanguage.framework; path = System/Library/Frameworks/NaturalLanguage.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
@@ -47,30 +43,24 @@
 		2B7CA68C2E55258D00F68AAC /* WatchConnectivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7CA67A2E55258D00F68A9A /* WatchConnectivityManager.swift */; };
 		2B7CA68D2E55258D00F68AAD /* NotificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7CA67B2E55258D00F68A9B /* NotificationManager.swift */; };
 		2B7CA68E2E55258D00F68AAE /* GamificationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7CA67C2E55258D00F68A9C /* GamificationManager.swift */; };
-				2B7CA6A02E55258D00F68AC0 /* AIMessageManager.swift */,
 		2B7CA68F2E55258D00F68AAF /* FastingActivityAttributes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7CA67D2E55258D00F68A9D /* FastingActivityAttributes.swift */; };
 		2B7CA6902E55258D00F68AB0 /* FastingPlan.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7CA67E2E55258D00F68A9E /* FastingPlan.swift */; };
 		2B7CA6912E55258D00F68AB1 /* FastingState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7CA67F2E55258D00F68A9F /* FastingState.swift */; };
 		2B7CA6922E55258D00F68AB2 /* FastingZone.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7CA6802E55258D00F68AA0 /* FastingZone.swift */; };
 		2B7CA6932E55258D00F68AB3 /* UserProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7CA6812E55258D00F68AA1 /* UserProfile.swift */; };
 		2B7CA6942E55258D00F68AB4 /* Badge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7CA6822E55258D00F68AA2 /* Badge.swift */; };
+		2B7CA6A32E55258D00F68AC3 /* AIMessageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7CA6A02E55258D00F68AC0 /* AIMessageManager.swift */; };
+		2B7CA6A42E55258D00F68AC4 /* StartTimeEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7CA6A12E55258D00F68AC1 /* StartTimeEditorView.swift */; };
+		2B7CA6A52E55258D00F68AC5 /* FastEditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7CA6A22E55258D00F68AC2 /* FastEditView.swift */; };
 		2B7CA6952E55258D00F68AB5 /* GaugeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7CA6832E55258D00F68AA3 /* GaugeView.swift */; };
 		2B7CA6962E55258D00F68AB6 /* PlanSelectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7CA6842E55258D00F68AA4 /* PlanSelectorView.swift */; };
 		2B7CA6972E55258D00F68AB7 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7CA6852E55258D00F68AA5 /* OnboardingView.swift */; };
 		2B7CA6982E55258D00F68AB8 /* CalendarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7CA6862E55258D00F68AA6 /* CalendarView.swift */; };
 		2B7CA6992E55258D00F68AB9 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B7CA6872E55258D00F68AA7 /* ProfileView.swift */; };
-				2B7CA6A12E55258D00F68AC1 /* StartTimeEditorView.swift */,
-				2B7CA6A22E55258D00F68AC2 /* FastEditView.swift */,
-		2B7CA6A02E55258D00F68AC0 /* AIMessageManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIMessageManager.swift; sourceTree = "<group>"; };
-		2B7CA6A12E55258D00F68AC1 /* StartTimeEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StartTimeEditorView.swift; sourceTree = "<group>"; };
-		2B7CA6A22E55258D00F68AC2 /* FastEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FastEditView.swift; sourceTree = "<group>"; };
 		2B7CA69A2E55258D00F68ABA /* HealthKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2B7CA69B2E55258D00F68ABB /* HealthKit.framework */; };
 		2B7CA69C2E55258D00F68ABC /* WatchConnectivity.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2B7CA69D2E55258D00F68ABD /* WatchConnectivity.framework */; };
 		2B7CA69E2E55258D00F68ABE /* ActivityKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2B7CA69F2E55258D00F68ABF /* ActivityKit.framework */; };
-				2B7CA6A62E55258D00F68AC6 /* NaturalLanguage.framework */,
-				2B7CA6A72E55258D00F68AC7 /* NaturalLanguage.framework in Frameworks */,
 		2B7CA6A72E55258D00F68AC7 /* NaturalLanguage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2B7CA6A62E55258D00F68AC6 /* NaturalLanguage.framework */; };
-		2B7CA6A62E55258D00F68AC6 /* NaturalLanguage.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = NaturalLanguage.framework; path = System/Library/Frameworks/NaturalLanguage.framework; sourceTree = SDKROOT; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -82,7 +72,6 @@
 				2B7CA69C2E55258D00F68ABC /* WatchConnectivity.framework in Frameworks */,
 				2B7CA69E2E55258D00F68ABE /* ActivityKit.framework in Frameworks */,
 				2B7CA6A72E55258D00F68AC7 /* NaturalLanguage.framework in Frameworks */,
-		2B7CA6A72E55258D00F68AC7 /* NaturalLanguage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2B7CA6A62E55258D00F68AC6 /* NaturalLanguage.framework */; };
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -93,10 +82,10 @@
 			isa = PBXGroup;
 			children = (
 				2B7CA66A2E55258C00F68A95 /* Glasstic */,
-				2B7CA6A02E55258D00F68AC0 /* Managers */,
-				2B7CA6A12E55258D00F68AC1 /* Models */,
-				2B7CA6A22E55258D00F68AC2 /* Views */,
-				2B7CA6A32E55258D00F68AC3 /* Frameworks */,
+				2B7CA6A82E55258D00F68AC8 /* Managers */,
+				2B7CA6A92E55258D00F68AC9 /* Models */,
+				2B7CA6AA2E55258D00F68ACA /* Views */,
+				2B7CA6AB2E55258D00F68ACB /* Frameworks */,
 				2B7CA6692E55258C00F68A95 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -119,7 +108,7 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		2B7CA6A02E55258D00F68AC0 /* Managers */ = {
+		2B7CA6A82E55258D00F68AC8 /* Managers */ = {
 			isa = PBXGroup;
 			children = (
 				2B7CA6792E55258D00F68A99 /* HealthKitManager.swift */,
@@ -131,7 +120,7 @@
 			path = Managers;
 			sourceTree = "<group>";
 		};
-		2B7CA6A12E55258D00F68AC1 /* Models */ = {
+		2B7CA6A92E55258D00F68AC9 /* Models */ = {
 			isa = PBXGroup;
 			children = (
 				2B7CA67D2E55258D00F68A9D /* FastingActivityAttributes.swift */,
@@ -144,7 +133,7 @@
 			path = Models;
 			sourceTree = "<group>";
 		};
-		2B7CA6A22E55258D00F68AC2 /* Views */ = {
+		2B7CA6AA2E55258D00F68ACA /* Views */ = {
 			isa = PBXGroup;
 			children = (
 				2B7CA6832E55258D00F68AA3 /* GaugeView.swift */,
@@ -154,21 +143,17 @@
 				2B7CA6872E55258D00F68AA7 /* ProfileView.swift */,
 				2B7CA6A12E55258D00F68AC1 /* StartTimeEditorView.swift */,
 				2B7CA6A22E55258D00F68AC2 /* FastEditView.swift */,
-		2B7CA6A02E55258D00F68AC0 /* AIMessageManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIMessageManager.swift; sourceTree = "<group>"; };
-		2B7CA6A12E55258D00F68AC1 /* StartTimeEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StartTimeEditorView.swift; sourceTree = "<group>"; };
-		2B7CA6A22E55258D00F68AC2 /* FastEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FastEditView.swift; sourceTree = "<group>"; };
 			);
 			path = Views;
 			sourceTree = "<group>";
 		};
-		2B7CA6A32E55258D00F68AC3 /* Frameworks */ = {
+		2B7CA6AB2E55258D00F68ACB /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
 				2B7CA69B2E55258D00F68ABB /* HealthKit.framework */,
 				2B7CA69D2E55258D00F68ABD /* WatchConnectivity.framework */,
 				2B7CA69F2E55258D00F68ABF /* ActivityKit.framework */,
 				2B7CA6A62E55258D00F68AC6 /* NaturalLanguage.framework */,
-		2B7CA6A62E55258D00F68AC6 /* NaturalLanguage.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = NaturalLanguage.framework; path = System/Library/Frameworks/NaturalLanguage.framework; sourceTree = SDKROOT; };
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -262,6 +247,9 @@
 				2B7CA6972E55258D00F68AB7 /* OnboardingView.swift in Sources */,
 				2B7CA6982E55258D00F68AB8 /* CalendarView.swift in Sources */,
 				2B7CA6992E55258D00F68AB9 /* ProfileView.swift in Sources */,
+				2B7CA6A32E55258D00F68AC3 /* AIMessageManager.swift in Sources */,
+				2B7CA6A42E55258D00F68AC4 /* StartTimeEditorView.swift in Sources */,
+				2B7CA6A52E55258D00F68AC5 /* FastEditView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -320,7 +308,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
@@ -377,7 +365,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;

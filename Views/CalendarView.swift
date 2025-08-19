@@ -9,7 +9,6 @@ struct FastingLog: Identifiable, Codable {
     var startTime: Date
     
     init(date: Date, duration: TimeInterval, startTime: Date? = nil) {
-        self.id = UUID()
         self.date = date
         self.duration = duration
         self.startTime = startTime ?? Calendar.current.date(byAdding: .second, value: -Int(duration), to: date) ?? date
