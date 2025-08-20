@@ -125,7 +125,7 @@ struct WaveView: View {
     }
 }
 
-struct WaveShape: Shape {
+struct WaveShape: Shape, Sendable {
     var offset: Angle
     var percent: CGFloat
 
