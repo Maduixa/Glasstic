@@ -1,4 +1,3 @@
-
 import SwiftUI
 
 struct ProfileView: View {
@@ -63,64 +62,86 @@ struct ProfileView: View {
     }
 
     private var badgesView: some View {
-        VStack {
+        VStack(alignment: .leading, spacing: 15) {
             Text("Badges")
                 .font(.title2).fontWeight(.bold).foregroundColor(.white)
-            
-            LazyVGrid(columns: columns, spacing: 20) {
+
+            LazyVGrid(columns: columns, spacing: 15) {
                 ForEach(Badge.allBadges) { badge in
-                    let isUnlocked = profile.unlockedBadgeIDs.contains(badge.id)
-                    Button(action: { if isUnlocked { selectedBadge = badge } }) {
-                        VStack {
-                            Image(systemName: badge.icon)
-                                .font(.largeTitle)
-                                .foregroundColor(isUnlocked ? badge.color.color : .gray)
-                            Text(badge.name)
-                                .font(.caption)
-                                .fontWeight(.medium)
-                                .foregroundColor(isUnlocked ? .white : .gray)
-                                .multilineTextAlignment(.center)
-                        }
-                        .frame(width: 100, height: 100)
-                        .background(isUnlocked ? .white.opacity(0.2) : .white.opacity(0.1))
-                        .cornerRadius(15)
-                        .opacity(isUnlocked ? 1.0 : 0.5)
-                    }
+                    badgeCell(badge: badge)
                 }
             }
         }
+    }
+
+    private func badgeCell(badge: Badge) -> some View {
+        let isUnlocked = profile.unlockedBadgeIDs.contains(badge.id)
+        
+        return Button(action: { selectedBadge = badge }) {
+            VStack(spacing: 8) {
+                Text(badge.emoji)
+                    .font(.system(size: 40))
+                    .opacity(isUnlocked ? 1.0 : 0.3)
+                    .scaleEffect(isUnlocked ? 1.0 : 0.8)
+                
+                Text(badge.name)
+                    .font(.caption)
+                    .fontWeight(.medium)
+                    .foregroundColor(isUnlocked ? .white : .white.opacity(0.5))
+                    .multilineTextAlignment(.center)
+            }
+            .frame(width: 100, height: 100)
+            .background(
+                RoundedRectangle(cornerRadius: 15)
+                    .fill(isUnlocked ? AnyShapeStyle(.ultraThinMaterial) : AnyShapeStyle(Color.black.opacity(0.3)))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 15)
+                            .stroke(isUnlocked ? Color.yellow.opacity(0.6) : Color.clear, lineWidth: 2)
+                    )
+            )
+        }
+        .scaleEffect(isUnlocked ? 1.0 : 0.9)
+        .animation(.easeInOut(duration: 0.2), value: isUnlocked)
     }
 }
 
 struct BadgeDetailView: View {
     let badge: Badge
-    @State private var animate = false
+    @Environment(\.dismiss) private var dismiss
 
     var body: some View {
         ZStack {
-            LinearGradient(colors: [badge.color.color.opacity(0.4), .gray.opacity(0.2)], startPoint: .top, endPoint: .bottom)
+            LinearGradient(colors: [.blue.opacity(0.3), .gray.opacity(0.2)], startPoint: .top, endPoint: .bottom)
                 .ignoresSafeArea()
 
-            VStack(spacing: 20) {
-                Image(systemName: badge.icon)
-                    .font(.system(size: 80))
-                    .foregroundColor(badge.color.color)
-                    .shadow(color: badge.color.color, radius: animate ? 20 : 5, x: 0, y: 0)
-                
+            VStack(spacing: 30) {
+                Text(badge.emoji)
+                    .font(.system(size: 100))
+                    .shadow(color: .yellow, radius: 10)
+
                 Text(badge.name)
-                    .font(.largeTitle).fontWeight(.bold).foregroundColor(.white)
-                
+                    .font(.largeTitle)
+                    .fontWeight(.bold)
+                    .foregroundColor(.white)
+
                 Text(badge.description)
-                    .font(.body).foregroundColor(.white.opacity(0.8))
+                    .font(.body)
+                    .foregroundColor(.white.opacity(0.8))
                     .multilineTextAlignment(.center)
+                    .padding(.horizontal)
+
+                Button("Close") {
+                    dismiss()
+                }
+                .font(.headline)
+                .foregroundColor(.white)
+                .padding()
+                .background(.ultraThinMaterial)
+                .cornerRadius(15)
             }
             .padding()
         }
-        .onAppear {
-            withAnimation(.easeInOut(duration: 1.5).repeatForever(autoreverses: true)) {
-                animate = true
-            }
-        }
+        .preferredColorScheme(.dark)
     }
 }
 

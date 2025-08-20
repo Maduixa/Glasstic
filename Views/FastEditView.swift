@@ -106,17 +106,17 @@ struct FastEditView: View {
                         .foregroundColor(.white)
                         .padding()
                         .frame(maxWidth: .infinity)
-                        .background(editedDuration > 0 ? .blue.opacity(0.6) : .gray.opacity(0.3))
+                        .background(editedDuration > 0 ? Color.blue.opacity(0.8) : Color.gray.opacity(0.5))
                         .cornerRadius(15)
                         .disabled(editedDuration <= 0)
                     }
-                    .padding(.horizontal)
                     
                     Spacer()
                 }
                 .padding()
             }
         }
+        .navigationBarHidden(true)
         .preferredColorScheme(.dark)
     }
 }

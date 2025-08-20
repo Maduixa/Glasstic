@@ -1,0 +1,18 @@
+"/Users/hyper/src/Glasstic/Managers/HealthKitManager.swift":
+  object: "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/HealthKitManager.o"
+  swift-dependencies: "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/HealthKitManager.swiftdeps"
+  const-values: "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/HealthKitManager.swiftconstvalues"
+  diagnostics: "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/HealthKitManager.dia"
+  dependencies: "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/HealthKitManager.d"
+"/Users/hyper/src/Glasstic/Glasstic/GlassticApp.swift":
+  swift-dependencies: "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/GlassticApp.swiftdeps"
+  object: "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/GlassticApp.o"
+  const-values: "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/GlassticApp.swiftconstvalues"
+  dependencies: "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/GlassticApp.d"
+  diagnostics: "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/GlassticApp.dia"
+"/Users/hyper/src/Glasstic/Glasstic/ContentView.swift":
+  dependencies: "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/ContentView.d"
+  object: "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/ContentView.o"
+  swift-dependencies: "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/ContentView.swiftdeps"
+  diagnostics: "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/ContentView.dia"
+  const-values: "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/ContentView.swiftconstvalues"

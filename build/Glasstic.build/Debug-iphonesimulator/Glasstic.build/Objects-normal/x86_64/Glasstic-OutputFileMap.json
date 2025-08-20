@@ -1,0 +1,218 @@
+{
+  "" : {
+    "diagnostics" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/Glasstic-master.dia",
+    "emit-module-dependencies" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/Glasstic-master-emit-module.d",
+    "emit-module-diagnostics" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/Glasstic-master-emit-module.dia",
+    "swift-dependencies" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/Glasstic-master.swiftdeps"
+  },
+  "/Users/hyper/src/Glasstic/Glasstic/ContentView.swift" : {
+    "const-values" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/ContentView.swiftconstvalues",
+    "dependencies" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/ContentView.d",
+    "diagnostics" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/ContentView.dia",
+    "index-unit-output-path" : "/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/ContentView.o",
+    "llvm-bc" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/ContentView.bc",
+    "object" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/ContentView.o",
+    "swift-dependencies" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/ContentView.swiftdeps",
+    "swiftmodule" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/ContentView~partial.swiftmodule"
+  },
+  "/Users/hyper/src/Glasstic/Glasstic/GlassticApp.swift" : {
+    "const-values" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/GlassticApp.swiftconstvalues",
+    "dependencies" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/GlassticApp.d",
+    "diagnostics" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/GlassticApp.dia",
+    "index-unit-output-path" : "/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/GlassticApp.o",
+    "llvm-bc" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/GlassticApp.bc",
+    "object" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/GlassticApp.o",
+    "swift-dependencies" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/GlassticApp.swiftdeps",
+    "swiftmodule" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/GlassticApp~partial.swiftmodule"
+  },
+  "/Users/hyper/src/Glasstic/Managers/AIMessageManager.swift" : {
+    "const-values" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/AIMessageManager.swiftconstvalues",
+    "dependencies" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/AIMessageManager.d",
+    "diagnostics" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/AIMessageManager.dia",
+    "index-unit-output-path" : "/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/AIMessageManager.o",
+    "llvm-bc" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/AIMessageManager.bc",
+    "object" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/AIMessageManager.o",
+    "swift-dependencies" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/AIMessageManager.swiftdeps",
+    "swiftmodule" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/AIMessageManager~partial.swiftmodule"
+  },
+  "/Users/hyper/src/Glasstic/Managers/GamificationManager.swift" : {
+    "const-values" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/GamificationManager.swiftconstvalues",
+    "dependencies" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/GamificationManager.d",
+    "diagnostics" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/GamificationManager.dia",
+    "index-unit-output-path" : "/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/GamificationManager.o",
+    "llvm-bc" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/GamificationManager.bc",
+    "object" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/GamificationManager.o",
+    "swift-dependencies" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/GamificationManager.swiftdeps",
+    "swiftmodule" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/GamificationManager~partial.swiftmodule"
+  },
+  "/Users/hyper/src/Glasstic/Managers/HealthKitManager.swift" : {
+    "const-values" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/HealthKitManager.swiftconstvalues",
+    "dependencies" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/HealthKitManager.d",
+    "diagnostics" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/HealthKitManager.dia",
+    "index-unit-output-path" : "/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/HealthKitManager.o",
+    "llvm-bc" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/HealthKitManager.bc",
+    "object" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/HealthKitManager.o",
+    "swift-dependencies" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/HealthKitManager.swiftdeps",
+    "swiftmodule" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/HealthKitManager~partial.swiftmodule"
+  },
+  "/Users/hyper/src/Glasstic/Managers/NotificationManager.swift" : {
+    "const-values" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/NotificationManager.swiftconstvalues",
+    "dependencies" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/NotificationManager.d",
+    "diagnostics" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/NotificationManager.dia",
+    "index-unit-output-path" : "/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/NotificationManager.o",
+    "llvm-bc" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/NotificationManager.bc",
+    "object" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/NotificationManager.o",
+    "swift-dependencies" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/NotificationManager.swiftdeps",
+    "swiftmodule" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/NotificationManager~partial.swiftmodule"
+  },
+  "/Users/hyper/src/Glasstic/Managers/WatchConnectivityManager.swift" : {
+    "const-values" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/WatchConnectivityManager.swiftconstvalues",
+    "dependencies" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/WatchConnectivityManager.d",
+    "diagnostics" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/WatchConnectivityManager.dia",
+    "index-unit-output-path" : "/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/WatchConnectivityManager.o",
+    "llvm-bc" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/WatchConnectivityManager.bc",
+    "object" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/WatchConnectivityManager.o",
+    "swift-dependencies" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/WatchConnectivityManager.swiftdeps",
+    "swiftmodule" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/WatchConnectivityManager~partial.swiftmodule"
+  },
+  "/Users/hyper/src/Glasstic/Models/Badge.swift" : {
+    "const-values" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/Badge.swiftconstvalues",
+    "dependencies" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/Badge.d",
+    "diagnostics" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/Badge.dia",
+    "index-unit-output-path" : "/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/Badge.o",
+    "llvm-bc" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/Badge.bc",
+    "object" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/Badge.o",
+    "swift-dependencies" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/Badge.swiftdeps",
+    "swiftmodule" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/Badge~partial.swiftmodule"
+  },
+  "/Users/hyper/src/Glasstic/Models/FastingActivityAttributes.swift" : {
+    "const-values" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/FastingActivityAttributes.swiftconstvalues",
+    "dependencies" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/FastingActivityAttributes.d",
+    "diagnostics" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/FastingActivityAttributes.dia",
+    "index-unit-output-path" : "/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/FastingActivityAttributes.o",
+    "llvm-bc" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/FastingActivityAttributes.bc",
+    "object" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/FastingActivityAttributes.o",
+    "swift-dependencies" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/FastingActivityAttributes.swiftdeps",
+    "swiftmodule" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/FastingActivityAttributes~partial.swiftmodule"
+  },
+  "/Users/hyper/src/Glasstic/Models/FastingPlan.swift" : {
+    "const-values" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/FastingPlan.swiftconstvalues",
+    "dependencies" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/FastingPlan.d",
+    "diagnostics" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/FastingPlan.dia",
+    "index-unit-output-path" : "/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/FastingPlan.o",
+    "llvm-bc" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/FastingPlan.bc",
+    "object" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/FastingPlan.o",
+    "swift-dependencies" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/FastingPlan.swiftdeps",
+    "swiftmodule" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/FastingPlan~partial.swiftmodule"
+  },
+  "/Users/hyper/src/Glasstic/Models/FastingState.swift" : {
+    "const-values" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/FastingState.swiftconstvalues",
+    "dependencies" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/FastingState.d",
+    "diagnostics" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/FastingState.dia",
+    "index-unit-output-path" : "/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/FastingState.o",
+    "llvm-bc" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/FastingState.bc",
+    "object" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/FastingState.o",
+    "swift-dependencies" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/FastingState.swiftdeps",
+    "swiftmodule" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/FastingState~partial.swiftmodule"
+  },
+  "/Users/hyper/src/Glasstic/Models/FastingZone.swift" : {
+    "const-values" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/FastingZone.swiftconstvalues",
+    "dependencies" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/FastingZone.d",
+    "diagnostics" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/FastingZone.dia",
+    "index-unit-output-path" : "/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/FastingZone.o",
+    "llvm-bc" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/FastingZone.bc",
+    "object" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/FastingZone.o",
+    "swift-dependencies" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/FastingZone.swiftdeps",
+    "swiftmodule" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/FastingZone~partial.swiftmodule"
+  },
+  "/Users/hyper/src/Glasstic/Models/UserProfile.swift" : {
+    "const-values" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/UserProfile.swiftconstvalues",
+    "dependencies" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/UserProfile.d",
+    "diagnostics" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/UserProfile.dia",
+    "index-unit-output-path" : "/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/UserProfile.o",
+    "llvm-bc" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/UserProfile.bc",
+    "object" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/UserProfile.o",
+    "swift-dependencies" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/UserProfile.swiftdeps",
+    "swiftmodule" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/UserProfile~partial.swiftmodule"
+  },
+  "/Users/hyper/src/Glasstic/Views/CalendarView.swift" : {
+    "const-values" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/CalendarView.swiftconstvalues",
+    "dependencies" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/CalendarView.d",
+    "diagnostics" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/CalendarView.dia",
+    "index-unit-output-path" : "/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/CalendarView.o",
+    "llvm-bc" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/CalendarView.bc",
+    "object" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/CalendarView.o",
+    "swift-dependencies" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/CalendarView.swiftdeps",
+    "swiftmodule" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/CalendarView~partial.swiftmodule"
+  },
+  "/Users/hyper/src/Glasstic/Views/FastEditView.swift" : {
+    "const-values" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/FastEditView.swiftconstvalues",
+    "dependencies" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/FastEditView.d",
+    "diagnostics" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/FastEditView.dia",
+    "index-unit-output-path" : "/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/FastEditView.o",
+    "llvm-bc" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/FastEditView.bc",
+    "object" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/FastEditView.o",
+    "swift-dependencies" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/FastEditView.swiftdeps",
+    "swiftmodule" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/FastEditView~partial.swiftmodule"
+  },
+  "/Users/hyper/src/Glasstic/Views/GaugeView.swift" : {
+    "const-values" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/GaugeView.swiftconstvalues",
+    "dependencies" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/GaugeView.d",
+    "diagnostics" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/GaugeView.dia",
+    "index-unit-output-path" : "/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/GaugeView.o",
+    "llvm-bc" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/GaugeView.bc",
+    "object" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/GaugeView.o",
+    "swift-dependencies" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/GaugeView.swiftdeps",
+    "swiftmodule" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/GaugeView~partial.swiftmodule"
+  },
+  "/Users/hyper/src/Glasstic/Views/OnboardingView.swift" : {
+    "const-values" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/OnboardingView.swiftconstvalues",
+    "dependencies" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/OnboardingView.d",
+    "diagnostics" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/OnboardingView.dia",
+    "index-unit-output-path" : "/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/OnboardingView.o",
+    "llvm-bc" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/OnboardingView.bc",
+    "object" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/OnboardingView.o",
+    "swift-dependencies" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/OnboardingView.swiftdeps",
+    "swiftmodule" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/OnboardingView~partial.swiftmodule"
+  },
+  "/Users/hyper/src/Glasstic/Views/PlanSelectorView.swift" : {
+    "const-values" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/PlanSelectorView.swiftconstvalues",
+    "dependencies" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/PlanSelectorView.d",
+    "diagnostics" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/PlanSelectorView.dia",
+    "index-unit-output-path" : "/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/PlanSelectorView.o",
+    "llvm-bc" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/PlanSelectorView.bc",
+    "object" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/PlanSelectorView.o",
+    "swift-dependencies" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/PlanSelectorView.swiftdeps",
+    "swiftmodule" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/PlanSelectorView~partial.swiftmodule"
+  },
+  "/Users/hyper/src/Glasstic/Views/ProfileView.swift" : {
+    "const-values" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/ProfileView.swiftconstvalues",
+    "dependencies" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/ProfileView.d",
+    "diagnostics" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/ProfileView.dia",
+    "index-unit-output-path" : "/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/ProfileView.o",
+    "llvm-bc" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/ProfileView.bc",
+    "object" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/ProfileView.o",
+    "swift-dependencies" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/ProfileView.swiftdeps",
+    "swiftmodule" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/ProfileView~partial.swiftmodule"
+  },
+  "/Users/hyper/src/Glasstic/Views/StartTimeEditorView.swift" : {
+    "const-values" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/StartTimeEditorView.swiftconstvalues",
+    "dependencies" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/StartTimeEditorView.d",
+    "diagnostics" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/StartTimeEditorView.dia",
+    "index-unit-output-path" : "/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/StartTimeEditorView.o",
+    "llvm-bc" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/StartTimeEditorView.bc",
+    "object" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/StartTimeEditorView.o",
+    "swift-dependencies" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/StartTimeEditorView.swiftdeps",
+    "swiftmodule" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/StartTimeEditorView~partial.swiftmodule"
+  },
+  "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/DerivedSources/GeneratedAssetSymbols.swift" : {
+    "const-values" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/GeneratedAssetSymbols.swiftconstvalues",
+    "dependencies" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/GeneratedAssetSymbols.d",
+    "diagnostics" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/GeneratedAssetSymbols.dia",
+    "index-unit-output-path" : "/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/GeneratedAssetSymbols.o",
+    "llvm-bc" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/GeneratedAssetSymbols.bc",
+    "object" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/GeneratedAssetSymbols.o",
+    "swift-dependencies" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/GeneratedAssetSymbols.swiftdeps",
+    "swiftmodule" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/GeneratedAssetSymbols~partial.swiftmodule"
+  }
+}

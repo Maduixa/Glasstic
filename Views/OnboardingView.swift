@@ -1,4 +1,3 @@
-
 import SwiftUI
 
 struct OnboardingView: View {
@@ -83,5 +82,11 @@ struct OnboardingPageView: View {
             Spacer()
         }
         .padding(.top, 80)
+    }
+}
+
+struct OnboardingView_Previews: PreviewProvider {
+    static var previews: some View {
+        OnboardingView(hasCompletedOnboarding: .constant(false))
     }
 }

@@ -1,5 +1,7 @@
 import SwiftUI
+#if canImport(ActivityKit)
 import ActivityKit
+#endif
 import Combine
 import UIKit
 
@@ -27,13 +29,20 @@ class FastingManager: ObservableObject {
 
     private var timer: Timer?
     private let connectivityManager = WatchConnectivityManager.shared
+    #if canImport(ActivityKit)
     private var currentActivity: Activity<FastingActivityAttributes>?
+    #else
+    private var currentActivity: Any?
+    #endif
 
     init() {
-        guard let defaults = UserDefaults(suiteName: "group.com.yourcompany.Glasstic") else {
-            fatalError("Could not initialize shared UserDefaults. Please check your App Group configuration.")
+        let suiteName = "group.com.maduixa.Glasstic"
+        if let defaults = UserDefaults(suiteName: suiteName) {
+            self.sharedDefaults = defaults
+        } else {
+            print("[FastingManager] App Group \(suiteName) not found. Falling back to standard UserDefaults.")
+            self.sharedDefaults = .standard
         }
-        self.sharedDefaults = defaults
 
         self.fastingState = FastingState(rawValue: sharedDefaults.string(forKey: "fastingState") ?? "idle") ?? .idle
         self.fastingStartDate = sharedDefaults.double(forKey: "fastingStartDate")
@@ -62,6 +71,7 @@ class FastingManager: ObservableObject {
         NotificationManager.shared.scheduleAINotification(for: goal)
 
         // Start Live Activity
+        #if canImport(ActivityKit)
         let attributes = FastingActivityAttributes(fastingGoal: goal)
         let initialState = FastingActivityAttributes.ContentState(elapsedTime: 0, currentZoneName: "Anabolic", progress: 0)
         
@@ -75,6 +85,7 @@ class FastingManager: ObservableObject {
         } catch (let error) {
             print("Error starting Live Activity: \(error.localizedDescription)")
         }
+        #endif
     }
 
     func endFasting() {
@@ -92,11 +103,13 @@ class FastingManager: ObservableObject {
         fastingGoal = 0
 
         // End Live Activity
+        #if canImport(ActivityKit)
         Task {
             let finalState = FastingActivityAttributes.ContentState(elapsedTime: elapsedTime, currentZoneName: "Ended", progress: 1.0)
-            await currentActivity?.end(using: finalState, dismissalPolicy: .immediate)
+            await (currentActivity as? Activity<FastingActivityAttributes>)?.end(using: finalState, dismissalPolicy: .immediate)
             print("Live Activity ended.")
         }
+        #endif
     }
 
     private func startTimer() {
@@ -113,12 +126,14 @@ class FastingManager: ObservableObject {
     }
 
     private func updateLiveActivity() {
+        #if canImport(ActivityKit)
         Task {
             let currentZone = FastingZone.allZones.filter { elapsedTime >= $0.duration }.last ?? .anabolic
             let progress = fastingGoal > 0 ? elapsedTime / fastingGoal : 0
             let updatedState = FastingActivityAttributes.ContentState(elapsedTime: elapsedTime, currentZoneName: currentZone.name, progress: progress)
-            await currentActivity?.update(using: updatedState)
+            await (currentActivity as? Activity<FastingActivityAttributes>)?.update(using: updatedState)
         }
+        #endif
     }
     
     private func sendContextToWatch() {
@@ -187,7 +202,7 @@ struct ContentView: View {
             StartTimeEditorView()
                 .environmentObject(fastingManager)
         }
-        .fullScreenCover(isPresented: .constant(!hasCompletedOnboarding)) {
+        .fullScreenCover(isPresented: .constant(false)) {
             OnboardingView(hasCompletedOnboarding: $hasCompletedOnboarding)
         }
         .preferredColorScheme(.dark)
@@ -327,7 +342,7 @@ struct FastingZoneInfoView: View {
         .onDisappear {
             messageTimer?.invalidate()
         }
-        .onChange(of: currentZone.id) { _, _ in
+        .onChange(of: currentZone.id) { _ in
             updateMessage()
         }
     }

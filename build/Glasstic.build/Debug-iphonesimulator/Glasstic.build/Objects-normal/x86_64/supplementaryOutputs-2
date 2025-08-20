@@ -1,0 +1,18 @@
+"/Users/hyper/src/Glasstic/Managers/WatchConnectivityManager.swift":
+  diagnostics: "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/WatchConnectivityManager.dia"
+  const-values: "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/WatchConnectivityManager.swiftconstvalues"
+  object: "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/WatchConnectivityManager.o"
+  dependencies: "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/WatchConnectivityManager.d"
+  swift-dependencies: "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/WatchConnectivityManager.swiftdeps"
+"/Users/hyper/src/Glasstic/Managers/NotificationManager.swift":
+  dependencies: "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/NotificationManager.d"
+  const-values: "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/NotificationManager.swiftconstvalues"
+  swift-dependencies: "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/NotificationManager.swiftdeps"
+  diagnostics: "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/NotificationManager.dia"
+  object: "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/NotificationManager.o"
+"/Users/hyper/src/Glasstic/Managers/GamificationManager.swift":
+  diagnostics: "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/GamificationManager.dia"
+  object: "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/GamificationManager.o"
+  const-values: "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/GamificationManager.swiftconstvalues"
+  dependencies: "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/GamificationManager.d"
+  swift-dependencies: "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/GamificationManager.swiftdeps"

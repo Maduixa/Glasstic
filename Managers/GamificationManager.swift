@@ -1,4 +1,3 @@
-
 import Foundation
 
 class GamificationManager {
@@ -101,5 +100,10 @@ class GamificationManager {
     
     func getProfile() -> UserProfile {
         return userProfile
+    }
+    
+    func updateProfile(_ newProfile: UserProfile) {
+        userProfile = newProfile
+        saveProfile()
     }
 }

@@ -1,0 +1,18 @@
+"/Users/hyper/src/Glasstic/Models/FastingState.swift":
+  dependencies: "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/FastingState.d"
+  const-values: "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/FastingState.swiftconstvalues"
+  swift-dependencies: "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/FastingState.swiftdeps"
+  object: "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/FastingState.o"
+  diagnostics: "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/FastingState.dia"
+"/Users/hyper/src/Glasstic/Models/FastingPlan.swift":
+  swift-dependencies: "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/FastingPlan.swiftdeps"
+  diagnostics: "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/FastingPlan.dia"
+  object: "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/FastingPlan.o"
+  const-values: "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/FastingPlan.swiftconstvalues"
+  dependencies: "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/FastingPlan.d"
+"/Users/hyper/src/Glasstic/Models/FastingActivityAttributes.swift":
+  diagnostics: "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/FastingActivityAttributes.dia"
+  dependencies: "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/FastingActivityAttributes.d"
+  swift-dependencies: "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/FastingActivityAttributes.swiftdeps"
+  const-values: "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/FastingActivityAttributes.swiftconstvalues"
+  object: "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/FastingActivityAttributes.o"

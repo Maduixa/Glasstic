@@ -1,0 +1,16 @@
+{
+  "source": "/Users/hyper/src/Glasstic/Glasstic/ContentView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "In this zone for %@",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 297
+        }
+      }
+    ]
+  },
+  "version": 1
+}

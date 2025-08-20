@@ -1,4 +1,3 @@
-
 import SwiftUI
 
 struct PlanSelectorView: View {
@@ -91,7 +90,7 @@ struct PlanSelectorView: View {
             
             Slider(value: $customHours, in: 1...72, step: 1)
                 .padding()
-                .onChange(of: customHours) {
+                .onChange(of: customHours) { _ in
                     self.selectedPlan = nil // Deselect preset if slider is used
                 }
         }

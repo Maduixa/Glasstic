@@ -1,0 +1,48 @@
+{
+  "source": "/Users/hyper/src/Glasstic/Views/PlanSelectorView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Choose Your Fast",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 19
+        }
+      },
+      {
+        "comment": "",
+        "key": "Select a preset plan or create your own.",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 25
+        }
+      },
+      {
+        "comment": "",
+        "key": "Start %@ Fast",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 47
+        }
+      },
+      {
+        "comment": "",
+        "key": "%lld hours",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 69
+        }
+      },
+      {
+        "comment": "",
+        "key": "Custom Duration: %lld hours",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 88
+        }
+      }
+    ]
+  },
+  "version": 1
+}

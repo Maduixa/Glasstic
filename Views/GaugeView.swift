@@ -1,4 +1,3 @@
-
 import SwiftUI
 
 struct GaugeView: View {
@@ -6,7 +5,8 @@ struct GaugeView: View {
     let fastingGoal: TimeInterval
 
     private var progress: CGFloat {
-        return CGFloat(elapsedTime / fastingGoal)
+        guard fastingGoal > 0 else { return 0 }
+        return CGFloat(min(elapsedTime / fastingGoal, 1.0))
     }
     
     private var completedZones: [FastingZone] {
@@ -44,7 +44,7 @@ struct GaugeView: View {
                 Text("Remaining Time")
                     .font(.caption)
                     .foregroundColor(.white.opacity(0.8))
-                Text(timeString(from: fastingGoal - elapsedTime))
+                Text(timeString(from: max(fastingGoal - elapsedTime, 0)))
                     .font(.headline)
                     .fontWeight(.semibold)
                     .foregroundColor(.white)
@@ -88,20 +88,20 @@ struct ZoneEmojiView: View {
                         .scaleEffect(isActive ? 1.4 : (isCompleted ? 1.1 : 0.8))
                         .opacity(isCompleted ? 1.0 : 0.3)
                         .shadow(color: isCompleted ? zone.color.opacity(0.8) : .clear, radius: 3, x: 0, y: 2)
-                        .animation(.easeInOut(duration: 0.5), value: isActive)
-                        .animation(.easeInOut(duration: 0.3), value: isCompleted)
                 }
                 .position(
                     x: 150 + 120 * cos(angle.radians),
                     y: 150 + 120 * sin(angle.radians)
                 )
+                .animation(.easeInOut(duration: 0.5), value: isActive)
+                .animation(.easeInOut(duration: 0.3), value: isCompleted)
             }
         }
         .frame(width: 300, height: 300)
     }
     
     private func isCurrentZone(zone: FastingZone) -> Bool {
-        let currentZone = FastingZone.allZones.filter { elapsedTime >= $0.duration }.last ?? .anabolic
+        let currentZone = FastingZone.allZones.filter { elapsedTime >= $0.duration }.last ?? FastingZone.anabolic
         return currentZone.id == zone.id
     }
 }
@@ -125,23 +125,15 @@ struct WaveView: View {
     }
 }
 
-struct WaveShape: Shape, Sendable {
-    var offset: Angle
-    var percent: CGFloat
-
-    var animatableData: AnimatablePair<Double, CGFloat> {
-        get { AnimatablePair(offset.degrees, percent) }
-        set { 
-            offset = Angle(degrees: newValue.first)
-            percent = newValue.second
-        }
-    }
+struct WaveShape: Shape {
+    let offset: Angle
+    let percent: CGFloat
 
     func path(in rect: CGRect) -> Path {
         var p = Path()
 
         let waveHeight = 0.015 * rect.height
-        let yOffset = CGFloat(1.0 - self.percent) * rect.height
+        let yOffset = CGFloat(1.0 - percent) * rect.height
         let startAngle = offset
         let endAngle = offset + Angle(degrees: 360)
 

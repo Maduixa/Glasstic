@@ -1,0 +1,24 @@
+{
+  "source": "/Users/hyper/src/Glasstic/Views/GaugeView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Elapsed Time",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 36
+        }
+      },
+      {
+        "comment": "",
+        "key": "Remaining Time",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 44
+        }
+      }
+    ]
+  },
+  "version": 1
+}

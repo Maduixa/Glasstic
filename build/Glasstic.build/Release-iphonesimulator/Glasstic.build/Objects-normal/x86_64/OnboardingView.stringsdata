@@ -1,0 +1,16 @@
+{
+  "source": "/Users/hyper/src/Glasstic/Views/OnboardingView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Get Started",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 72
+        }
+      }
+    ]
+  },
+  "version": 1
+}

@@ -1,0 +1,100 @@
+{
+  "" : {
+    "const-values" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Release-iphonesimulator/Glasstic.build/Objects-normal/x86_64/Glasstic-master.swiftconstvalues",
+    "dependencies" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Release-iphonesimulator/Glasstic.build/Objects-normal/x86_64/Glasstic-master.d",
+    "diagnostics" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Release-iphonesimulator/Glasstic.build/Objects-normal/x86_64/Glasstic-master.dia",
+    "emit-module-dependencies" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Release-iphonesimulator/Glasstic.build/Objects-normal/x86_64/Glasstic-master-emit-module.d",
+    "emit-module-diagnostics" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Release-iphonesimulator/Glasstic.build/Objects-normal/x86_64/Glasstic-master-emit-module.dia",
+    "swift-dependencies" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Release-iphonesimulator/Glasstic.build/Objects-normal/x86_64/Glasstic-master.swiftdeps"
+  },
+  "/Users/hyper/src/Glasstic/Glasstic/ContentView.swift" : {
+    "index-unit-output-path" : "/Glasstic.build/Release-iphonesimulator/Glasstic.build/Objects-normal/x86_64/ContentView.o",
+    "llvm-bc" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Release-iphonesimulator/Glasstic.build/Objects-normal/x86_64/ContentView.bc",
+    "object" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Release-iphonesimulator/Glasstic.build/Objects-normal/x86_64/ContentView.o"
+  },
+  "/Users/hyper/src/Glasstic/Glasstic/GlassticApp.swift" : {
+    "index-unit-output-path" : "/Glasstic.build/Release-iphonesimulator/Glasstic.build/Objects-normal/x86_64/GlassticApp.o",
+    "llvm-bc" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Release-iphonesimulator/Glasstic.build/Objects-normal/x86_64/GlassticApp.bc",
+    "object" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Release-iphonesimulator/Glasstic.build/Objects-normal/x86_64/GlassticApp.o"
+  },
+  "/Users/hyper/src/Glasstic/Managers/GamificationManager.swift" : {
+    "index-unit-output-path" : "/Glasstic.build/Release-iphonesimulator/Glasstic.build/Objects-normal/x86_64/GamificationManager.o",
+    "llvm-bc" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Release-iphonesimulator/Glasstic.build/Objects-normal/x86_64/GamificationManager.bc",
+    "object" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Release-iphonesimulator/Glasstic.build/Objects-normal/x86_64/GamificationManager.o"
+  },
+  "/Users/hyper/src/Glasstic/Managers/HealthKitManager.swift" : {
+    "index-unit-output-path" : "/Glasstic.build/Release-iphonesimulator/Glasstic.build/Objects-normal/x86_64/HealthKitManager.o",
+    "llvm-bc" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Release-iphonesimulator/Glasstic.build/Objects-normal/x86_64/HealthKitManager.bc",
+    "object" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Release-iphonesimulator/Glasstic.build/Objects-normal/x86_64/HealthKitManager.o"
+  },
+  "/Users/hyper/src/Glasstic/Managers/NotificationManager.swift" : {
+    "index-unit-output-path" : "/Glasstic.build/Release-iphonesimulator/Glasstic.build/Objects-normal/x86_64/NotificationManager.o",
+    "llvm-bc" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Release-iphonesimulator/Glasstic.build/Objects-normal/x86_64/NotificationManager.bc",
+    "object" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Release-iphonesimulator/Glasstic.build/Objects-normal/x86_64/NotificationManager.o"
+  },
+  "/Users/hyper/src/Glasstic/Managers/WatchConnectivityManager.swift" : {
+    "index-unit-output-path" : "/Glasstic.build/Release-iphonesimulator/Glasstic.build/Objects-normal/x86_64/WatchConnectivityManager.o",
+    "llvm-bc" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Release-iphonesimulator/Glasstic.build/Objects-normal/x86_64/WatchConnectivityManager.bc",
+    "object" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Release-iphonesimulator/Glasstic.build/Objects-normal/x86_64/WatchConnectivityManager.o"
+  },
+  "/Users/hyper/src/Glasstic/Models/Badge.swift" : {
+    "index-unit-output-path" : "/Glasstic.build/Release-iphonesimulator/Glasstic.build/Objects-normal/x86_64/Badge.o",
+    "llvm-bc" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Release-iphonesimulator/Glasstic.build/Objects-normal/x86_64/Badge.bc",
+    "object" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Release-iphonesimulator/Glasstic.build/Objects-normal/x86_64/Badge.o"
+  },
+  "/Users/hyper/src/Glasstic/Models/FastingActivityAttributes.swift" : {
+    "index-unit-output-path" : "/Glasstic.build/Release-iphonesimulator/Glasstic.build/Objects-normal/x86_64/FastingActivityAttributes.o",
+    "llvm-bc" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Release-iphonesimulator/Glasstic.build/Objects-normal/x86_64/FastingActivityAttributes.bc",
+    "object" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Release-iphonesimulator/Glasstic.build/Objects-normal/x86_64/FastingActivityAttributes.o"
+  },
+  "/Users/hyper/src/Glasstic/Models/FastingPlan.swift" : {
+    "index-unit-output-path" : "/Glasstic.build/Release-iphonesimulator/Glasstic.build/Objects-normal/x86_64/FastingPlan.o",
+    "llvm-bc" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Release-iphonesimulator/Glasstic.build/Objects-normal/x86_64/FastingPlan.bc",
+    "object" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Release-iphonesimulator/Glasstic.build/Objects-normal/x86_64/FastingPlan.o"
+  },
+  "/Users/hyper/src/Glasstic/Models/FastingState.swift" : {
+    "index-unit-output-path" : "/Glasstic.build/Release-iphonesimulator/Glasstic.build/Objects-normal/x86_64/FastingState.o",
+    "llvm-bc" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Release-iphonesimulator/Glasstic.build/Objects-normal/x86_64/FastingState.bc",
+    "object" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Release-iphonesimulator/Glasstic.build/Objects-normal/x86_64/FastingState.o"
+  },
+  "/Users/hyper/src/Glasstic/Models/FastingZone.swift" : {
+    "index-unit-output-path" : "/Glasstic.build/Release-iphonesimulator/Glasstic.build/Objects-normal/x86_64/FastingZone.o",
+    "llvm-bc" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Release-iphonesimulator/Glasstic.build/Objects-normal/x86_64/FastingZone.bc",
+    "object" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Release-iphonesimulator/Glasstic.build/Objects-normal/x86_64/FastingZone.o"
+  },
+  "/Users/hyper/src/Glasstic/Models/UserProfile.swift" : {
+    "index-unit-output-path" : "/Glasstic.build/Release-iphonesimulator/Glasstic.build/Objects-normal/x86_64/UserProfile.o",
+    "llvm-bc" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Release-iphonesimulator/Glasstic.build/Objects-normal/x86_64/UserProfile.bc",
+    "object" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Release-iphonesimulator/Glasstic.build/Objects-normal/x86_64/UserProfile.o"
+  },
+  "/Users/hyper/src/Glasstic/Views/CalendarView.swift" : {
+    "index-unit-output-path" : "/Glasstic.build/Release-iphonesimulator/Glasstic.build/Objects-normal/x86_64/CalendarView.o",
+    "llvm-bc" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Release-iphonesimulator/Glasstic.build/Objects-normal/x86_64/CalendarView.bc",
+    "object" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Release-iphonesimulator/Glasstic.build/Objects-normal/x86_64/CalendarView.o"
+  },
+  "/Users/hyper/src/Glasstic/Views/GaugeView.swift" : {
+    "index-unit-output-path" : "/Glasstic.build/Release-iphonesimulator/Glasstic.build/Objects-normal/x86_64/GaugeView.o",
+    "llvm-bc" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Release-iphonesimulator/Glasstic.build/Objects-normal/x86_64/GaugeView.bc",
+    "object" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Release-iphonesimulator/Glasstic.build/Objects-normal/x86_64/GaugeView.o"
+  },
+  "/Users/hyper/src/Glasstic/Views/OnboardingView.swift" : {
+    "index-unit-output-path" : "/Glasstic.build/Release-iphonesimulator/Glasstic.build/Objects-normal/x86_64/OnboardingView.o",
+    "llvm-bc" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Release-iphonesimulator/Glasstic.build/Objects-normal/x86_64/OnboardingView.bc",
+    "object" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Release-iphonesimulator/Glasstic.build/Objects-normal/x86_64/OnboardingView.o"
+  },
+  "/Users/hyper/src/Glasstic/Views/PlanSelectorView.swift" : {
+    "index-unit-output-path" : "/Glasstic.build/Release-iphonesimulator/Glasstic.build/Objects-normal/x86_64/PlanSelectorView.o",
+    "llvm-bc" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Release-iphonesimulator/Glasstic.build/Objects-normal/x86_64/PlanSelectorView.bc",
+    "object" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Release-iphonesimulator/Glasstic.build/Objects-normal/x86_64/PlanSelectorView.o"
+  },
+  "/Users/hyper/src/Glasstic/Views/ProfileView.swift" : {
+    "index-unit-output-path" : "/Glasstic.build/Release-iphonesimulator/Glasstic.build/Objects-normal/x86_64/ProfileView.o",
+    "llvm-bc" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Release-iphonesimulator/Glasstic.build/Objects-normal/x86_64/ProfileView.bc",
+    "object" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Release-iphonesimulator/Glasstic.build/Objects-normal/x86_64/ProfileView.o"
+  },
+  "/Users/hyper/src/Glasstic/build/Glasstic.build/Release-iphonesimulator/Glasstic.build/DerivedSources/GeneratedAssetSymbols.swift" : {
+    "index-unit-output-path" : "/Glasstic.build/Release-iphonesimulator/Glasstic.build/Objects-normal/x86_64/GeneratedAssetSymbols.o",
+    "llvm-bc" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Release-iphonesimulator/Glasstic.build/Objects-normal/x86_64/GeneratedAssetSymbols.bc",
+    "object" : "/Users/hyper/src/Glasstic/build/Glasstic.build/Release-iphonesimulator/Glasstic.build/Objects-normal/x86_64/GeneratedAssetSymbols.o"
+  }
+}

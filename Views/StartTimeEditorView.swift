@@ -57,20 +57,20 @@ struct StartTimeEditorView: View {
                         .foregroundColor(.white)
                         .padding()
                         .frame(maxWidth: .infinity)
-                        .background(.blue.opacity(0.6))
+                        .background(Color.blue.opacity(0.8))
                         .cornerRadius(15)
                     }
-                    .padding(.horizontal)
                     
                     Spacer()
                 }
                 .padding()
             }
         }
-        .preferredColorScheme(.dark)
+        .navigationBarHidden(true)
         .onAppear {
             editedStartTime = fastingManager.getStartDate()
         }
+        .preferredColorScheme(.dark)
     }
 }
 

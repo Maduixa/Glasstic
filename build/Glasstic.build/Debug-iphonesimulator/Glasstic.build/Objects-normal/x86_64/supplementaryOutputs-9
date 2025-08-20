@@ -1,0 +1,18 @@
+"/Users/hyper/src/Glasstic/Views/PlanSelectorView.swift":
+  diagnostics: "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/PlanSelectorView.dia"
+  dependencies: "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/PlanSelectorView.d"
+  const-values: "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/PlanSelectorView.swiftconstvalues"
+  swift-dependencies: "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/PlanSelectorView.swiftdeps"
+  object: "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/PlanSelectorView.o"
+"/Users/hyper/src/Glasstic/Views/GaugeView.swift":
+  const-values: "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/GaugeView.swiftconstvalues"
+  dependencies: "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/GaugeView.d"
+  swift-dependencies: "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/GaugeView.swiftdeps"
+  diagnostics: "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/GaugeView.dia"
+  object: "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/GaugeView.o"
+"/Users/hyper/src/Glasstic/Views/OnboardingView.swift":
+  dependencies: "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/OnboardingView.d"
+  diagnostics: "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/OnboardingView.dia"
+  const-values: "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/OnboardingView.swiftconstvalues"
+  object: "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/OnboardingView.o"
+  swift-dependencies: "/Users/hyper/src/Glasstic/build/Glasstic.build/Debug-iphonesimulator/Glasstic.build/Objects-normal/x86_64/OnboardingView.swiftdeps"

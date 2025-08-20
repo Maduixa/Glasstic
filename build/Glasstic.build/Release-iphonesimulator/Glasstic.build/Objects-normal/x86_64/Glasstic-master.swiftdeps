@@ -1,0 +1,23 @@
+version: "Apple Swift version 6.1.2 (swiftlang-6.1.2.1.2 clang-1700.0.13.5)"
+options: "143a22612ebc958079d7a0b304e7178e94c8dcc9418334a05de60269703cf31a"
+build_start_time: [1755644318, 169492000]
+build_end_time: [1755644319, 393679000]
+inputs:
+  "/Users/hyper/src/Glasstic/Glasstic/ContentView.swift": !dirty [1755644291, 475786785]
+  "/Users/hyper/src/Glasstic/Glasstic/GlassticApp.swift": !dirty [1755639308, 114340775]
+  "/Users/hyper/src/Glasstic/Managers/GamificationManager.swift": !dirty [1755642488, 159923446]
+  "/Users/hyper/src/Glasstic/Managers/HealthKitManager.swift": !dirty [1755642488, 159923863]
+  "/Users/hyper/src/Glasstic/Managers/NotificationManager.swift": !dirty [1755644291, 477118376]
+  "/Users/hyper/src/Glasstic/Managers/WatchConnectivityManager.swift": !dirty [1755641661, 868192639]
+  "/Users/hyper/src/Glasstic/Models/Badge.swift": !dirty [1755639265, 830055237]
+  "/Users/hyper/src/Glasstic/Models/FastingActivityAttributes.swift": !dirty [1755638922, 156945109]
+  "/Users/hyper/src/Glasstic/Models/FastingPlan.swift": !dirty [1755638538, 266453624]
+  "/Users/hyper/src/Glasstic/Models/FastingState.swift": !dirty [1755641086, 189675416]
+  "/Users/hyper/src/Glasstic/Models/FastingZone.swift": !dirty [1755644291, 477703171]
+  "/Users/hyper/src/Glasstic/Models/UserProfile.swift": !dirty [1755638736, 924634457]
+  "/Users/hyper/src/Glasstic/Views/CalendarView.swift": !dirty [1755644291, 478212590]
+  "/Users/hyper/src/Glasstic/Views/GaugeView.swift": !dirty [1755644291, 478940761]
+  "/Users/hyper/src/Glasstic/Views/OnboardingView.swift": !dirty [1755638856, 581319094]
+  "/Users/hyper/src/Glasstic/Views/PlanSelectorView.swift": !dirty [1755638548, 257769823]
+  "/Users/hyper/src/Glasstic/Views/ProfileView.swift": !dirty [1755642507, 89031750]
+  "/Users/hyper/src/Glasstic/build/Glasstic.build/Release-iphonesimulator/Glasstic.build/DerivedSources/GeneratedAssetSymbols.swift": !dirty [1755642591, 859340694]

@@ -1,4 +1,3 @@
-
 import SwiftUI
 
 struct Badge: Identifiable, Codable, Hashable {
@@ -49,15 +48,30 @@ struct CodableColor: Codable, Hashable {
         self.blue = Double(nsColor.blueComponent)
         self.opacity = Double(nsColor.alphaComponent)
         #else
-        // Default for other platforms, like watchOS
-        self.red = 0
-        self.green = 0
-        self.blue = 0
-        self.opacity = 1
+        // Fallback for other platforms
+        self.red = 0.5
+        self.green = 0.5
+        self.blue = 0.5
+        self.opacity = 1.0
         #endif
     }
 
     var color: Color {
-        Color(.sRGB, red: red, green: green, blue: blue, opacity: opacity)
+        return Color(.sRGB, red: red, green: green, blue: blue, opacity: opacity)
+    }
+}
+
+extension Badge {
+    var emoji: String {
+        switch id {
+        case "first_fast": return "🌟"
+        case "7_day_streak": return "🔥"
+        case "30_day_streak": return "👑"
+        case "10_fasts": return "🎯"
+        case "50_fasts": return "💎"
+        case "24_hour_fast": return "⏰"
+        case "autophagy_unlocked": return "🧬"
+        default: return "🏆"
+        }
     }
 }

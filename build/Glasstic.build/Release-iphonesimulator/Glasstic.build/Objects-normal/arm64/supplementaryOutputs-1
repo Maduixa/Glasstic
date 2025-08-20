@@ -1,0 +1,9 @@
+"/Users/hyper/src/Glasstic/Glasstic/GlassticApp.swift":
+  dependencies: "/Users/hyper/src/Glasstic/build/Glasstic.build/Release-iphonesimulator/Glasstic.build/Objects-normal/arm64/Glasstic-master.d"
+  diagnostics: "/Users/hyper/src/Glasstic/build/Glasstic.build/Release-iphonesimulator/Glasstic.build/Objects-normal/arm64/Glasstic-master.dia"
+  swiftmodule: "/Users/hyper/src/Glasstic/build/Glasstic.build/Release-iphonesimulator/Glasstic.build/Objects-normal/arm64/Glasstic.swiftmodule"
+  abi-baseline-json: "/Users/hyper/src/Glasstic/build/Glasstic.build/Release-iphonesimulator/Glasstic.build/Objects-normal/arm64/Glasstic.abi.json"
+  const-values: "/Users/hyper/src/Glasstic/build/Glasstic.build/Release-iphonesimulator/Glasstic.build/Objects-normal/arm64/Glasstic-master.swiftconstvalues"
+  swiftdoc: "/Users/hyper/src/Glasstic/build/Glasstic.build/Release-iphonesimulator/Glasstic.build/Objects-normal/arm64/Glasstic.swiftdoc"
+  swiftsourceinfo: "/Users/hyper/src/Glasstic/build/Glasstic.build/Release-iphonesimulator/Glasstic.build/Objects-normal/arm64/Glasstic.swiftsourceinfo"
+  objc-header: "/Users/hyper/src/Glasstic/build/Glasstic.build/Release-iphonesimulator/Glasstic.build/Objects-normal/arm64/Glasstic-Swift.h"
