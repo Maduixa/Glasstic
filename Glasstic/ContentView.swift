@@ -121,7 +121,8 @@ class FastingManager: ObservableObject {
 
             if Int(self.elapsedTime) % 30 == 0 { self.updateLiveActivity() }
 
-            if self.elapsedTime >= self.fastingGoal { self.endFasting() }
+            // Remove auto-end behavior - let user continue past goal
+            // if self.elapsedTime >= self.fastingGoal { self.endFasting() }
         }
     }
 
@@ -130,7 +131,7 @@ class FastingManager: ObservableObject {
         Task {
             let currentZone = FastingZone.allZones.filter { elapsedTime >= $0.duration }.last ?? .anabolic
             let progress = fastingGoal > 0 ? elapsedTime / fastingGoal : 0
-            let updatedState = FastingActivityAttributes.ContentState(elapsedTime: elapsedTime, currentZoneName: currentZone.name, progress: progress)
+            let updatedState = FastingActivityAttributes.ContentState(elapsedTime: elapsedTime, currentZoneName: currentZone.name, progress: min(progress, 1.0))
             await (currentActivity as? Activity<FastingActivityAttributes>)?.update(using: updatedState)
         }
         #endif
