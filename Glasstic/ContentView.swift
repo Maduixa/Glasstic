@@ -208,7 +208,7 @@ struct ContentView: View {
         .sheet(isPresented: $isShowingFastSummary) {
             FastSummaryView(fastingManager: fastingManager)
         }
-        .fullScreenCover(isPresented: .constant(false)) {
+        .fullScreenCover(isPresented: .constant(!hasCompletedOnboarding)) {
             OnboardingView(hasCompletedOnboarding: $hasCompletedOnboarding)
         }
         .preferredColorScheme(themeManager.currentTheme.mode)

@@ -159,7 +159,7 @@ struct FastSummaryView: View {
     
     private var benefitsSection: some View {
         VStack(alignment: .leading, spacing: 15) {
-            Text("AI Summary")
+            Text("Summary")
                 .font(.title2)
                 .fontWeight(.bold)
                 .foregroundColor(.white)

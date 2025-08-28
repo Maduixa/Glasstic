@@ -3,18 +3,40 @@ import SwiftUI
 struct ProfileView: View {
     @State private var profile = GamificationManager.shared.getProfile()
     @State private var selectedBadge: Badge? = nil
+    @State private var isShowingSettings = false
+    @StateObject private var themeManager = ThemeManager.shared
 
     let columns = [GridItem(.adaptive(minimum: 100))]
 
     var body: some View {
         ZStack {
-            LinearGradient(colors: [.blue.opacity(0.3), .gray.opacity(0.2)], startPoint: .top, endPoint: .bottom)
-                .ignoresSafeArea()
+            // Use theme-aware background
+            LinearGradient(
+                colors: themeManager.currentTheme.primaryGradientColors,
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .ignoresSafeArea()
 
             ScrollView {
                 VStack(spacing: 20) {
-                    Text("My Progress")
-                        .font(.largeTitle).fontWeight(.bold).foregroundColor(.white)
+                    // Header with settings button
+                    HStack {
+                        Text("My Progress")
+                            .font(.largeTitle).fontWeight(.bold).foregroundColor(.white)
+                        
+                        Spacer()
+                        
+                        Button(action: { isShowingSettings.toggle() }) {
+                            Image(systemName: "gearshape.fill")
+                                .font(.title2)
+                                .foregroundColor(.white)
+                                .padding()
+                                .background(.ultraThinMaterial)
+                                .clipShape(Circle())
+                        }
+                    }
+                    .padding(.horizontal)
 
                     streakView
                         .padding()
@@ -32,7 +54,10 @@ struct ProfileView: View {
         .sheet(item: $selectedBadge) { badge in
             BadgeDetailView(badge: badge)
         }
-        .preferredColorScheme(.dark)
+        .sheet(isPresented: $isShowingSettings) {
+            SettingsView()
+        }
+        .preferredColorScheme(themeManager.currentTheme.mode)
     }
 
     private var streakView: some View {
@@ -115,16 +140,21 @@ struct ProfileView: View {
 struct BadgeDetailView: View {
     let badge: Badge
     @Environment(\.dismiss) private var dismiss
+    @StateObject private var themeManager = ThemeManager.shared
 
     var body: some View {
         ZStack {
-            LinearGradient(colors: [.blue.opacity(0.3), .gray.opacity(0.2)], startPoint: .top, endPoint: .bottom)
-                .ignoresSafeArea()
+            LinearGradient(
+                colors: themeManager.currentTheme.primaryGradientColors,
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+            .ignoresSafeArea()
 
             VStack(spacing: 30) {
                 Text(badge.emoji)
                     .font(.system(size: 100))
-                    .shadow(color: .yellow, radius: 10)
+                    .shadow(color: themeManager.currentTheme.accentColor.color, radius: 10)
 
                 Text(badge.name)
                     .font(.largeTitle)
@@ -148,7 +178,7 @@ struct BadgeDetailView: View {
             }
             .padding()
         }
-        .preferredColorScheme(.dark)
+        .preferredColorScheme(themeManager.currentTheme.mode)
     }
 }
 

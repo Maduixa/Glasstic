@@ -3,6 +3,7 @@ import SwiftUI
 struct GaugeView: View {
     let elapsedTime: TimeInterval
     let fastingGoal: TimeInterval
+    @StateObject private var themeManager = ThemeManager.shared
 
     private var progress: CGFloat {
         guard fastingGoal > 0 else { return 0 }
@@ -12,24 +13,44 @@ struct GaugeView: View {
     private var completedZones: [FastingZone] {
         return FastingZone.allZones.filter { elapsedTime >= $0.duration }
     }
+    
+    private var currentZone: FastingZone {
+        return FastingZone.allZones.filter { elapsedTime >= $0.duration }.last ?? FastingZone.anabolic
+    }
 
     var body: some View {
         ZStack {
-            // Background Glass
+            // Background Glass with enhanced shadows
             Circle()
                 .fill(.ultraThinMaterial)
-                .shadow(color: .black.opacity(0.2), radius: 10, x: 0, y: 10)
+                .shadow(color: .black.opacity(0.3), radius: 15, x: 0, y: 10)
+                .shadow(color: themeManager.currentTheme.accentColor.color.opacity(0.2), radius: 20, x: 0, y: 0)
 
-            // Progress Wave
-            WaveView(progress: progress, color: .blue)
+            // Progress Wave with theme colors
+            WaveView(progress: progress, colors: themeManager.currentTheme.progressGradientColors)
                 .clipShape(Circle())
 
             // Zone Emojis positioned around the gauge
             ZoneEmojiView(elapsedTime: elapsedTime, fastingGoal: fastingGoal)
+            
+            // Following emoji that moves along the progress
+            FollowingEmojiView(progress: progress, currentZone: currentZone)
 
-            // Border
+            // Enhanced border with theme gradient and increased width
             Circle()
-                .stroke(LinearGradient(colors: [.white.opacity(0.5), .white.opacity(0.1)], startPoint: .topLeading, endPoint: .bottomTrailing), lineWidth: 2)
+                .stroke(
+                    LinearGradient(
+                        colors: [
+                            themeManager.currentTheme.accentColor.color.opacity(0.8),
+                            themeManager.currentTheme.accentColor.color.opacity(0.3),
+                            .white.opacity(0.1)
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    ),
+                    lineWidth: 14
+                )
+                .shadow(color: themeManager.currentTheme.accentColor.color.opacity(0.6), radius: 8, x: 0, y: 0)
 
             // Text Content
             VStack {
@@ -106,16 +127,63 @@ struct ZoneEmojiView: View {
     }
 }
 
+struct FollowingEmojiView: View {
+    let progress: CGFloat
+    let currentZone: FastingZone
+    @State private var animationOffset: CGFloat = 0
+    
+    var body: some View {
+        ZStack {
+            // Calculate position based on progress around the circle
+            let angle = Angle.degrees(360 * Double(progress) - 90) // Start from top
+            let radius: CGFloat = 135 // Slightly larger radius than zone emojis
+            let x = CGFloat(150) + radius * CGFloat(cos(angle.radians))
+            let y = CGFloat(150) + radius * CGFloat(sin(angle.radians))
+            
+            // Following emoji with enhanced glow and animation
+            ZStack {
+                // Glow effect
+                Circle()
+                    .fill(currentZone.color.opacity(0.4))
+                    .frame(width: 50, height: 50)
+                    .blur(radius: 12)
+                    .scaleEffect(1.3 + sin(animationOffset) * 0.2)
+                
+                // Emoji
+                Text(currentZone.emoji)
+                    .font(.system(size: 28))
+                    .scaleEffect(1.4 + sin(animationOffset) * 0.1)
+                    .shadow(color: currentZone.color.opacity(0.8), radius: 5, x: 0, y: 0)
+            }
+            .position(x: x, y: y)
+            .opacity(progress > 0 ? 1.0 : 0.0)
+            .animation(.easeInOut(duration: 0.5), value: progress)
+            .onAppear {
+                withAnimation(.easeInOut(duration: 2.0).repeatForever(autoreverses: true)) {
+                    animationOffset = .pi * 2
+                }
+            }
+        }
+        .frame(width: 300, height: 300)
+    }
+}
+
 struct WaveView: View {
     let progress: CGFloat
-    let color: Color
+    let colors: [Color]
 
     @State private var waveOffset = Angle(degrees: 0)
 
     var body: some View {
         ZStack {
             WaveShape(offset: waveOffset, percent: progress)
-                .fill(color)
+                .fill(
+                    LinearGradient(
+                        colors: colors,
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
                 .onAppear {
                     withAnimation(.linear(duration: 2).repeatForever(autoreverses: false)) {
                         self.waveOffset = Angle(degrees: 360)
