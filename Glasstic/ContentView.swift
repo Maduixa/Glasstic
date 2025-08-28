@@ -169,18 +169,20 @@ class FastingManager: ObservableObject {
 // MARK: - Main Content View
 struct ContentView: View {
     @StateObject private var fastingManager = FastingManager()
+    @StateObject private var themeManager = ThemeManager.shared
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding: Bool = false
 
     @State private var isShowingCalendar = false
     @State private var isShowingPlanSelector = false
     @State private var isShowingProfile = false
     @State private var isShowingStartTimeEditor = false
+    @State private var isShowingFastSummary = false
 
     var body: some View {
         ZStack {
-            LinearGradient(colors: [.blue.opacity(0.3), .gray.opacity(0.2)], startPoint: .topLeading, endPoint: .bottomTrailing)
-                .ignoresSafeArea()
-
+            // Animated background with pulsating effect
+            AnimatedBackground(theme: themeManager.currentTheme)
+            
             VStack {
                 header
                 Spacer()
@@ -203,10 +205,21 @@ struct ContentView: View {
             StartTimeEditorView()
                 .environmentObject(fastingManager)
         }
+        .sheet(isPresented: $isShowingFastSummary) {
+            FastSummaryView(fastingManager: fastingManager)
+        }
         .fullScreenCover(isPresented: .constant(false)) {
             OnboardingView(hasCompletedOnboarding: $hasCompletedOnboarding)
         }
-        .preferredColorScheme(.dark)
+        .preferredColorScheme(themeManager.currentTheme.mode)
+        .onChange(of: fastingManager.fastingState) { state in
+            if state == .idle && fastingManager.elapsedTime > 0 {
+                // Show summary when fast ends
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                    isShowingFastSummary = true
+                }
+            }
+        }
     }
 
     @ViewBuilder
