@@ -6,7 +6,11 @@ struct GaugeView: View {
 
     private var progress: CGFloat {
         guard fastingGoal > 0 else { return 0 }
-        return CGFloat(min(elapsedTime / fastingGoal, 1.0))
+        return CGFloat(elapsedTime / fastingGoal)
+    }
+    
+    private var clampedProgress: CGFloat {
+        return min(progress, 1.0)
     }
     
     private var completedZones: [FastingZone] {
@@ -20,8 +24,11 @@ struct GaugeView: View {
                 .fill(.ultraThinMaterial)
                 .shadow(color: .black.opacity(0.2), radius: 10, x: 0, y: 10)
 
+            // Glossy Progress Bar
+            GlossyProgressRing(progress: progress)
+
             // Progress Wave
-            WaveView(progress: progress, color: .blue)
+            WaveView(progress: clampedProgress, color: .blue)
                 .clipShape(Circle())
 
             // Zone Emojis positioned around the gauge
@@ -44,10 +51,10 @@ struct GaugeView: View {
                 Text("Remaining Time")
                     .font(.caption)
                     .foregroundColor(.white.opacity(0.8))
-                Text(timeString(from: max(fastingGoal - elapsedTime, 0)))
+                Text(remainingTimeString())
                     .font(.headline)
                     .fontWeight(.semibold)
-                    .foregroundColor(.white)
+                    .foregroundColor(fastingGoal - elapsedTime < 0 ? .orange : .white)
             }
         }
     }
@@ -57,6 +64,16 @@ struct GaugeView: View {
         let minutes = Int(timeInterval) / 60 % 60
         let seconds = Int(timeInterval) % 60
         return String(format: "%02i:%02i:%02i", hours, minutes, seconds)
+    }
+    
+    private func remainingTimeString() -> String {
+        let remaining = fastingGoal - elapsedTime
+        if remaining < 0 {
+            let overtime = abs(remaining)
+            return "+\(timeString(from: overtime))"
+        } else {
+            return timeString(from: remaining)
+        }
     }
 }
 
@@ -74,20 +91,20 @@ struct ZoneEmojiView: View {
                 let isActive = isCurrentZone(zone: zone)
                 
                 ZStack {
-                    // Glow effect for active/completed zones
-                    if isCompleted {
+                    // Glow effect for active zone only
+                    if isActive {
                         Circle()
                             .fill(zone.color.opacity(0.3))
                             .frame(width: 35, height: 35)
-                            .blur(radius: isActive ? 8 : 4)
-                            .scaleEffect(isActive ? 1.2 : 1.0)
+                            .blur(radius: 8)
+                            .scaleEffect(1.2)
                     }
                     
                     Text(zone.emoji)
                         .font(.title2)
-                        .scaleEffect(isActive ? 1.4 : (isCompleted ? 1.1 : 0.8))
-                        .opacity(isCompleted ? 1.0 : 0.3)
-                        .shadow(color: isCompleted ? zone.color.opacity(0.8) : .clear, radius: 3, x: 0, y: 2)
+                        .scaleEffect(isActive ? 1.4 : 0.8)
+                        .opacity(isActive ? 1.0 : 0.0)
+                        .shadow(color: isActive ? zone.color.opacity(0.8) : .clear, radius: 3, x: 0, y: 2)
                 }
                 .position(
                     x: 150 + 120 * cos(angle.radians),
@@ -150,6 +167,60 @@ struct WaveShape: Shape {
         p.closeSubpath()
 
         return p
+    }
+}
+
+struct GlossyProgressRing: View {
+    let progress: CGFloat
+    
+    var body: some View {
+        ZStack {
+            // Background ring
+            Circle()
+                .stroke(
+                    LinearGradient(
+                        colors: [.white.opacity(0.1), .white.opacity(0.05)],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    ),
+                    style: StrokeStyle(lineWidth: 8, lineCap: .round)
+                )
+            
+            // Progress ring
+            Circle()
+                .trim(from: 0, to: min(progress, 1.0))
+                .stroke(
+                    LinearGradient(
+                        colors: progress > 1.0 ? 
+                            [.orange.opacity(0.8), .red.opacity(0.6)] :
+                            [.blue.opacity(0.8), .cyan.opacity(0.6)],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    ),
+                    style: StrokeStyle(lineWidth: 8, lineCap: .round)
+                )
+                .rotationEffect(.degrees(-90))
+                .shadow(
+                    color: progress > 1.0 ? .orange.opacity(0.3) : .blue.opacity(0.3),
+                    radius: 4, x: 0, y: 2
+                )
+            
+            // Overflow indicator for progress > 1.0
+            if progress > 1.0 {
+                Circle()
+                    .trim(from: 0, to: min(progress - 1.0, 1.0))
+                    .stroke(
+                        LinearGradient(
+                            colors: [.red.opacity(0.9), .orange.opacity(0.7)],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        style: StrokeStyle(lineWidth: 6, lineCap: .round, dash: [10, 5])
+                    )
+                    .rotationEffect(.degrees(-90))
+                    .shadow(color: .red.opacity(0.5), radius: 6, x: 0, y: 3)
+            }
+        }
     }
 }
 
