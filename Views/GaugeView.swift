@@ -3,6 +3,7 @@ import SwiftUI
 struct GaugeView: View {
     let elapsedTime: TimeInterval
     let fastingGoal: TimeInterval
+    @StateObject private var themeManager = ThemeManager.shared
 
     private var progress: CGFloat {
         guard fastingGoal > 0 else { return 0 }
@@ -28,11 +29,14 @@ struct GaugeView: View {
             GlossyProgressRing(progress: progress)
 
             // Progress Wave
-            WaveView(progress: clampedProgress, color: .blue)
+            WaveView(progress: clampedProgress, color: themeManager.currentTheme.accentColor.color)
                 .clipShape(Circle())
 
             // Zone Emojis positioned around the gauge
             ZoneEmojiView(elapsedTime: elapsedTime, fastingGoal: fastingGoal)
+            
+            // Following emoji that moves with progress
+            FollowingEmojiView(progress: clampedProgress, elapsedTime: elapsedTime)
 
             // Border
             Circle()
@@ -172,6 +176,7 @@ struct WaveShape: Shape {
 
 struct GlossyProgressRing: View {
     let progress: CGFloat
+    @StateObject private var themeManager = ThemeManager.shared
     
     var body: some View {
         ZStack {
@@ -183,7 +188,7 @@ struct GlossyProgressRing: View {
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
                     ),
-                    style: StrokeStyle(lineWidth: 8, lineCap: .round)
+                    style: StrokeStyle(lineWidth: 14, lineCap: .round)
                 )
             
             // Progress ring
@@ -193,16 +198,16 @@ struct GlossyProgressRing: View {
                     LinearGradient(
                         colors: progress > 1.0 ? 
                             [.orange.opacity(0.8), .red.opacity(0.6)] :
-                            [.blue.opacity(0.8), .cyan.opacity(0.6)],
+                            themeManager.currentTheme.progressGradientColors,
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
                     ),
-                    style: StrokeStyle(lineWidth: 8, lineCap: .round)
+                    style: StrokeStyle(lineWidth: 14, lineCap: .round)
                 )
                 .rotationEffect(.degrees(-90))
                 .shadow(
-                    color: progress > 1.0 ? .orange.opacity(0.3) : .blue.opacity(0.3),
-                    radius: 4, x: 0, y: 2
+                    color: progress > 1.0 ? .orange.opacity(0.3) : themeManager.currentTheme.accentColor.color.opacity(0.3),
+                    radius: 6, x: 0, y: 3
                 )
             
             // Overflow indicator for progress > 1.0
@@ -215,12 +220,49 @@ struct GlossyProgressRing: View {
                             startPoint: .topLeading,
                             endPoint: .bottomTrailing
                         ),
-                        style: StrokeStyle(lineWidth: 6, lineCap: .round, dash: [10, 5])
+                        style: StrokeStyle(lineWidth: 10, lineCap: .round, dash: [12, 6])
                     )
                     .rotationEffect(.degrees(-90))
-                    .shadow(color: .red.opacity(0.5), radius: 6, x: 0, y: 3)
+                    .shadow(color: .red.opacity(0.5), radius: 8, x: 0, y: 4)
             }
         }
+    }
+}
+
+struct FollowingEmojiView: View {
+    let progress: CGFloat
+    let elapsedTime: TimeInterval
+    
+    private var currentZone: FastingZone {
+        return FastingZone.allZones.filter { elapsedTime >= $0.duration }.last ?? FastingZone.anabolic
+    }
+    
+    private var progressAngle: Angle {
+        return Angle.degrees(360 * Double(progress) - 90) // Start from top
+    }
+    
+    var body: some View {
+        ZStack {
+            // Glow effect behind the emoji
+            Circle()
+                .fill(currentZone.color.opacity(0.4))
+                .frame(width: 50, height: 50)
+                .blur(radius: 12)
+                .scaleEffect(1.3)
+            
+            // Main emoji
+            Text(currentZone.emoji)
+                .font(.title)
+                .scaleEffect(1.6)
+                .shadow(color: currentZone.color.opacity(0.9), radius: 5, x: 0, y: 3)
+        }
+        .position(
+            x: 150 + 140 * cos(progressAngle.radians),
+            y: 150 + 140 * sin(progressAngle.radians)
+        )
+        .animation(.easeInOut(duration: 0.8), value: progress)
+        .animation(.easeInOut(duration: 0.6), value: currentZone.id)
+        .frame(width: 300, height: 300)
     }
 }
 

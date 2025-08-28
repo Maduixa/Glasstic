@@ -3,19 +3,24 @@ import SwiftUI
 struct ProfileView: View {
     @State private var profile = GamificationManager.shared.getProfile()
     @State private var selectedBadge: Badge? = nil
+    @State private var isShowingSettings = false
+    @StateObject private var themeManager = ThemeManager.shared
 
     let columns = [GridItem(.adaptive(minimum: 100))]
 
     var body: some View {
         ZStack {
-            LinearGradient(colors: [.blue.opacity(0.3), .gray.opacity(0.2)], startPoint: .top, endPoint: .bottom)
-                .ignoresSafeArea()
+            LinearGradient(
+                colors: themeManager.currentTheme.primaryGradientColors,
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .ignoresSafeArea()
 
             ScrollView {
                 VStack(spacing: 20) {
-                    Text("My Progress")
-                        .font(.largeTitle).fontWeight(.bold).foregroundColor(.white)
-
+                    headerSection
+                    
                     streakView
                         .padding()
                         .background(.ultraThinMaterial)
@@ -32,7 +37,28 @@ struct ProfileView: View {
         .sheet(item: $selectedBadge) { badge in
             BadgeDetailView(badge: badge)
         }
-        .preferredColorScheme(.dark)
+        .sheet(isPresented: $isShowingSettings) {
+            SettingsView()
+        }
+        .preferredColorScheme(themeManager.currentTheme.mode)
+    }
+    
+    private var headerSection: some View {
+        HStack {
+            Text("My Progress")
+                .font(.largeTitle).fontWeight(.bold).foregroundColor(.white)
+            
+            Spacer()
+            
+            Button(action: { isShowingSettings.toggle() }) {
+                Image(systemName: "gearshape.fill")
+                    .font(.title2)
+                    .foregroundColor(.white)
+                    .padding()
+                    .background(.ultraThinMaterial)
+                    .clipShape(Circle())
+            }
+        }
     }
 
     private var streakView: some View {
