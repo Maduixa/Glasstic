@@ -1,4 +1,10 @@
 import SwiftUI
+#if canImport(UIKit)
+import UIKit
+#endif
+#if canImport(AppKit)
+import AppKit
+#endif
 
 struct Badge: Identifiable, Codable, Hashable {
     let id: String
@@ -64,14 +70,14 @@ struct CodableColor: Codable, Hashable {
 extension Badge {
     var emoji: String {
         switch id {
-        case "first_fast": return "🌟"
-        case "7_day_streak": return "🔥"
-        case "30_day_streak": return "👑"
-        case "10_fasts": return "🎯"
-        case "50_fasts": return "💎"
-        case "24_hour_fast": return "⏰"
-        case "autophagy_unlocked": return "🧬"
-        default: return "🏆"
+        case "first_fast": return "\u{1F31F}"
+        case "7_day_streak": return "\u{1F525}"
+        case "30_day_streak": return "\u{1F451}"
+        case "10_fasts": return "\u{1F3AF}"
+        case "50_fasts": return "\u{1F48E}"
+        case "24_hour_fast": return "\u{23F0}"
+        case "autophagy_unlocked": return "\u{1F9EC}"
+        default: return "\u{1F3C6}"
         }
     }
 }

@@ -1,5 +1,5 @@
-
 import Foundation
+#if canImport(ActivityKit)
 import ActivityKit
 
 struct FastingActivityAttributes: ActivityAttributes {
@@ -13,3 +13,4 @@ struct FastingActivityAttributes: ActivityAttributes {
     // Static data for the Live Activity
     var fastingGoal: TimeInterval
 }
+#endif

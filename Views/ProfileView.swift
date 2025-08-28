@@ -3,24 +3,19 @@ import SwiftUI
 struct ProfileView: View {
     @State private var profile = GamificationManager.shared.getProfile()
     @State private var selectedBadge: Badge? = nil
-    @State private var isShowingSettings = false
-    @StateObject private var themeManager = ThemeManager.shared
 
     let columns = [GridItem(.adaptive(minimum: 100))]
 
     var body: some View {
         ZStack {
-            LinearGradient(
-                colors: themeManager.currentTheme.primaryGradientColors,
-                startPoint: .top,
-                endPoint: .bottom
-            )
-            .ignoresSafeArea()
+            LinearGradient(colors: [.blue.opacity(0.3), .gray.opacity(0.2)], startPoint: .top, endPoint: .bottom)
+                .ignoresSafeArea()
 
             ScrollView {
                 VStack(spacing: 20) {
-                    headerSection
-                    
+                    Text("My Progress")
+                        .font(.largeTitle).fontWeight(.bold).foregroundColor(.white)
+
                     streakView
                         .padding()
                         .background(.ultraThinMaterial)
@@ -37,28 +32,7 @@ struct ProfileView: View {
         .sheet(item: $selectedBadge) { badge in
             BadgeDetailView(badge: badge)
         }
-        .sheet(isPresented: $isShowingSettings) {
-            SettingsView()
-        }
-        .preferredColorScheme(themeManager.currentTheme.mode)
-    }
-    
-    private var headerSection: some View {
-        HStack {
-            Text("My Progress")
-                .font(.largeTitle).fontWeight(.bold).foregroundColor(.white)
-            
-            Spacer()
-            
-            Button(action: { isShowingSettings.toggle() }) {
-                Image(systemName: "gearshape.fill")
-                    .font(.title2)
-                    .foregroundColor(.white)
-                    .padding()
-                    .background(.ultraThinMaterial)
-                    .clipShape(Circle())
-            }
-        }
+        .preferredColorScheme(.dark)
     }
 
     private var streakView: some View {
@@ -118,12 +92,19 @@ struct ProfileView: View {
             }
             .frame(width: 100, height: 100)
             .background(
-                RoundedRectangle(cornerRadius: 15)
-                    .fill(isUnlocked ? AnyShapeStyle(.ultraThinMaterial) : AnyShapeStyle(Color.black.opacity(0.3)))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 15)
-                            .stroke(isUnlocked ? Color.yellow.opacity(0.6) : Color.clear, lineWidth: 2)
-                    )
+                ZStack {
+                    // Locked background
+                    RoundedRectangle(cornerRadius: 15)
+                        .fill(Color.black.opacity(0.3))
+                        .opacity(isUnlocked ? 0 : 1)
+                    // Unlocked background (material)
+                    RoundedRectangle(cornerRadius: 15)
+                        .fill(.ultraThinMaterial)
+                        .opacity(isUnlocked ? 1 : 0)
+                    // Border when unlocked
+                    RoundedRectangle(cornerRadius: 15)
+                        .stroke(isUnlocked ? Color.yellow.opacity(0.6) : Color.clear, lineWidth: 2)
+                }
             )
         }
         .scaleEffect(isUnlocked ? 1.0 : 0.9)

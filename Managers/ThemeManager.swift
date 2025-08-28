@@ -24,6 +24,51 @@ struct AppTheme: Identifiable, Codable {
     }
 }
 
+// Custom Codable to support ColorScheme (not Codable by default)
+extension AppTheme {
+    private enum CodingKeys: String, CodingKey {
+        case id, name, primaryGradient, secondaryGradient, accentColor, progressColors, mode
+    }
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(String.self, forKey: .id)
+        name = try container.decode(String.self, forKey: .name)
+        primaryGradient = try container.decode([CodableColor].self, forKey: .primaryGradient)
+        secondaryGradient = try container.decode([CodableColor].self, forKey: .secondaryGradient)
+        accentColor = try container.decode(CodableColor.self, forKey: .accentColor)
+        progressColors = try container.decode([CodableColor].self, forKey: .progressColors)
+        if let modeString = try container.decodeIfPresent(String.self, forKey: .mode) {
+            switch modeString.lowercased() {
+            case "light": mode = .light
+            case "dark": mode = .dark
+            default: mode = nil
+            }
+        } else {
+            mode = nil
+        }
+    }
+    
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(id, forKey: .id)
+        try container.encode(name, forKey: .name)
+        try container.encode(primaryGradient, forKey: .primaryGradient)
+        try container.encode(secondaryGradient, forKey: .secondaryGradient)
+        try container.encode(accentColor, forKey: .accentColor)
+        try container.encode(progressColors, forKey: .progressColors)
+        let modeString: String? = {
+            guard let mode = self.mode else { return nil }
+            switch mode {
+            case .light: return "light"
+            case .dark: return "dark"
+            @unknown default: return nil
+            }
+        }()
+        try container.encodeIfPresent(modeString, forKey: .mode)
+    }
+}
+
 // MARK: - Predefined Themes
 extension AppTheme {
     static let defaultBlue = AppTheme(

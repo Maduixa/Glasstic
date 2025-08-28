@@ -3,15 +3,10 @@ import SwiftUI
 struct GaugeView: View {
     let elapsedTime: TimeInterval
     let fastingGoal: TimeInterval
-    @StateObject private var themeManager = ThemeManager.shared
 
     private var progress: CGFloat {
         guard fastingGoal > 0 else { return 0 }
-        return CGFloat(elapsedTime / fastingGoal)
-    }
-    
-    private var clampedProgress: CGFloat {
-        return min(progress, 1.0)
+        return CGFloat(min(elapsedTime / fastingGoal, 1.0))
     }
     
     private var completedZones: [FastingZone] {
@@ -25,18 +20,12 @@ struct GaugeView: View {
                 .fill(.ultraThinMaterial)
                 .shadow(color: .black.opacity(0.2), radius: 10, x: 0, y: 10)
 
-            // Glossy Progress Bar
-            GlossyProgressRing(progress: progress)
-
             // Progress Wave
-            WaveView(progress: clampedProgress, color: themeManager.currentTheme.accentColor.color)
+            WaveView(progress: progress, color: .blue)
                 .clipShape(Circle())
 
             // Zone Emojis positioned around the gauge
             ZoneEmojiView(elapsedTime: elapsedTime, fastingGoal: fastingGoal)
-            
-            // Following emoji that moves with progress
-            FollowingEmojiView(progress: clampedProgress, elapsedTime: elapsedTime)
 
             // Border
             Circle()
@@ -55,10 +44,10 @@ struct GaugeView: View {
                 Text("Remaining Time")
                     .font(.caption)
                     .foregroundColor(.white.opacity(0.8))
-                Text(remainingTimeString())
+                Text(timeString(from: max(fastingGoal - elapsedTime, 0)))
                     .font(.headline)
                     .fontWeight(.semibold)
-                    .foregroundColor(fastingGoal - elapsedTime < 0 ? .orange : .white)
+                    .foregroundColor(.white)
             }
         }
     }
@@ -68,16 +57,6 @@ struct GaugeView: View {
         let minutes = Int(timeInterval) / 60 % 60
         let seconds = Int(timeInterval) % 60
         return String(format: "%02i:%02i:%02i", hours, minutes, seconds)
-    }
-    
-    private func remainingTimeString() -> String {
-        let remaining = fastingGoal - elapsedTime
-        if remaining < 0 {
-            let overtime = abs(remaining)
-            return "+\(timeString(from: overtime))"
-        } else {
-            return timeString(from: remaining)
-        }
     }
 }
 
@@ -89,30 +68,30 @@ struct ZoneEmojiView: View {
         ZStack {
             ForEach(FastingZone.allZones.indices, id: \.self) { index in
                 let zone = FastingZone.allZones[index]
-                let zoneProgress = min(zone.duration / fastingGoal, 1.0)
+                let zoneProgress = min(zone.duration / max(fastingGoal, 1), 1.0)
                 let angle = Angle.degrees(360 * zoneProgress - 90) // Start from top
                 let isCompleted = elapsedTime >= zone.duration
                 let isActive = isCurrentZone(zone: zone)
                 
                 ZStack {
-                    // Glow effect for active zone only
-                    if isActive {
+                    // Glow effect for active/completed zones
+                    if isCompleted {
                         Circle()
                             .fill(zone.color.opacity(0.3))
                             .frame(width: 35, height: 35)
-                            .blur(radius: 8)
-                            .scaleEffect(1.2)
+                            .blur(radius: isActive ? 8 : 4)
+                            .scaleEffect(isActive ? 1.2 : 1.0)
                     }
                     
                     Text(zone.emoji)
                         .font(.title2)
-                        .scaleEffect(isActive ? 1.4 : 0.8)
-                        .opacity(isActive ? 1.0 : 0.0)
-                        .shadow(color: isActive ? zone.color.opacity(0.8) : .clear, radius: 3, x: 0, y: 2)
+                        .scaleEffect(isActive ? 1.4 : (isCompleted ? 1.1 : 0.8))
+                        .opacity(isCompleted ? 1.0 : 0.3)
+                        .shadow(color: isCompleted ? zone.color.opacity(0.8) : .clear, radius: 3, x: 0, y: 2)
                 }
                 .position(
-                    x: 150 + 120 * cos(angle.radians),
-                    y: 150 + 120 * sin(angle.radians)
+                    x: CGFloat(150) + CGFloat(120) * CGFloat(cos(angle.radians)),
+                    y: CGFloat(150) + CGFloat(120) * CGFloat(sin(angle.radians))
                 )
                 .animation(.easeInOut(duration: 0.5), value: isActive)
                 .animation(.easeInOut(duration: 0.3), value: isCompleted)
@@ -171,98 +150,6 @@ struct WaveShape: Shape {
         p.closeSubpath()
 
         return p
-    }
-}
-
-struct GlossyProgressRing: View {
-    let progress: CGFloat
-    @StateObject private var themeManager = ThemeManager.shared
-    
-    var body: some View {
-        ZStack {
-            // Background ring
-            Circle()
-                .stroke(
-                    LinearGradient(
-                        colors: [.white.opacity(0.1), .white.opacity(0.05)],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    ),
-                    style: StrokeStyle(lineWidth: 14, lineCap: .round)
-                )
-            
-            // Progress ring
-            Circle()
-                .trim(from: 0, to: min(progress, 1.0))
-                .stroke(
-                    LinearGradient(
-                        colors: progress > 1.0 ? 
-                            [.orange.opacity(0.8), .red.opacity(0.6)] :
-                            themeManager.currentTheme.progressGradientColors,
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    ),
-                    style: StrokeStyle(lineWidth: 14, lineCap: .round)
-                )
-                .rotationEffect(.degrees(-90))
-                .shadow(
-                    color: progress > 1.0 ? .orange.opacity(0.3) : themeManager.currentTheme.accentColor.color.opacity(0.3),
-                    radius: 6, x: 0, y: 3
-                )
-            
-            // Overflow indicator for progress > 1.0
-            if progress > 1.0 {
-                Circle()
-                    .trim(from: 0, to: min(progress - 1.0, 1.0))
-                    .stroke(
-                        LinearGradient(
-                            colors: [.red.opacity(0.9), .orange.opacity(0.7)],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        ),
-                        style: StrokeStyle(lineWidth: 10, lineCap: .round, dash: [12, 6])
-                    )
-                    .rotationEffect(.degrees(-90))
-                    .shadow(color: .red.opacity(0.5), radius: 8, x: 0, y: 4)
-            }
-        }
-    }
-}
-
-struct FollowingEmojiView: View {
-    let progress: CGFloat
-    let elapsedTime: TimeInterval
-    
-    private var currentZone: FastingZone {
-        return FastingZone.allZones.filter { elapsedTime >= $0.duration }.last ?? FastingZone.anabolic
-    }
-    
-    private var progressAngle: Angle {
-        return Angle.degrees(360 * Double(progress) - 90) // Start from top
-    }
-    
-    var body: some View {
-        ZStack {
-            // Glow effect behind the emoji
-            Circle()
-                .fill(currentZone.color.opacity(0.4))
-                .frame(width: 50, height: 50)
-                .blur(radius: 12)
-                .scaleEffect(1.3)
-            
-            // Main emoji
-            Text(currentZone.emoji)
-                .font(.title)
-                .scaleEffect(1.6)
-                .shadow(color: currentZone.color.opacity(0.9), radius: 5, x: 0, y: 3)
-        }
-        .position(
-            x: 150 + 140 * cos(progressAngle.radians),
-            y: 150 + 140 * sin(progressAngle.radians)
-        )
-        .animation(.easeInOut(duration: 0.8), value: progress)
-        .animation(.easeInOut(duration: 0.6), value: currentZone.id)
-        .frame(width: 300, height: 300)
     }
 }
 
