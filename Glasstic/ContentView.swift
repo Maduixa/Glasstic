@@ -175,6 +175,7 @@ struct ContentView: View {
     @State private var isShowingCalendar = false
     @State private var isShowingPlanSelector = false
     @State private var isShowingProfile = false
+    @State private var isShowingSettings = false
     @State private var isShowingStartTimeEditor = false
     @State private var isShowingFastSummary = false
 
@@ -201,6 +202,7 @@ struct ContentView: View {
                 .environmentObject(fastingManager)
         }
         .sheet(isPresented: $isShowingProfile) { ProfileView() }
+        .sheet(isPresented: $isShowingSettings) { SettingsView() }
         .sheet(isPresented: $isShowingStartTimeEditor) {
             StartTimeEditorView()
                 .environmentObject(fastingManager)
@@ -231,10 +233,17 @@ struct ContentView: View {
                     .background(.ultraThinMaterial).clipShape(Circle())
             }
             Spacer()
-            Button(action: { isShowingCalendar.toggle() }) {
-                Image(systemName: "calendar")
-                    .font(.title2).foregroundColor(.white).padding()
-                    .background(.ultraThinMaterial).clipShape(Circle())
+            HStack(spacing: 12) {
+                Button(action: { isShowingSettings.toggle() }) {
+                    Image(systemName: "gearshape.fill")
+                        .font(.title2).foregroundColor(.white).padding()
+                        .background(.ultraThinMaterial).clipShape(Circle())
+                }
+                Button(action: { isShowingCalendar.toggle() }) {
+                    Image(systemName: "calendar")
+                        .font(.title2).foregroundColor(.white).padding()
+                        .background(.ultraThinMaterial).clipShape(Circle())
+                }
             }
         }.padding()
     }
