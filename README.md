@@ -31,7 +31,7 @@ Glasstic is an iOS app that brings elegance to intermittent fasting tracking thr
 - **Progress Statistics**: Detailed insights into your fasting patterns
 
 ### ⌚ **Cross-Platform Integration**
-- **Apple Watch Support**: Real-time synchronization with Watch app
+- **Watch Connectivity Ready**: Phone-to-watch context sync hooks; watch app planned
 - **HealthKit Integration**: Seamlessly sync with Apple Health
 - **Data Persistence**: Secure local storage with App Groups support
 - **Edit Functionality**: Adjust start times and past fasting sessions
@@ -49,7 +49,7 @@ Glasstic is an iOS app that brings elegance to intermittent fasting tracking thr
 - HealthKit (Health data integration)
 - WatchConnectivity (Apple Watch sync)
 - UserNotifications (Local notifications)
-- NaturalLanguage (AI message processing)
+- NaturalLanguage (templated messaging today; richer processing planned)
 
 ## 🚀 Installation & Setup
 
@@ -76,11 +76,25 @@ xcrun simctl boot "iPhone 15 Pro"
 xcodebuild -project Glasstic.xcodeproj -scheme Glasstic -destination 'platform=iOS Simulator,name=iPhone 15 Pro' build
 ```
 
+### App Group Configuration (for Watch/Widgets)
+
+To enable shared state across the iOS app and potential extensions (Watch, Widgets), configure an App Group:
+
+- In your Apple Developer account, create an App Group identifier like `group.com.yourteam.Glasstic`.
+- In Xcode, enable App Groups under Signing & Capabilities for all relevant targets and add the identifier.
+- Update the suite name in code if needed (search for `group.com.maduixa.Glasstic`).
+
+If an App Group is not available at runtime, the app falls back to standard `UserDefaults`.
+
 ### First Launch Setup
 1. Grant **HealthKit permissions** when prompted
 2. Complete the **onboarding flow** to learn about features
 3. Choose your preferred **fasting plan**
 4. Start your first fasting session!
+
+Notes:
+- HealthKit permissions are requested on first use; the app records completed fasts as Mindful Minutes (`HKCategoryTypeIdentifier.mindfulSession`).
+- Live Activities require iOS 16+ and user authorization; if unavailable, the app continues without them.
 
 ## 📖 Usage Guide
 
@@ -98,6 +112,8 @@ xcodebuild -project Glasstic.xcodeproj -scheme Glasstic -destination 'platform=i
 - **♻️ Autophagy (24-48h)**: Cellular cleaning and repair
 - **✨ Deep Autophagy (48h+)**: Maximum cellular renewal
 
+Internally, each zone is defined by a start threshold (time since fast start) at which it becomes active.
+
 ### Tracking & History
 - View your fasting history in the **Calendar** tab
 - Edit past fasting sessions by tapping on calendar entries
@@ -112,6 +128,8 @@ xcodebuild -project Glasstic.xcodeproj -scheme Glasstic -destination 'platform=i
 - **GamificationManager**: Badge system and progress tracking
 - **HealthKitManager**: Apple Health integration
 - **WatchConnectivityManager**: Apple Watch synchronization
+  
+Live Activities update approximately every 30 seconds. By default, your fast does not auto-end when the goal is reached; you can continue beyond the goal and end manually.
 
 ### Key Design Patterns
 - **State Synchronization**: Multi-layer approach with UserDefaults persistence
