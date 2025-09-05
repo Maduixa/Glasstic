@@ -129,7 +129,7 @@ class FastingManager: ObservableObject {
     private func updateLiveActivity() {
         #if canImport(ActivityKit)
         Task {
-            let currentZone = FastingZone.allZones.filter { elapsedTime >= $0.duration }.last ?? .anabolic
+            let currentZone = FastingZone.allZones.filter { elapsedTime >= $0.threshold }.last ?? .anabolic
             let progress = fastingGoal > 0 ? elapsedTime / fastingGoal : 0
             let updatedState = FastingActivityAttributes.ContentState(elapsedTime: elapsedTime, currentZoneName: currentZone.name, progress: min(progress, 1.0))
             await (currentActivity as? Activity<FastingActivityAttributes>)?.update(using: updatedState)
@@ -297,12 +297,12 @@ struct FastingZoneInfoView: View {
     @State private var messageType: Int = 0
 
     private var currentZone: FastingZone {
-        return FastingZone.allZones.filter { elapsedTime >= $0.duration }.last ?? .anabolic
+        return FastingZone.allZones.filter { elapsedTime >= $0.threshold }.last ?? .anabolic
     }
     
     private var timeInCurrentZone: TimeInterval {
-        let previousZone = FastingZone.allZones.filter { $0.duration < currentZone.duration }.last
-        let startTime = previousZone?.duration ?? 0
+        let previousZone = FastingZone.allZones.filter { $0.threshold < currentZone.threshold }.last
+        let startTime = previousZone?.threshold ?? 0
         return elapsedTime - startTime
     }
 

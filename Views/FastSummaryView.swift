@@ -16,7 +16,7 @@ struct FastSummaryView: View {
     }
     
     private var completedZones: [FastingZone] {
-        return FastingZone.allZones.filter { fastingManager.elapsedTime >= $0.duration }
+        return FastingZone.allZones.filter { fastingManager.elapsedTime >= $0.threshold }
     }
     
     private var aiBenefitsSummary: String {

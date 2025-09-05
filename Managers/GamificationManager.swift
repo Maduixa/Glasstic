@@ -93,7 +93,7 @@ class GamificationManager {
             userProfile.unlockBadge(id: "24_hour_fast")
         }
         // Zones
-        if duration >= FastingZone.autophagy.duration {
+        if duration >= FastingZone.autophagy.threshold {
             userProfile.unlockBadge(id: "autophagy_unlocked")
         }
     }

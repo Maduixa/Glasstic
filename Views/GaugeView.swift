@@ -10,7 +10,7 @@ struct GaugeView: View {
     }
     
     private var completedZones: [FastingZone] {
-        return FastingZone.allZones.filter { elapsedTime >= $0.duration }
+        return FastingZone.allZones.filter { elapsedTime >= $0.threshold }
     }
 
     var body: some View {
@@ -68,9 +68,9 @@ struct ZoneEmojiView: View {
         ZStack {
             ForEach(FastingZone.allZones.indices, id: \.self) { index in
                 let zone = FastingZone.allZones[index]
-                let zoneProgress = min(zone.duration / max(fastingGoal, 1), 1.0)
+                let zoneProgress = min(zone.threshold / max(fastingGoal, 1), 1.0)
                 let angle = Angle.degrees(360 * zoneProgress - 90) // Start from top
-                let isCompleted = elapsedTime >= zone.duration
+                let isCompleted = elapsedTime >= zone.threshold
                 let isActive = isCurrentZone(zone: zone)
                 
                 ZStack {
@@ -101,7 +101,7 @@ struct ZoneEmojiView: View {
     }
     
     private func isCurrentZone(zone: FastingZone) -> Bool {
-        let currentZone = FastingZone.allZones.filter { elapsedTime >= $0.duration }.last ?? FastingZone.anabolic
+        let currentZone = FastingZone.allZones.filter { elapsedTime >= $0.threshold }.last ?? FastingZone.anabolic
         return currentZone.id == zone.id
     }
 }
