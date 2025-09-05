@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct ProfileView: View {
+    @StateObject private var themeManager = ThemeManager.shared
     @State private var profile = GamificationManager.shared.getProfile()
     @State private var selectedBadge: Badge? = nil
 
@@ -32,7 +33,7 @@ struct ProfileView: View {
         .sheet(item: $selectedBadge) { badge in
             BadgeDetailView(badge: badge)
         }
-        .preferredColorScheme(.dark)
+        .preferredColorScheme(themeManager.currentTheme.mode)
     }
 
     private var streakView: some View {
@@ -114,6 +115,7 @@ struct ProfileView: View {
 
 struct BadgeDetailView: View {
     let badge: Badge
+    @StateObject private var themeManager = ThemeManager.shared
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
@@ -148,7 +150,7 @@ struct BadgeDetailView: View {
             }
             .padding()
         }
-        .preferredColorScheme(.dark)
+        .preferredColorScheme(themeManager.currentTheme.mode)
     }
 }
 

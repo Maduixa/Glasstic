@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct OnboardingView: View {
+    @StateObject private var themeManager = ThemeManager.shared
     @Binding var hasCompletedOnboarding: Bool
 
     var body: some View {
@@ -37,7 +38,7 @@ struct OnboardingView: View {
             }
             .tabViewStyle(PageTabViewStyle())
         }
-        .preferredColorScheme(.dark)
+        .preferredColorScheme(themeManager.currentTheme.mode)
     }
 }
 

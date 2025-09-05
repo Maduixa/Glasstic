@@ -44,10 +44,6 @@ class WatchConnectivityManager: NSObject, WCSessionDelegate, ObservableObject {
     }
 
     func sendContext(_ context: [String: Any]) {
-        guard WCSession.default.isReachable else {
-            print("WCSession is not reachable.")
-            return
-        }
         do {
             try WCSession.default.updateApplicationContext(context)
             print("Sent context to watch: \(context)")

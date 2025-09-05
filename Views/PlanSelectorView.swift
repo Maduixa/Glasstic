@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct PlanSelectorView: View {
+    @StateObject private var themeManager = ThemeManager.shared
     @EnvironmentObject var fastingManager: FastingManager
     @Environment(\.dismiss) var dismiss
     
@@ -56,7 +57,7 @@ struct PlanSelectorView: View {
 
             }
         }
-        .preferredColorScheme(.dark)
+        .preferredColorScheme(themeManager.currentTheme.mode)
     }
     
     private func planCard(plan: FastingPlan) -> some View {

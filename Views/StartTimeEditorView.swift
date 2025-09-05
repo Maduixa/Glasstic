@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct StartTimeEditorView: View {
+    @StateObject private var themeManager = ThemeManager.shared
     @EnvironmentObject var fastingManager: FastingManager
     @Environment(\.dismiss) private var dismiss
     @State private var editedStartTime: Date = Date()
@@ -70,7 +71,7 @@ struct StartTimeEditorView: View {
         .onAppear {
             editedStartTime = fastingManager.getStartDate()
         }
-        .preferredColorScheme(.dark)
+        .preferredColorScheme(themeManager.currentTheme.mode)
     }
 }
 

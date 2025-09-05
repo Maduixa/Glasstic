@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct FastEditView: View {
+    @StateObject private var themeManager = ThemeManager.shared
     let fast: FastingLog
     let onSave: (FastingLog) -> Void
     
@@ -117,7 +118,7 @@ struct FastEditView: View {
             }
         }
         .navigationBarHidden(true)
-        .preferredColorScheme(.dark)
+        .preferredColorScheme(themeManager.currentTheme.mode)
     }
 }
 

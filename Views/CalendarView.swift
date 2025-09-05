@@ -16,6 +16,7 @@ struct FastingLog: Identifiable, Codable {
 }
 
 struct CalendarView: View {
+    @StateObject private var themeManager = ThemeManager.shared
     @State private var date = Date()
     @State private var loggedFasts: [FastingLog] = [
         // Sample data to show highlights
@@ -39,7 +40,7 @@ struct CalendarView: View {
             }
             .padding()
         }
-        .preferredColorScheme(.dark)
+        .preferredColorScheme(themeManager.currentTheme.mode)
         .sheet(isPresented: $isShowingFastEditor) {
             if let selectedFast = selectedFast {
                 FastEditView(fast: selectedFast) { updatedFast in

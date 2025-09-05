@@ -85,7 +85,7 @@ The app uses a multi-layer state sync approach:
 **Timer Management**
 - Robust timer lifecycle handling with cleanup on state changes
 - Date-based elapsed time calculation for accuracy across app launches
-- Automatic fasting completion when goal duration is reached
+- By default, fasting does not auto-end when goal duration is reached
 
 **Cross-Platform Integration**
 - App Groups for data sharing between main app and potential extensions

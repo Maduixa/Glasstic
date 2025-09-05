@@ -31,7 +31,7 @@ Glasstic is an iOS app that brings elegance to intermittent fasting tracking thr
 - **Progress Statistics**: Detailed insights into your fasting patterns
 
 ### ⌚ **Cross-Platform Integration**
-- **Apple Watch Support**: Real-time synchronization with Watch app
+- **Watch Connectivity Ready**: Phone-to-watch context sync hooks; watch app planned
 - **HealthKit Integration**: Seamlessly sync with Apple Health
 - **Data Persistence**: Secure local storage with App Groups support
 - **Edit Functionality**: Adjust start times and past fasting sessions
@@ -49,7 +49,7 @@ Glasstic is an iOS app that brings elegance to intermittent fasting tracking thr
 - HealthKit (Health data integration)
 - WatchConnectivity (Apple Watch sync)
 - UserNotifications (Local notifications)
-- NaturalLanguage (AI message processing)
+- NaturalLanguage (templated messaging today; richer processing planned)
 
 ## 🚀 Installation & Setup
 

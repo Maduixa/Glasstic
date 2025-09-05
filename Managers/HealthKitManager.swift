@@ -14,24 +14,36 @@ class HealthKitManager {
             return
         }
 
-        let typesToShare: Set = [
-            HKObjectType.categoryType(forIdentifier: .sleepAnalysis)!
-        ]
+        guard let mindfulType = HKObjectType.categoryType(forIdentifier: .mindfulSession) else {
+            completion(false, nil)
+            return
+        }
 
-        let typesToRead: Set = [
-            HKObjectType.categoryType(forIdentifier: .sleepAnalysis)!,
-            HKObjectType.quantityType(forIdentifier: .bodyMass)!,
-            HKObjectType.quantityType(forIdentifier: .heartRate)!
-        ]
+        var typesToShare: Set<HKSampleType> = [mindfulType]
+        var typesToRead: Set<HKObjectType> = [mindfulType]
+
+        if let bodyMass = HKObjectType.quantityType(forIdentifier: .bodyMass) {
+            typesToRead.insert(bodyMass)
+        }
+        if let heartRate = HKObjectType.quantityType(forIdentifier: .heartRate) {
+            typesToRead.insert(heartRate)
+        }
 
         healthStore.requestAuthorization(toShare: typesToShare, read: typesToRead, completion: completion)
     }
 
     func saveFast(startDate: Date, endDate: Date, completion: @escaping (Bool, Error?) -> Void) {
-        let fasting = HKCategorySample(type: HKObjectType.categoryType(forIdentifier: .sleepAnalysis)!,
-                                       value: 0, // Value is not used for intermittent fasting
-                                       start: startDate,
-                                       end: endDate)
-        healthStore.save(fasting, withCompletion: completion)
+        guard let mindfulType = HKObjectType.categoryType(forIdentifier: .mindfulSession) else {
+            completion(false, nil)
+            return
+        }
+
+        let sample = HKCategorySample(
+            type: mindfulType,
+            value: HKCategoryValue.notApplicable.rawValue,
+            start: startDate,
+            end: endDate
+        )
+        healthStore.save(sample, withCompletion: completion)
     }
 }
