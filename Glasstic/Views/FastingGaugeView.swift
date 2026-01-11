@@ -67,17 +67,28 @@ struct FastingGaugeView: View {
                                 to: segment.trimmedProgress(for: elapsed, thresholds: thresholds)
                             )
                             .stroke(
-                                style: StrokeStyle(lineWidth: segment.zone == activeZone ? 20 : 16, lineCap: .round)
+                                style: StrokeStyle(
+                                    lineWidth: segment.zone == activeZone ? 20 : 16,
+                                    lineCap: .round
+                                )
                             )
                             .fill(progressGradient(for: segment.zone))
-                            .shadow(color: accent.opacity(segment.zone == activeZone ? 0.5 : 0.12), radius: segment.zone == activeZone ? 18 : 8, x: 0, y: 8)
+                            .shadow(
+                                color: accent.opacity(segment.zone == activeZone ? 0.5 : 0.12),
+                                radius: segment.zone == activeZone ? 18 : 8,
+                                x: 0,
+                                y: 8
+                            )
                             .rotationEffect(.degrees(-90))
                             .animation(.easeInOut(duration: 0.4), value: elapsed)
                     }
 
                     if let activeSegment = segments.first(where: { $0.zone == activeZone }) {
                         Circle()
-                            .trim(from: activeSegment.startFraction, to: activeSegment.trimmedProgress(for: elapsed, thresholds: thresholds))
+                            .trim(
+                                from: activeSegment.startFraction,
+                                to: activeSegment.trimmedProgress(for: elapsed, thresholds: thresholds)
+                            )
                             .stroke(
                                 accent.opacity(0.4),
                                 style: StrokeStyle(lineWidth: 32, lineCap: .round)

@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct HomeView: View {
-    @EnvironmentObject private var store: FastingStore
+    @Environment(FastingStore.self) private var store
     @State private var isSettingsPresented = false
     @State private var editingSession: SessionEditorContext?
 
@@ -55,6 +55,7 @@ struct HomeView: View {
                     VStack(spacing: 24) {
                         timerCard
                         gaugeCard
+                        aiInsightsCard
                         streakAndThemes
                         calendarCard
                     }
@@ -148,7 +149,10 @@ struct HomeView: View {
                     .foregroundStyle(.primary)
                     .padding()
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(store.selectedTheme.accent.opacity(0.12), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+                    .background(
+                        store.selectedTheme.accent.opacity(0.12),
+                        in: RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    )
                     .transition(.opacity.combined(with: .scale(scale: 0.98)))
                     .animation(.easeInOut(duration: 0.35), value: store.activeNudge)
             }
@@ -184,6 +188,11 @@ struct HomeView: View {
         .glassCard(material: store.selectedTheme.materialBias.material)
     }
 
+    private var aiInsightsCard: some View {
+        AIInsightsView()
+            .environment(store)
+    }
+
     private var streakAndThemes: some View {
         VStack(spacing: 16) {
             HStack {
@@ -214,7 +223,7 @@ struct HomeView: View {
 
     private var calendarCard: some View {
         CalendarPanelView(editingSession: $editingSession)
-            .environmentObject(store)
+            .environment(store)
             .glassCard(material: store.selectedTheme.materialBias.material)
     }
 
@@ -243,6 +252,6 @@ private extension Color {
 
 struct SessionEditorContext: Identifiable {
     var id: UUID { session.id }
-    var session: FastingSession
+    var session: FastingSessionData
     var isNew: Bool
 }

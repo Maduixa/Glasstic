@@ -58,6 +58,42 @@ struct FastingThresholds: Codable, Equatable {
         fatBurningEndHours: 18
     )
 
+    // MARK: - Preset Fasting Windows
+
+    static let preset16_8 = FastingThresholds(
+        postMealEndHours: 4,
+        earlyFastingEndHours: 12,
+        fatBurningEndHours: 16  // 16-hour fast
+    )
+
+    static let preset18_6 = FastingThresholds(
+        postMealEndHours: 4,
+        earlyFastingEndHours: 12,
+        fatBurningEndHours: 18  // 18-hour fast
+    )
+
+    static let preset20_4 = FastingThresholds(
+        postMealEndHours: 4,
+        earlyFastingEndHours: 12,
+        fatBurningEndHours: 20  // 20-hour fast
+    )
+
+    static let presetOMAD = FastingThresholds(
+        postMealEndHours: 4,
+        earlyFastingEndHours: 12,
+        fatBurningEndHours: 23  // One Meal A Day (23 hours)
+    )
+
+    static var allPresets: [(name: String, thresholds: FastingThresholds)] {
+        [
+            ("16:8", preset16_8),
+            ("18:6", preset18_6),
+            ("20:4", preset20_4),
+            ("OMAD", presetOMAD),
+            ("Custom", `default`)
+        ]
+    }
+
     func zone(for elapsed: TimeInterval) -> FastingZone {
         let hours = elapsed / 3600
         if hours < postMealEndHours {

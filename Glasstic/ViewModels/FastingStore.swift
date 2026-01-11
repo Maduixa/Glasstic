@@ -1,85 +1,126 @@
 import Combine
 import SwiftUI
+import Observation
 
+@Observable
 @MainActor
-final class FastingStore: ObservableObject {
-    @Published private(set) var sessions: [FastingSession]
-    @Published var thresholds: FastingThresholds {
-        didSet { persist() }
+final class FastingStore {
+    private(set) var sessions: [FastingSessionData] = []
+    var thresholds: FastingThresholds {
+        didSet {
+            UserDefaults.standard.set(try? JSONEncoder().encode(thresholds), forKey: "thresholds")
+        }
     }
-    @Published var selectedTheme: AppTheme {
-        didSet { persist() }
+    var selectedTheme: AppTheme {
+        didSet {
+            UserDefaults.standard.set(selectedTheme.id, forKey: "selectedThemeID")
+        }
     }
-    @Published private(set) var activeSession: FastingSession?
-    @Published private(set) var elapsed: TimeInterval = 0
-    @Published private(set) var activeZone: FastingZone = .postMeal
-    @Published private(set) var activeNudge: String = ""
+    private(set) var activeSession: FastingSessionData?
+    private(set) var elapsed: TimeInterval = 0
+    private(set) var activeZone: FastingZone = .postMeal
+    private(set) var activeNudge: String = ""
 
-    private let persistence = JSONFileStore<PersistedAppState>(fileName: "app_state.json")
+    private let dataService = DataService.shared
+    private let healthKitService = HealthKitService.shared
+    private let notificationService = NotificationService.shared
+    private let watchConnectivity = IOSWatchConnectivityService.shared
     private var timer: AnyCancellable?
     private var zoneFeedback = PassthroughSubject<FastingZone, Never>()
     private var cancellables = Set<AnyCancellable>()
 
     init() {
-        let state = persistence.load(
-            defaultValue: PersistedAppState(
-                sessions: [],
-                thresholds: .default,
-                selectedThemeID: AppTheme.allThemes.first?.id
-            )
-        )
-        let theme = AppTheme.allThemes.first { $0.id == state.selectedThemeID } ?? AppTheme.allThemes.first!
-        self.sessions = state.sessions.sorted { $0.startDate > $1.startDate }
-        self.thresholds = state.thresholds
-        self.selectedTheme = theme
-        self.activeSession = sessions.first(where: { $0.isActive })
+        // Load thresholds from UserDefaults
+        if let data = UserDefaults.standard.data(forKey: "thresholds"),
+           let savedThresholds = try? JSONDecoder().decode(FastingThresholds.self, from: data) {
+            self.thresholds = savedThresholds
+        } else {
+            self.thresholds = .default
+        }
+
+        // Load selected theme
+        if let themeIDString = UserDefaults.standard.string(forKey: "selectedThemeID"),
+           let themeID = UUID(uuidString: themeIDString),
+           let theme = AppTheme.allThemes.first(where: { $0.id == themeID }) {
+            self.selectedTheme = theme
+        } else {
+            self.selectedTheme = AppTheme.allThemes.first ?? AppTheme.allThemes[0]
+        }
+
+        // Load sessions from SwiftData
+        do {
+            self.sessions = try dataService.fetchAllSessions()
+            self.activeSession = try dataService.fetchActiveSessions().first
+        } catch {
+            #if DEBUG
+            NSLog("Failed to load sessions: \(error.localizedDescription)")
+            #endif
+            self.sessions = []
+            self.activeSession = nil
+        }
 
         observeZoneChanges()
         resumeTimerIfNeeded()
+        watchConnectivity.configure(with: self)
     }
 
     func startFast(note: String = "") {
         guard activeSession == nil else { return }
         let now = Date()
-        let session = FastingSession(startDate: now, note: note)
+        let session = FastingSessionData(startDate: now, note: note)
         activeSession = session
         sessions.insert(session, at: 0)
+        dataService.insert(session)
         elapsed = 0
         recalculateZone()
         activeNudge = nudge(for: activeZone)
-        persist()
         startTimer()
+        watchConnectivity.notifySessionStarted(startDate: now)
     }
 
     func endFast(note: String? = nil) {
-        guard var session = activeSession else { return }
-        let endDate = Date()
-        session.endDate = endDate
+        guard let session = activeSession else { return }
+        session.endDate = Date()
         if let note {
             session.note = note
         }
-        replace(session)
+        dataService.save()
+
+        // Save to HealthKit
+        Task {
+            try? await healthKitService.saveFastingWorkout(
+                startDate: session.startDate,
+                endDate: session.endDate ?? Date(),
+                duration: session.duration
+            )
+
+            // Check for streak milestone
+            let streak = streakCount
+            try? await notificationService.notifyStreakMilestone(streak: streak)
+        }
+
+        refreshSessions()
         activeSession = nil
         stopTimer()
         elapsed = 0
         activeZone = thresholds.zone(for: 0)
         activeNudge = ""
-        persist()
+        watchConnectivity.notifySessionEnded()
     }
 
-    func delete(_ session: FastingSession) {
+    func delete(_ session: FastingSessionData) {
         if session.id == activeSession?.id {
             stopTimer()
             activeSession = nil
             elapsed = 0
         }
-        sessions.removeAll { $0.id == session.id }
-        persist()
+        dataService.delete(session)
+        refreshSessions()
     }
 
-    func updateSession(_ session: FastingSession) {
-        replace(session)
-        persist()
+    func updateSession(_ session: FastingSessionData) {
+        dataService.save()
+        refreshSessions()
         if session.id == activeSession?.id {
             activeSession = session
         }
@@ -92,50 +133,73 @@ final class FastingStore: ObservableObject {
     func updateThresholds(_ thresholds: FastingThresholds) {
         self.thresholds = thresholds.clamped()
         recalculateZone()
+        watchConnectivity.syncToWatch()
     }
 
     var streakCount: Int {
-        guard !sessions.isEmpty else { return 0 }
-        let calendar = Calendar.current
-        var streak = 0
-        var dayCursor = calendar.startOfDay(for: Date())
-
-        while true {
-            if sessions.contains(where: { $0.isCompleted && calendar.isDate($0.startDate, inSameDayAs: dayCursor) }) {
-                streak += 1
-                guard let previous = calendar.date(byAdding: .day, value: -1, to: dayCursor) else {
-                    break
-                }
-                dayCursor = previous
-            } else {
-                break
-            }
+        do {
+            return try dataService.streakCount()
+        } catch {
+            return 0
         }
-        return streak
     }
 
-    func session(for day: Date) -> FastingSession? {
-        let calendar = Calendar.current
-        return sessions.first { calendar.isDate($0.startDate, inSameDayAs: day) }
+    func session(for day: Date) -> FastingSessionData? {
+        do {
+            return try dataService.session(for: day)
+        } catch {
+            return nil
+        }
     }
 
     func nudge(for zone: FastingZone) -> String {
         zone.defaultNudges.randomElement() ?? ""
     }
 
-    private func replace(_ session: FastingSession) {
-        if let index = sessions.firstIndex(where: { $0.id == session.id }) {
-            sessions[index] = session
-        } else {
-            sessions.append(session)
+    func requestPermissions() async {
+        do {
+            try await healthKitService.requestAuthorization()
+            try await notificationService.requestAuthorization()
+            notificationService.setupCategories()
+        } catch {
+            #if DEBUG
+            NSLog("Permission request failed: \(error.localizedDescription)")
+            #endif
         }
-        sessions.sort { $0.startDate > $1.startDate }
+    }
+
+    // MARK: - AI Analysis Methods
+
+    func canAnalyzeAIData() -> Bool {
+        do {
+            return try AIAnalysisService.shared.canAnalyze()
+        } catch {
+            return false
+        }
+    }
+
+    func getAIPrediction() throws -> AIAnalysisService.FastingPrediction {
+        try AIAnalysisService.shared.getPrediction()
+    }
+
+    func getAIInsights() throws -> FastingInsights {
+        try AIAnalysisService.shared.getInsights()
+    }
+
+    private func refreshSessions() {
+        do {
+            sessions = try dataService.fetchAllSessions()
+        } catch {
+            #if DEBUG
+            NSLog("Failed to refresh sessions: \(error.localizedDescription)")
+            #endif
+        }
     }
 
     private func observeZoneChanges() {
         zoneFeedback
             .removeDuplicates()
-            .sink { [weak self] zone in
+            .sink { [weak self] (zone: FastingZone) in
                 guard let self else { return }
                 activeNudge = nudge(for: zone)
             }
@@ -184,12 +248,4 @@ final class FastingStore: ObservableObject {
         }
     }
 
-    private func persist() {
-        let state = PersistedAppState(
-            sessions: sessions,
-            thresholds: thresholds,
-            selectedThemeID: selectedTheme.id
-        )
-        persistence.save(state)
-    }
 }
