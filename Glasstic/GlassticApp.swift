@@ -1,13 +1,16 @@
 import SwiftUI
+import SwiftData
+import GlassticFeature
 
 @main
 struct GlassticApp: App {
-    @StateObject private var store = FastingStore()
+    @State private var store = FastingStore()
 
     var body: some Scene {
         WindowGroup {
-            HomeView()
-                .environmentObject(store)
+            ContentView()
+                .environment(store)
         }
+        .modelContainer(DataService.shared.modelContainer)
     }
 }
