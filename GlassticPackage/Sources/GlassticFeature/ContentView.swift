@@ -339,18 +339,48 @@ private struct BottomPillMenu: View {
                 .fill(
                     LinearGradient(
                         colors: [
-                            Color.white.opacity(0.1),
-                            Color.white.opacity(0.07),
-                            Color.white.opacity(0.06)
+                            Color.white.opacity(0.15),
+                            Color.white.opacity(0.08),
+                            Color.white.opacity(0.05)
                         ],
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
                     )
                 )
+                .overlay(
+                    Capsule()
+                        .fill(
+                            LinearGradient(
+                                colors: [
+                                    Color.white.opacity(0.2),
+                                    Color.clear
+                                ],
+                                startPoint: .top,
+                                endPoint: .center
+                            )
+                        )
+                        .blendMode(.overlay)
+                )
+                .overlay(
+                    Capsule()
+                        .stroke(
+                            LinearGradient(
+                                colors: [
+                                    Color.white.opacity(0.4),
+                                    Color.white.opacity(0.1)
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 1.2
+                        )
+                )
+                .shadow(color: .black.opacity(0.25), radius: 16, x: 0, y: 8)
+                .shadow(color: .black.opacity(0.1), radius: 4, x: 0, y: 2)
 
-            if let lensCenter, let lensDiameter {
+            if let lensCenter, let lensSize {
                 MagnifyBubble(accentColor: accentColor, isDragging: isDragging)
-                    .frame(width: lensDiameter, height: lensDiameter)
+                    .frame(width: lensSize.width, height: lensSize.height)
                     .position(lensCenter)
                     .scaleEffect(isDragging ? 1.08 : 1.0)
                     .animation(.spring(response: 0.35, dampingFraction: 0.82), value: lensCenter)
@@ -401,10 +431,6 @@ private struct BottomPillMenu: View {
         .onPreferenceChange(TabFramePreferenceKey.self) { frames in
             tabFrames = frames
         }
-        .overlay(
-            Capsule()
-                .stroke(.white.opacity(0.12), lineWidth: 0.9)
-        )
         .padding(.horizontal, 12)
         .padding(.bottom, 6)
     }
@@ -421,12 +447,14 @@ private struct BottomPillMenu: View {
             return clampedLocation(dragLocation)
         }
         guard let frame = tabFrames[activeTab] else { return nil }
-        return CGPoint(x: frame.midX, y: frame.midY)
+        return CGPoint(x: frame.midX, y: frame.midY + 2)
     }
 
-    private var lensDiameter: CGFloat? {
+    private var lensSize: CGSize? {
         guard let frame = tabFrames[activeTab] else { return nil }
-        return max(frame.height * 1.05, 52)
+        let height = max(frame.height * 0.95, 48)
+        let width = max(frame.width * 0.95, 65)
+        return CGSize(width: width, height: height)
     }
 
     private var dragGesture: some Gesture {
@@ -483,11 +511,11 @@ private struct BottomPillMenu: View {
     }
 
     private func clampedLocation(_ location: CGPoint) -> CGPoint {
-        guard let lensDiameter else { return location }
-        let radius = lensDiameter / 2
+        guard let lensSize else { return location }
+        let halfWidth = lensSize.width / 2
         let minX = tabFrames.values.map(\.minX).min() ?? location.x
         let maxX = tabFrames.values.map(\.maxX).max() ?? location.x
-        let clampedX = min(max(location.x, minX + radius), maxX - radius)
+        let clampedX = min(max(location.x, minX + halfWidth), maxX - halfWidth)
         let y = tabFrames[activeTab]?.midY ?? location.y
         return CGPoint(x: clampedX, y: y)
     }
@@ -506,37 +534,76 @@ private struct MagnifyBubble: View {
     let isDragging: Bool
 
     var body: some View {
-        Circle()
-            .fill(Color.white.opacity(isDragging ? 0.2 : 0.15))
-            .liquidGlass(
-                .regular
-                    .tint(.white)
-                    .cornerRadius(999)
-                    .interactive(),
-                in: Circle()
-            )
-            .overlay(
-                Circle()
-                    .stroke(.white.opacity(0.35), lineWidth: 1)
-            )
-            .overlay(
-                Circle()
-                    .fill(
-                        LinearGradient(
-                            colors: [
-                                .white.opacity(isDragging ? 0.75 : 0.55),
-                                .white.opacity(0.2),
-                                .clear
-                            ],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
+        ZStack {
+            Capsule()
+                .fill(
+                    LinearGradient(
+                        colors: [
+                            Color.white.opacity(isDragging ? 0.35 : 0.28),
+                            Color.white.opacity(isDragging ? 0.22 : 0.18),
+                            Color.white.opacity(isDragging ? 0.15 : 0.12)
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
                     )
-                    .blendMode(.screen)
-                    .opacity(0.7)
-            )
-            .shadow(color: .white.opacity(0.25), radius: 10, x: 0, y: 6)
-            .shadow(color: accentColor.opacity(isDragging ? 0.4 : 0.25), radius: 18, x: 0, y: 12)
+                )
+
+            Capsule()
+                .fill(
+                    LinearGradient(
+                        colors: [
+                            .white.opacity(isDragging ? 0.45 : 0.35),
+                            .clear
+                        ],
+                        startPoint: .top,
+                        endPoint: .center
+                    )
+                )
+                .blendMode(.overlay)
+
+            Capsule()
+                .fill(
+                    RadialGradient(
+                        colors: [
+                            accentColor.opacity(isDragging ? 0.25 : 0.18),
+                            .clear
+                        ],
+                        center: .center,
+                        startRadius: 0,
+                        endRadius: 40
+                    )
+                )
+                .blendMode(.screen)
+
+            Capsule()
+                .stroke(
+                    LinearGradient(
+                        colors: [
+                            Color.white.opacity(0.6),
+                            Color.white.opacity(0.2)
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    ),
+                    lineWidth: 1.8
+                )
+
+            Capsule()
+                .fill(
+                    LinearGradient(
+                        colors: [
+                            .clear,
+                            Color.black.opacity(0.06)
+                        ],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
+                .padding(3)
+        }
+        .shadow(color: accentColor.opacity(isDragging ? 0.45 : 0.3), radius: 16, x: 0, y: 8)
+        .shadow(color: .white.opacity(0.2), radius: 8, x: 0, y: -2)
+        .shadow(color: .black.opacity(0.2), radius: 6, x: 0, y: 3)
     }
 }
 
