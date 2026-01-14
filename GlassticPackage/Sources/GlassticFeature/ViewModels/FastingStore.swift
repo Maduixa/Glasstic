@@ -3,15 +3,18 @@ import SwiftUI
 @MainActor
 @Observable
 public final class FastingStore {
+    private static let targetDurationKey = "glasstic.targetDuration"
     public private(set) var activeSession: FastingSession?
     public private(set) var elapsed: TimeInterval = 0
     private var timer: Timer?
 
     private let dataService = DataService.shared
-    public let targetDuration: TimeInterval
+    private let defaults = UserDefaults.standard
+    public var targetDuration: TimeInterval
 
     public init(targetDuration: TimeInterval = 16 * 3600) {
-        self.targetDuration = targetDuration
+        let stored = defaults.double(forKey: Self.targetDurationKey)
+        self.targetDuration = stored > 0 ? stored : targetDuration
         loadActiveSession()
         if activeSession != nil {
             startTimer()
@@ -20,7 +23,7 @@ public final class FastingStore {
 
     public var progress: Double {
         guard elapsed > 0 else { return 0 }
-        return min(elapsed / targetDuration, 1.0)
+        return min(elapsed / max(targetDuration, 1), 1.0)
     }
 
     public var isActive: Bool {
@@ -39,6 +42,12 @@ public final class FastingStore {
         stopTimer()
         activeSession = nil
         elapsed = 0
+    }
+
+    public func updateTargetDuration(hours: Double) {
+        let clamped = min(max(hours, 8), 24)
+        targetDuration = clamped * 3600
+        defaults.set(targetDuration, forKey: Self.targetDurationKey)
     }
 
     private func loadActiveSession() {
