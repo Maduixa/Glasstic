@@ -4,7 +4,7 @@ import GlassticFeature
 
 @main
 struct GlassticApp: App {
-    @State private var store = FastingStore()
+    @State private var store = GlassticFeature.FastingStore()
 
     var body: some Scene {
         WindowGroup {

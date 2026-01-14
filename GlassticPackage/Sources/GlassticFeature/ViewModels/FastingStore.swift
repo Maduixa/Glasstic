@@ -50,7 +50,9 @@ public final class FastingStore {
 
     private func startTimer() {
         timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
-            self?.updateElapsed()
+            Task { @MainActor in
+                self?.updateElapsed()
+            }
         }
     }
 
