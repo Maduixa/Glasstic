@@ -21,9 +21,10 @@ Config/                # xcconfigs and entitlements
 ```
 
 ## Current UI
-- Single gauge card showing elapsed/remaining against a 16h target
+- Glassy progress ring showing elapsed time vs target (target is adjustable in Settings)
+- Zone-aware knob uses the fasting emoji and the counter uses smooth numeric transitions
 - CTA below the gauge (cyan for start, muted red for end) aligned above the glass pill nav
-- Bottom glass pill navigation with four tabs (Session, Insights, Rhythm, Settings)
+- Bottom glass pill navigation with four tabs (Session, Insights, Rhythm, Settings) plus a drag-to-focus magnifying effect
 
 ## Notes for contributors
 - Keep feature work in `GlassticPackage/Sources/GlassticFeature/`

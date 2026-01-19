@@ -1,18 +1,10 @@
+import CoreMotion
 import SwiftUI
 
 struct HomeView: View {
     @EnvironmentObject private var store: FastingStore
     @State private var isSettingsPresented = false
     @State private var editingSession: SessionEditorContext?
-
-    private var gradient: LinearGradient {
-        let colors = store.selectedTheme.gradientColors
-        return LinearGradient(
-            colors: colors.isEmpty ? [.black, .gray] : colors,
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
-        )
-    }
 
     private var elapsedText: String {
         guard let session = store.activeSession else {
@@ -35,21 +27,10 @@ struct HomeView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                gradient
-                    .ignoresSafeArea()
-                    .overlay(
-                        RadialGradient(
-                            colors: [
-                                store.selectedTheme.accent.opacity(0.35),
-                                Color.black.opacity(0.1)
-                            ],
-                            center: .center,
-                            startRadius: 40,
-                            endRadius: 600
-                        )
-                        .blendMode(.screen)
-                        .opacity(0.6)
-                    )
+                FluidThemeBackground(
+                    colors: store.selectedTheme.gradientColors,
+                    accent: store.selectedTheme.accent
+                )
 
                 ScrollView(showsIndicators: false) {
                     VStack(spacing: 24) {
@@ -228,6 +209,126 @@ struct HomeView: View {
                 store.endFast()
             }
         }
+    }
+}
+
+private struct FluidThemeBackground: View {
+    let colors: [Color]
+    let accent: Color
+    @Environment(\.scenePhase) private var scenePhase
+    @StateObject private var motion = MotionProvider()
+
+    var body: some View {
+        TimelineView(.periodic(from: .now, by: 1.0 / 30.0)) { context in
+            let t = context.date.timeIntervalSinceReferenceDate
+            let baseColors = colors.isEmpty ? [Color.black, Color.gray] : colors
+            let slow = t * 0.08
+            let mid = t * 0.12
+            let fast = t * 0.18
+            let drift: CGFloat = 0.16
+            let driftSmall: CGFloat = 0.1
+            let parallax = motion.normalizedTilt
+            let parallaxX = CGFloat(parallax.width) * 0.12
+            let parallaxY = CGFloat(parallax.height) * 0.12
+            let x1 = CGFloat(0.2 + drift * sin(slow) + parallaxX)
+            let y1 = CGFloat(0.2 + drift * cos(slow * 0.9) + parallaxY)
+            let x2 = CGFloat(0.8 + drift * cos(mid) - parallaxX * 0.9)
+            let y2 = CGFloat(0.72 + drift * sin(mid * 1.1) - parallaxY * 0.9)
+            let x3 = CGFloat(0.52 + driftSmall * sin(fast + 1.2) + parallaxX * 0.5)
+            let y3 = CGFloat(0.12 + driftSmall * cos(fast * 0.8 + 0.5) + parallaxY * 0.5)
+            let startX = CGFloat(0.1 + driftSmall * sin(slow * 0.7) + parallaxX * 0.5)
+            let startY = CGFloat(0.04 + driftSmall * cos(slow * 0.6) + parallaxY * 0.5)
+            let endX = CGFloat(0.9 + driftSmall * cos(slow * 0.8) - parallaxX * 0.5)
+            let endY = CGFloat(0.96 + driftSmall * sin(slow * 0.9) - parallaxY * 0.5)
+
+            ZStack {
+                LinearGradient(
+                    colors: baseColors,
+                    startPoint: UnitPoint(x: clampedUnit(startX), y: clampedUnit(startY)),
+                    endPoint: UnitPoint(x: clampedUnit(endX), y: clampedUnit(endY))
+                )
+
+                RadialGradient(
+                    colors: [accent.opacity(0.5), .clear],
+                    center: UnitPoint(x: clampedUnit(x1), y: clampedUnit(y1)),
+                    startRadius: 20,
+                    endRadius: 380
+                )
+                .blendMode(.screen)
+                .blur(radius: 6)
+
+                RadialGradient(
+                    colors: [accent.opacity(0.3), .clear],
+                    center: UnitPoint(x: clampedUnit(x2), y: clampedUnit(y2)),
+                    startRadius: 28,
+                    endRadius: 460
+                )
+                .blendMode(.screen)
+                .blur(radius: 14)
+
+                RadialGradient(
+                    colors: [Color.white.opacity(0.14), .clear],
+                    center: UnitPoint(x: clampedUnit(x3), y: clampedUnit(y3)),
+                    startRadius: 18,
+                    endRadius: 260
+                )
+                .blendMode(.screen)
+                .opacity(0.55)
+            }
+            .ignoresSafeArea()
+        }
+        .onAppear { motion.start() }
+        .onDisappear { motion.stop() }
+        .onChange(of: scenePhase) { _, phase in
+            switch phase {
+            case .active:
+                motion.start()
+            case .inactive, .background:
+                motion.stop()
+            @unknown default:
+                motion.stop()
+            }
+        }
+    }
+
+    private func clampedUnit(_ value: CGFloat) -> CGFloat {
+        min(max(value, 0.0), 1.0)
+    }
+}
+
+@MainActor
+private final class MotionProvider: ObservableObject {
+    @Published var normalizedTilt = CGSize.zero
+
+    private let manager = CMMotionManager()
+    private var currentTilt = CGSize.zero
+
+    func start() {
+        guard manager.isDeviceMotionAvailable else { return }
+        if manager.isDeviceMotionActive { return }
+        manager.deviceMotionUpdateInterval = 1.0 / 30.0
+        manager.startDeviceMotionUpdates(to: .main) { [weak self] motion, _ in
+            guard let self, let motion else { return }
+            let maxTilt = 0.35
+            let targetX = clamp(motion.attitude.roll / maxTilt)
+            let targetY = clamp(motion.attitude.pitch / maxTilt)
+            let smoothing: CGFloat = 0.18
+            let nextX = currentTilt.width + (targetX - currentTilt.width) * smoothing
+            let nextY = currentTilt.height + (targetY - currentTilt.height) * smoothing
+            let next = CGSize(width: nextX, height: nextY)
+            currentTilt = next
+            normalizedTilt = next
+        }
+    }
+
+    func stop() {
+        manager.stopDeviceMotionUpdates()
+        currentTilt = .zero
+        normalizedTilt = .zero
+    }
+
+    private func clamp(_ value: Double) -> CGFloat {
+        CGFloat(min(max(value, -1.0), 1.0))
     }
 }
 
