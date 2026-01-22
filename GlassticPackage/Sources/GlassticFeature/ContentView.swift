@@ -4,6 +4,7 @@ import SwiftUI
 public struct ContentView: View {
     @Environment(FastingStore.self) private var store
     @State private var selectedTab: BottomTab = .session
+    @State private var showProtocolPicker = false
 
     public init() {}
 
@@ -11,7 +12,7 @@ public struct ContentView: View {
 
     public var body: some View {
         ZStack {
-            LiquidBackground()
+            LiquidBackground(accentColor: store.accentColor)
 
             VStack(spacing: 18) {
                 tabContent
@@ -23,18 +24,22 @@ public struct ContentView: View {
         .safeAreaInset(edge: .bottom) {
             BottomPillMenu(
                 selectedTab: $selectedTab,
-                accentColor: accentColor,
+                accentColor: store.accentColor,
                 height: bottomMenuHeight
             )
-                .frame(height: bottomMenuHeight)
+            .frame(height: bottomMenuHeight)
+        }
+        .sheet(isPresented: $showProtocolPicker) {
+            ProtocolPickerSheet()
         }
     }
 
-    private var accentColor: Color { .cyan }
+    private var accentColor: Color { store.accentColor }
+
     private var actionColor: Color {
         store.isActive
-        ? Color(red: 0.93, green: 0.32, blue: 0.32)
-        : accentColor
+            ? Color(red: 0.93, green: 0.32, blue: 0.32)
+            : accentColor
     }
 
     @ViewBuilder
@@ -45,35 +50,104 @@ public struct ContentView: View {
         case .settings:
             settingsTab
         case .insights:
-            PlaceholderTab(title: "Insights")
+            insightsTab
         case .rhythm:
-            PlaceholderTab(title: "Rhythm")
+            rhythmTab
         }
     }
+
+    // MARK: - Session Tab
 
     private var sessionTab: some View {
-        VStack(spacing: 18) {
-            GlassmorphicGauge(
-                progress: store.progress,
-                elapsed: store.elapsed,
-                remaining: max(store.targetDuration - store.elapsed, 0),
-                goal: store.targetDuration,
-                isActive: store.isActive,
-                accentColor: accentColor
-            )
+        ScrollView {
+            VStack(spacing: 18) {
+                GlassmorphicGauge(
+                    progress: store.progress,
+                    elapsed: store.elapsed,
+                    remaining: store.remainingTime,
+                    goal: store.targetDuration,
+                    isActive: store.isActive,
+                    currentZone: store.currentZone,
+                    estimatedCalories: store.estimatedCalories
+                )
 
-            actionButton
+                // Zone progress card when active
+                if store.isActive {
+                    ZoneProgressCard(
+                        currentZone: store.currentZone,
+                        zoneProgress: store.zoneProgress,
+                        timeToNextZone: store.timeToNextZone
+                    )
+                }
+
+                actionButton
+
+                // Protocol selector when not active
+                if !store.isActive {
+                    protocolSelector
+                }
+
+                Spacer(minLength: 0)
+            }
+        }
+        .scrollIndicators(.hidden)
+    }
+
+    // MARK: - Insights Tab
+
+    private var insightsTab: some View {
+        ScrollView {
+            VStack(spacing: 18) {
+                Text("Insights")
+                    .font(.title2.weight(.semibold))
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+
+                // Stats cards
+                StatsCard()
+
+                // Zones overview
+                ZonesOverviewCard(
+                    currentZone: store.currentZone,
+                    elapsed: store.elapsed
+                )
+
+                Spacer(minLength: 0)
+            }
+        }
+        .scrollIndicators(.hidden)
+    }
+
+    // MARK: - Rhythm Tab
+
+    private var rhythmTab: some View {
+        VStack(spacing: 18) {
+            Text("Rhythm")
+                .font(.title2.weight(.semibold))
+                .foregroundStyle(.white)
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+            Text("Calendar and history coming soon")
+                .font(.subheadline)
+                .foregroundStyle(.white.opacity(0.6))
 
             Spacer(minLength: 0)
         }
     }
+
+    // MARK: - Settings Tab
 
     private var settingsTab: some View {
-        VStack(spacing: 18) {
-            SettingsPanel(accentColor: accentColor)
-            Spacer(minLength: 0)
+        ScrollView {
+            VStack(spacing: 18) {
+                SettingsPanel(accentColor: accentColor)
+                Spacer(minLength: 0)
+            }
         }
+        .scrollIndicators(.hidden)
     }
+
+    // MARK: - Components
 
     private var actionButton: some View {
         Button(action: {
@@ -112,7 +186,136 @@ public struct ContentView: View {
         .padding(.top, 8)
     }
 
+    private var protocolSelector: some View {
+        Button(action: { showProtocolPicker = true }) {
+            HStack {
+                Image(systemName: store.selectedProtocol.iconName)
+                    .foregroundStyle(accentColor)
+                Text(store.selectedProtocol.name)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(.white)
+                Spacer()
+                Text("\(Int(store.targetDuration / 3600))h goal")
+                    .font(.caption)
+                    .foregroundStyle(.white.opacity(0.6))
+                Image(systemName: "chevron.right")
+                    .font(.caption)
+                    .foregroundStyle(.white.opacity(0.4))
+            }
+            .padding(16)
+            .background(
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .fill(Color.white.opacity(0.08))
+                    .liquidGlass(
+                        .regular
+                            .tint(.white)
+                            .cornerRadius(16),
+                        in: RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    )
+            )
+        }
+        .buttonStyle(.plain)
+    }
 }
+
+// MARK: - Stats Card
+
+private struct StatsCard: View {
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("This Week")
+                .font(.headline.weight(.semibold))
+                .foregroundStyle(.white)
+
+            HStack(spacing: 16) {
+                StatItem(value: "3", label: "Fasts", icon: "flame.fill")
+                StatItem(value: "48h", label: "Total", icon: "clock.fill")
+                StatItem(value: "16h", label: "Average", icon: "chart.bar.fill")
+            }
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: 22, style: .continuous)
+                .fill(Color.white.opacity(0.08))
+                .liquidGlass(
+                    .regular
+                        .tint(.white)
+                        .cornerRadius(22),
+                    in: RoundedRectangle(cornerRadius: 22, style: .continuous)
+                )
+        )
+    }
+}
+
+private struct StatItem: View {
+    let value: String
+    let label: String
+    let icon: String
+
+    var body: some View {
+        VStack(spacing: 4) {
+            Image(systemName: icon)
+                .font(.title3)
+                .foregroundStyle(.white.opacity(0.6))
+            Text(value)
+                .font(.title2.weight(.bold))
+                .foregroundStyle(.white)
+            Text(label)
+                .font(.caption)
+                .foregroundStyle(.white.opacity(0.5))
+        }
+        .frame(maxWidth: .infinity)
+    }
+}
+
+// MARK: - Protocol Picker Sheet
+
+private struct ProtocolPickerSheet: View {
+    @Environment(FastingStore.self) private var store
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationStack {
+            List {
+                ForEach(FastingProtocol.allCases) { fastingProtocol in
+                    Button(action: {
+                        store.selectProtocol(fastingProtocol)
+                        dismiss()
+                    }) {
+                        HStack {
+                            Image(systemName: fastingProtocol.iconName)
+                                .foregroundStyle(.cyan)
+                                .frame(width: 30)
+                            VStack(alignment: .leading) {
+                                Text(fastingProtocol.name)
+                                    .font(.headline)
+                                Text(fastingProtocol.description)
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                            Spacer()
+                            if store.selectedProtocol == fastingProtocol {
+                                Image(systemName: "checkmark")
+                                    .foregroundStyle(.cyan)
+                            }
+                        }
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .navigationTitle("Fasting Protocol")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Done") { dismiss() }
+                }
+            }
+        }
+    }
+}
+
+// MARK: - Settings Panel
 
 private struct SettingsPanel: View {
     @Environment(FastingStore.self) private var store
@@ -124,6 +327,32 @@ private struct SettingsPanel: View {
             set: { store.updateTargetDuration(hours: $0) }
         )
     }
+    
+    private var notificationsBinding: Binding<Bool> {
+        Binding(
+            get: { store.notificationsEnabled },
+            set: { newValue in
+                if newValue && !store.notificationsAuthorized {
+                    Task { await store.requestNotificationAuthorization() }
+                } else {
+                    store.notificationsEnabled = newValue
+                }
+            }
+        )
+    }
+    
+    private var healthKitBinding: Binding<Bool> {
+        Binding(
+            get: { store.healthKitEnabled },
+            set: { newValue in
+                if newValue && !store.healthKitAuthorized {
+                    Task { await store.requestHealthKitAuthorization() }
+                } else {
+                    store.healthKitEnabled = newValue
+                }
+            }
+        )
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -131,6 +360,7 @@ private struct SettingsPanel: View {
                 .font(.title2.weight(.semibold))
                 .foregroundStyle(.white)
 
+            // Goal duration
             VStack(alignment: .leading, spacing: 12) {
                 HStack {
                     Text("Goal duration")
@@ -145,10 +375,10 @@ private struct SettingsPanel: View {
                         .animation(.smooth(duration: 0.25), value: goalHours.wrappedValue)
                 }
 
-                Slider(value: goalHours, in: 8...24, step: 1)
+                Slider(value: goalHours, in: 1...72, step: 1)
                     .tint(accentColor)
 
-                Text("Used for progress and remaining time.")
+                Text("Adjust your fasting goal duration.")
                     .font(.caption)
                     .foregroundStyle(.white.opacity(0.6))
             }
@@ -163,27 +393,219 @@ private struct SettingsPanel: View {
                         in: RoundedRectangle(cornerRadius: 22, style: .continuous)
                     )
             )
+
+            // Current protocol info
+            VStack(alignment: .leading, spacing: 8) {
+                HStack {
+                    Image(systemName: store.selectedProtocol.iconName)
+                        .foregroundStyle(accentColor)
+                    Text("Current Protocol")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(.white.opacity(0.85))
+                    Spacer()
+                    Text(store.selectedProtocol.name)
+                        .font(.subheadline)
+                        .foregroundStyle(.white)
+                }
+                Text(store.selectedProtocol.description)
+                    .font(.caption)
+                    .foregroundStyle(.white.opacity(0.6))
+            }
+            .padding(16)
+            .background(
+                RoundedRectangle(cornerRadius: 22, style: .continuous)
+                    .fill(Color.white.opacity(0.08))
+                    .liquidGlass(
+                        .regular
+                            .tint(.white)
+                            .cornerRadius(22),
+                        in: RoundedRectangle(cornerRadius: 22, style: .continuous)
+                    )
+            )
+            
+            // Notifications section
+            SettingsSection(title: "Notifications", icon: "bell.fill", accentColor: accentColor) {
+                SettingsToggleRow(
+                    title: "Notifications",
+                    subtitle: store.notificationsAuthorized ? "Enabled" : "Tap to enable",
+                    icon: "bell.badge.fill",
+                    isOn: notificationsBinding,
+                    accentColor: accentColor
+                )
+                
+                if store.notificationsEnabled {
+                    SettingsInfoRow(
+                        title: "Zone Alerts",
+                        value: "On",
+                        icon: "flame.fill"
+                    )
+                    SettingsInfoRow(
+                        title: "Goal Reminders",
+                        value: "On",
+                        icon: "target"
+                    )
+                    SettingsInfoRow(
+                        title: "Hydration Reminders",
+                        value: "Every 2h",
+                        icon: "drop.fill"
+                    )
+                }
+            }
+            
+            // HealthKit section
+            SettingsSection(title: "Health", icon: "heart.fill", accentColor: accentColor) {
+                SettingsToggleRow(
+                    title: "Apple Health",
+                    subtitle: store.healthKitAuthorized ? "Connected" : "Tap to connect",
+                    icon: "heart.text.square.fill",
+                    isOn: healthKitBinding,
+                    accentColor: accentColor
+                )
+                
+                if store.healthKitEnabled, let profile = store.userProfile {
+                    if let weight = profile.weightKg {
+                        SettingsInfoRow(
+                            title: "Weight",
+                            value: String(format: "%.1f kg", weight),
+                            icon: "scalemass.fill"
+                        )
+                    }
+                    if let height = profile.heightCm {
+                        SettingsInfoRow(
+                            title: "Height",
+                            value: String(format: "%.0f cm", height),
+                            icon: "ruler.fill"
+                        )
+                    }
+                    if let bmr = profile.calculatedBMR ?? profile.estimatedBMR {
+                        SettingsInfoRow(
+                            title: "Est. BMR",
+                            value: String(format: "%.0f kcal", bmr),
+                            icon: "flame.fill"
+                        )
+                    }
+                }
+            }
+            
+            // About section
+            SettingsSection(title: "About", icon: "info.circle.fill", accentColor: accentColor) {
+                SettingsInfoRow(
+                    title: "Version",
+                    value: "1.0.0",
+                    icon: "app.badge.fill"
+                )
+                SettingsInfoRow(
+                    title: "Build",
+                    value: "1",
+                    icon: "hammer.fill"
+                )
+            }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
 
-private struct PlaceholderTab: View {
-    let title: String
+// MARK: - Settings Section
 
+private struct SettingsSection<Content: View>: View {
+    let title: String
+    let icon: String
+    let accentColor: Color
+    @ViewBuilder let content: Content
+    
     var body: some View {
-        VStack(spacing: 12) {
-            Text(title)
-                .font(.title2.weight(.semibold))
-                .foregroundStyle(.white)
-            Text("Coming soon")
-                .font(.subheadline)
-                .foregroundStyle(.white.opacity(0.6))
-            Spacer(minLength: 0)
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 8) {
+                Image(systemName: icon)
+                    .foregroundStyle(accentColor)
+                    .font(.subheadline)
+                Text(title)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(.white.opacity(0.85))
+            }
+            
+            VStack(spacing: 0) {
+                content
+            }
         }
-        .frame(maxWidth: .infinity)
+        .padding(16)
+        .background(
+            RoundedRectangle(cornerRadius: 22, style: .continuous)
+                .fill(Color.white.opacity(0.08))
+                .liquidGlass(
+                    .regular
+                        .tint(.white)
+                        .cornerRadius(22),
+                    in: RoundedRectangle(cornerRadius: 22, style: .continuous)
+                )
+        )
     }
 }
+
+// MARK: - Settings Toggle Row
+
+private struct SettingsToggleRow: View {
+    let title: String
+    let subtitle: String
+    let icon: String
+    @Binding var isOn: Bool
+    let accentColor: Color
+    
+    var body: some View {
+        HStack(spacing: 12) {
+            Image(systemName: icon)
+                .font(.title3)
+                .foregroundStyle(isOn ? accentColor : .white.opacity(0.5))
+                .frame(width: 28)
+            
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(.subheadline.weight(.medium))
+                    .foregroundStyle(.white)
+                Text(subtitle)
+                    .font(.caption)
+                    .foregroundStyle(.white.opacity(0.6))
+            }
+            
+            Spacer()
+            
+            Toggle("", isOn: $isOn)
+                .labelsHidden()
+                .tint(accentColor)
+        }
+        .padding(.vertical, 8)
+    }
+}
+
+// MARK: - Settings Info Row
+
+private struct SettingsInfoRow: View {
+    let title: String
+    let value: String
+    let icon: String
+    
+    var body: some View {
+        HStack(spacing: 12) {
+            Image(systemName: icon)
+                .font(.subheadline)
+                .foregroundStyle(.white.opacity(0.5))
+                .frame(width: 28)
+            
+            Text(title)
+                .font(.subheadline)
+                .foregroundStyle(.white.opacity(0.8))
+            
+            Spacer()
+            
+            Text(value)
+                .font(.subheadline)
+                .foregroundStyle(.white.opacity(0.6))
+        }
+        .padding(.vertical, 6)
+    }
+}
+
+// MARK: - Bottom Tab Enum
 
 private enum BottomTab: String, CaseIterable, Identifiable {
     case session
@@ -195,32 +617,27 @@ private enum BottomTab: String, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .session:
-            return "Session"
-        case .insights:
-            return "Insights"
-        case .rhythm:
-            return "Rhythm"
-        case .settings:
-            return "Settings"
+        case .session: return "Session"
+        case .insights: return "Insights"
+        case .rhythm: return "Rhythm"
+        case .settings: return "Settings"
         }
     }
 
     var iconName: String {
         switch self {
-        case .session:
-            return "flame.fill"
-        case .insights:
-            return "chart.bar.fill"
-        case .rhythm:
-            return "moon.stars.fill"
-        case .settings:
-            return "gearshape.fill"
+        case .session: return "flame.fill"
+        case .insights: return "chart.bar.fill"
+        case .rhythm: return "moon.stars.fill"
+        case .settings: return "gearshape.fill"
         }
     }
 }
 
+// MARK: - Liquid Background
+
 private struct LiquidBackground: View {
+    let accentColor: Color
     @Environment(\.scenePhase) private var scenePhase
     @StateObject private var motion = MotionProvider()
 
@@ -254,8 +671,9 @@ private struct LiquidBackground: View {
                     endPoint: UnitPoint(x: clampedUnit(endX), y: clampedUnit(endY))
                 )
 
+                // Primary accent glow
                 RadialGradient(
-                    colors: [Color.cyan.opacity(0.36), .clear],
+                    colors: [accentColor.opacity(0.36), .clear],
                     center: UnitPoint(x: clampedUnit(x1), y: clampedUnit(y1)),
                     startRadius: 36,
                     endRadius: 320
@@ -263,8 +681,9 @@ private struct LiquidBackground: View {
                 .blendMode(.screen)
                 .blur(radius: 12)
 
+                // Secondary accent glow
                 RadialGradient(
-                    colors: [Color.cyan.opacity(0.24), .clear],
+                    colors: [accentColor.opacity(0.24), .clear],
                     center: UnitPoint(x: clampedUnit(x2), y: clampedUnit(y2)),
                     startRadius: 48,
                     endRadius: 300
@@ -292,6 +711,8 @@ private struct LiquidBackground: View {
         min(max(value, 0.0), 1.0)
     }
 }
+
+// MARK: - Motion Provider
 
 @MainActor
 private final class MotionProvider: ObservableObject {
@@ -329,6 +750,8 @@ private final class MotionProvider: ObservableObject {
     }
 }
 
+// MARK: - Bottom Pill Menu
+
 private struct BottomPillMenu: View {
     @Binding var selectedTab: BottomTab
     let accentColor: Color
@@ -365,8 +788,6 @@ private struct BottomPillMenu: View {
                                 selectedTab = tab
                             }
                         } label: {
-                            let scale = magnification(for: tab)
-                            let lift = liftOffset(for: tab)
                             let isActive = activeTab == tab
                             VStack(spacing: 5) {
                                 Image(systemName: tab.iconName)
@@ -394,9 +815,6 @@ private struct BottomPillMenu: View {
                                     .matchedGeometryEffect(id: "pillSelection", in: selectionNamespace)
                                 }
                             }
-                            .scaleEffect(scale)
-                            .offset(y: lift)
-                            .animation(.spring(response: 0.3, dampingFraction: 0.8), value: scale)
                             .frame(maxWidth: .infinity)
                             .background(
                                 GeometryReader { proxy in
@@ -465,26 +883,11 @@ private struct BottomPillMenu: View {
             }
     }
 
-    private func magnification(for tab: BottomTab) -> CGFloat {
-        1.0
-    }
-
-    private func liftOffset(for tab: BottomTab) -> CGFloat {
-        0
-    }
-
     private func nearestTab(to location: CGPoint) -> BottomTab? {
         guard !tabFrames.isEmpty else { return nil }
         return tabFrames.min { lhs, rhs in
             abs(lhs.value.midX - location.x) < abs(rhs.value.midX - location.x)
         }?.key
-    }
-
-    private var interactionCenterX: CGFloat? {
-        if let dragLocation {
-            return dragLocation.x
-        }
-        return tabFrames[activeTab]?.midX
     }
 
     private func selectionWidth(for tab: BottomTab) -> CGFloat {
@@ -527,6 +930,8 @@ private struct BottomPillMenu: View {
     }
 }
 
+// MARK: - Tab Frame Preference Key
+
 private struct TabFramePreferenceKey: PreferenceKey {
     static let defaultValue: [BottomTab: CGRect] = [:]
 
@@ -534,6 +939,8 @@ private struct TabFramePreferenceKey: PreferenceKey {
         value.merge(nextValue(), uniquingKeysWith: { $1 })
     }
 }
+
+// MARK: - Glass Pill Surface
 
 private struct GlassPillSurface<S: Shape>: View {
     let shape: S
@@ -548,8 +955,8 @@ private struct GlassPillSurface<S: Shape>: View {
 
     var body: some View {
         let glass = isInteractive
-        ? glassStyle.tint(tint).interactive()
-        : glassStyle.tint(tint)
+            ? glassStyle.tint(tint).interactive()
+            : glassStyle.tint(tint)
 
         shape
             .fill(.clear)
@@ -646,30 +1053,5 @@ private struct GlassPillSurface<S: Shape>: View {
 
     private func clampedUnit(_ value: CGFloat) -> CGFloat {
         min(max(value, 0.0), 1.0)
-    }
-}
-
-private struct StatusPill: View {
-    let isActive: Bool
-
-    var body: some View {
-        HStack(spacing: 6) {
-            Circle()
-                .fill(isActive ? Color.green : Color.orange)
-                .frame(width: 6, height: 6)
-
-            Text(isActive ? "Active" : "Ready")
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(.white)
-                .shadow(color: .black.opacity(0.35), radius: 2, x: 0, y: 1)
-        }
-        .padding(.vertical, 6)
-        .padding(.horizontal, 12)
-        .liquidGlass(
-            .regular
-                .tint(isActive ? .green : .orange)
-                .cornerRadius(999),
-            in: Capsule()
-        )
     }
 }
