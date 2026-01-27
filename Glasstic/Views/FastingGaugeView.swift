@@ -6,8 +6,6 @@ struct FastingGaugeView: View {
     var activeZone: FastingZone
     var accent: Color
 
-    @State private var pulse = false
-
     private var elapsedHours: Double {
         elapsed / 3600
     }
@@ -75,25 +73,6 @@ struct FastingGaugeView: View {
                             .animation(.easeInOut(duration: 0.4), value: elapsed)
                     }
 
-                    if let activeSegment = segments.first(where: { $0.zone == activeZone }) {
-                        Circle()
-                            .trim(from: activeSegment.startFraction, to: activeSegment.trimmedProgress(for: elapsed, thresholds: thresholds))
-                            .stroke(
-                                accent.opacity(0.4),
-                                style: StrokeStyle(lineWidth: 32, lineCap: .round)
-                            )
-                            .blur(radius: 22)
-                            .opacity(pulse ? 0.6 : 0.2)
-                            .rotationEffect(.degrees(-90))
-                            .animation(
-                                .easeInOut(duration: 1.6).repeatForever(autoreverses: true),
-                                value: pulse
-                            )
-                            .onAppear {
-                                pulse = true
-                            }
-                    }
-
                     VStack(spacing: 8) {
                         Text(TimeFormatter.shared.string(from: elapsed))
                             .font(.system(size: 34, weight: .semibold, design: .rounded))
@@ -131,10 +110,8 @@ struct FastingGaugeView: View {
                     }
                     .padding(.horizontal, 12)
                     .padding(.vertical, 8)
-                    .background(
-                        RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .fill(Color.white.opacity(segment.zone == activeZone ? 0.12 : 0.06))
-                    )
+                    .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                    .opacity(segment.zone == activeZone ? 1.0 : 0.7)
                 }
             }
         }

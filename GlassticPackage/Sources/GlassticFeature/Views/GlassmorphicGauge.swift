@@ -25,186 +25,159 @@ public struct GlassmorphicGauge: View {
     }
 
     public var body: some View {
-        GlassEffectContainer(spacing: 12) {
+        TimelineView(.animation(minimumInterval: 1.0 / 30.0)) { timeline in
+            let time = timeline.date.timeIntervalSinceReferenceDate
+
             GeometryReader { proxy in
                 let size = min(proxy.size.width, proxy.size.height)
                 let ringDiameter = size * 0.94
                 let ringWidth = max(size * 0.085, 20)
-                let ringRadius = ringDiameter / 2
-                let innerSize = size * 0.81
-                let angle = clampedProgress * 360 - 90
-                let capPoint = CGPoint(
-                    x: size / 2 + CGFloat(cos(angle * .pi / 180)) * ringRadius,
-                    y: size / 2 + CGFloat(sin(angle * .pi / 180)) * ringRadius
-                )
+                let innerSize = size * 0.78
 
                 ZStack {
-                    Circle()
-                        .stroke(trackGradient, style: StrokeStyle(lineWidth: ringWidth, lineCap: .round))
-                        .frame(width: ringDiameter, height: ringDiameter)
-                        .rotationEffect(.degrees(-90))
-                        .shadow(color: .black.opacity(0.08), radius: 8, x: 0, y: 6)
-
+                    // Track ring with glass highlight
                     Circle()
                         .stroke(
-                            Color.white.opacity(0.3),
-                            style: StrokeStyle(lineWidth: ringWidth * 0.28, lineCap: .round)
+                            Color.white.opacity(0.12),
+                            style: StrokeStyle(lineWidth: ringWidth, lineCap: .round)
+                        )
+                        .frame(width: ringDiameter, height: ringDiameter)
+
+                    // Glass highlight on track
+                    Circle()
+                        .trim(from: 0.05, to: 0.35)
+                        .stroke(
+                            LinearGradient(
+                                colors: [.white.opacity(0.3), .white.opacity(0.05)],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            style: StrokeStyle(lineWidth: ringWidth * 0.6, lineCap: .round)
                         )
                         .frame(width: ringDiameter, height: ringDiameter)
                         .rotationEffect(.degrees(-90))
-                        .blendMode(.screen)
-                        .opacity(0.35)
+                        .blendMode(.plusLighter)
 
-                    Circle()
-                        .trim(from: 0.06, to: 0.42)
-                        .stroke(
-                            glassHighlightGradient,
-                            style: StrokeStyle(lineWidth: ringWidth * 0.55, lineCap: .round)
-                        )
-                        .frame(width: ringDiameter, height: ringDiameter)
-                        .rotationEffect(.degrees(-90))
-                        .blendMode(.screen)
-                        .opacity(0.65)
-
-                    Circle()
-                        .trim(from: 0.52, to: 0.94)
-                        .stroke(
-                            Color.black.opacity(0.08),
-                            style: StrokeStyle(lineWidth: ringWidth * 0.45, lineCap: .round)
-                        )
-                        .frame(width: ringDiameter, height: ringDiameter)
-                        .rotationEffect(.degrees(-90))
-
+                    // Progress ring
                     Circle()
                         .trim(from: 0, to: clampedProgress)
-                        .stroke(progressGradient, style: StrokeStyle(lineWidth: ringWidth, lineCap: .round))
+                        .stroke(
+                            progressGradient,
+                            style: StrokeStyle(lineWidth: ringWidth, lineCap: .round)
+                        )
                         .frame(width: ringDiameter, height: ringDiameter)
                         .rotationEffect(.degrees(-90))
-                        .shadow(color: accentColor.opacity(0.35), radius: 10, x: 0, y: 6)
+                        .shadow(color: accentColor.opacity(0.4), radius: 12, x: 0, y: 6)
                         .animation(.easeInOut(duration: 0.45), value: clampedProgress)
 
-                    Circle()
-                        .trim(from: 0, to: clampedProgress)
-                        .stroke(
-                            Color.white.opacity(0.55),
-                            style: StrokeStyle(lineWidth: ringWidth * 0.35, lineCap: .round)
-                        )
-                        .frame(width: ringDiameter, height: ringDiameter)
-                        .rotationEffect(.degrees(-90))
-                        .blendMode(.screen)
-                        .opacity(0.7)
+                    // Progress ring highlight
+                    if clampedProgress > 0.02 {
+                        Circle()
+                            .trim(from: 0, to: clampedProgress)
+                            .stroke(
+                                Color.white.opacity(0.4),
+                                style: StrokeStyle(lineWidth: ringWidth * 0.35, lineCap: .round)
+                            )
+                            .frame(width: ringDiameter, height: ringDiameter)
+                            .rotationEffect(.degrees(-90))
+                            .blendMode(.plusLighter)
+                    }
 
+                    // Knob at progress end
                     if clampedProgress > 0 {
-                        ZStack {
-                            Circle()
-                                .fill(.white)
-                                .shadow(color: accentColor.opacity(0.3), radius: 4, x: 0, y: 2)
-                            Circle()
-                                .stroke(accentColor.opacity(0.4), lineWidth: 2)
-                            Text(zoneEmoji)
-                                .font(.system(size: ringWidth * 0.6))
-                                .shadow(color: .black.opacity(0.12), radius: 1, x: 0, y: 1)
-                        }
-                        .frame(width: ringWidth * 1.15, height: ringWidth * 1.15)
-                        .position(capPoint)
+                        knobView(ringDiameter: ringDiameter, ringWidth: ringWidth, size: size)
                     }
 
-                    Circle()
-                        .fill(Color.white.opacity(0.95))
-                        .frame(width: innerSize, height: innerSize)
-                        .shadow(color: .black.opacity(0.08), radius: 10, x: 0, y: 6)
-                        .overlay(
-                            Circle()
-                                .stroke(.white.opacity(0.8), lineWidth: 1)
-                        )
-                        .overlay(
-                            Circle()
-                                .stroke(Color.white.opacity(0.35), lineWidth: 2)
-                                .blendMode(.screen)
-                                .padding(innerSize * 0.04)
-                        )
-                        .overlay(
-                            Circle()
-                                .fill(
-                                    LinearGradient(
-                                        colors: [
-                                            .white.opacity(0.6),
-                                            .clear
-                                        ],
-                                        startPoint: .topLeading,
-                                        endPoint: .bottomTrailing
-                                    )
-                                )
-                                .opacity(0.6)
-                        )
-
-                    VStack(spacing: 10) {
-                        Text("Elapsed time (\(progressPercent)%)")
-                            .font(.subheadline.weight(.semibold))
-                            .foregroundStyle(Color.black.opacity(0.45))
-
-                        Text(timeString(from: elapsedSeconds))
-                            .font(.system(size: size * 0.175, weight: .semibold, design: .rounded))
-                            .foregroundStyle(counterGradient)
-                            .monospacedDigit()
-                            .contentTransition(.numericText())
-                            .animation(.smooth(duration: 0.4), value: elapsedSeconds)
-                            .shadow(color: accentColor.opacity(0.25), radius: 6, x: 0, y: 3)
-
-                        StatusPill(title: statusLabel, tint: accentColor)
-                    }
+                    // Center content with glass effect and refraction
+                    centerContent(innerSize: innerSize, containerSize: size, time: time)
                 }
                 .frame(width: size, height: size)
             }
-            .aspectRatio(1, contentMode: .fit)
-            .frame(maxWidth: 360)
         }
+        .aspectRatio(1, contentMode: .fit)
+        .frame(maxWidth: 360)
     }
 
-    private var trackGradient: LinearGradient {
-        LinearGradient(
-            colors: [
-                Color.white.opacity(0.4),
-                Color.white.opacity(0.12),
-                Color.white.opacity(0.35)
-            ],
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
+    private func knobView(ringDiameter: CGFloat, ringWidth: CGFloat, size: CGFloat) -> some View {
+        let angle = clampedProgress * 360 - 90
+        let radius = ringDiameter / 2
+        let capPoint = CGPoint(
+            x: size / 2 + CGFloat(cos(angle * .pi / 180)) * radius,
+            y: size / 2 + CGFloat(sin(angle * .pi / 180)) * radius
         )
+
+        return Text(zoneEmoji)
+            .font(.system(size: ringWidth * 0.7))
+            .frame(width: ringWidth * 1.3, height: ringWidth * 1.3)
+            .background(.white, in: .circle)
+            .overlay(Circle().stroke(accentColor.opacity(0.4), lineWidth: 2))
+            .shadow(color: accentColor.opacity(0.3), radius: 4, x: 0, y: 2)
+            .position(capPoint)
     }
 
-    private var glassHighlightGradient: LinearGradient {
-        LinearGradient(
-            colors: [
-                Color.white.opacity(0.7),
-                Color.white.opacity(0.1)
-            ],
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
-        )
+    private func centerContent(innerSize: CGFloat, containerSize: CGFloat, time: TimeInterval) -> some View {
+        let phase = time * 0.3
+
+        return ZStack {
+            // Glass base
+            Circle()
+                .fill(.clear)
+                .frame(width: innerSize, height: innerSize)
+                .glassEffect(.regular, in: .circle)
+
+            // Refraction caustics inside
+            ZStack {
+                RadialGradient(
+                    colors: [Color.white.opacity(0.35), .clear],
+                    center: UnitPoint(
+                        x: 0.25 + sin(phase * 0.5) * 0.08,
+                        y: 0.2 + cos(phase * 0.4) * 0.06
+                    ),
+                    startRadius: 0,
+                    endRadius: innerSize * 0.4
+                )
+
+                RadialGradient(
+                    colors: [accentColor.opacity(0.2), .clear],
+                    center: UnitPoint(
+                        x: 0.75 - sin(phase * 0.4) * 0.06,
+                        y: 0.7 + cos(phase * 0.35) * 0.05
+                    ),
+                    startRadius: 0,
+                    endRadius: innerSize * 0.35
+                )
+            }
+            .frame(width: innerSize, height: innerSize)
+            .clipShape(Circle())
+            .blendMode(.plusLighter)
+
+            // Content
+            VStack(spacing: 10) {
+                Text("Elapsed (\(progressPercent)%)")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(.secondary)
+
+                Text(timeString(from: elapsedSeconds))
+                    .font(.system(size: containerSize * 0.16, weight: .semibold, design: .rounded))
+                    .foregroundStyle(accentColor)
+                    .monospacedDigit()
+                    .contentTransition(.numericText())
+                    .animation(.smooth(duration: 0.4), value: elapsedSeconds)
+                    .shadow(color: accentColor.opacity(0.3), radius: 8)
+
+                StatusPill(title: statusLabel, tint: accentColor)
+            }
+        }
     }
 
     private var progressGradient: AngularGradient {
         AngularGradient(
             colors: [
-                accentColor.opacity(0.7),
+                accentColor.opacity(0.6),
                 accentColor,
-                accentColor.opacity(0.5),
                 accentColor.opacity(0.8)
             ],
             center: .center
-        )
-    }
-
-    private var counterGradient: LinearGradient {
-        LinearGradient(
-            colors: [
-                accentColor.opacity(0.95),
-                Color.black.opacity(0.72),
-                accentColor.opacity(0.85)
-            ],
-            startPoint: .topLeading,
-            endPoint: .bottomTrailing
         )
     }
 
@@ -229,8 +202,8 @@ public struct GlassmorphicGauge: View {
         let totalSeconds = max(seconds, 0)
         let hours = totalSeconds / 3600
         let minutes = (totalSeconds % 3600) / 60
-        let seconds = totalSeconds % 60
-        return String(format: "%02d:%02d:%02d", hours, minutes, seconds)
+        let secs = totalSeconds % 60
+        return String(format: "%02d:%02d:%02d", hours, minutes, secs)
     }
 
     private var zoneEmoji: String {
@@ -239,47 +212,30 @@ public struct GlassmorphicGauge: View {
 
     private var currentZone: GaugeZone {
         let hours = max(elapsed, 0) / 3600
-        if hours < 4 {
-            return .postMeal
-        }
-        if hours < 12 {
-            return .earlyFasting
-        }
-        if hours < 18 {
-            return .fatBurning
-        }
+        if hours < 4 { return .postMeal }
+        if hours < 12 { return .earlyFasting }
+        if hours < 18 { return .fatBurning }
         return .deepFast
     }
 
     private enum GaugeZone {
-        case postMeal
-        case earlyFasting
-        case fatBurning
-        case deepFast
+        case postMeal, earlyFasting, fatBurning, deepFast
 
         var title: String {
             switch self {
-            case .postMeal:
-                return "POST-MEAL"
-            case .earlyFasting:
-                return "EARLY FAST"
-            case .fatBurning:
-                return "FAT BURN"
-            case .deepFast:
-                return "DEEP FAST"
+            case .postMeal: return "POST-MEAL"
+            case .earlyFasting: return "EARLY FAST"
+            case .fatBurning: return "FAT BURN"
+            case .deepFast: return "DEEP FAST"
             }
         }
 
         var emoji: String {
             switch self {
-            case .postMeal:
-                return "\u{1F37D}\u{FE0F}"
-            case .earlyFasting:
-                return "\u{1F324}\u{FE0F}"
-            case .fatBurning:
-                return "\u{1F525}"
-            case .deepFast:
-                return "\u{1F319}"
+            case .postMeal: return "🍽️"
+            case .earlyFasting: return "🌤️"
+            case .fatBurning: return "🔥"
+            case .deepFast: return "🌙"
             }
         }
     }
@@ -296,18 +252,11 @@ private struct StatusPill: View {
                 .foregroundStyle(tint)
             Text(title)
                 .font(.caption.weight(.semibold))
-                .foregroundStyle(Color.black.opacity(0.55))
+                .foregroundStyle(.primary)
                 .kerning(0.7)
         }
         .padding(.vertical, 6)
         .padding(.horizontal, 12)
-        .background(
-            Capsule()
-                .fill(Color.white.opacity(0.8))
-        )
-        .overlay(
-            Capsule()
-                .stroke(tint.opacity(0.35), lineWidth: 1)
-        )
+        .glassEffect(.regular.tint(tint), in: .capsule)
     }
 }

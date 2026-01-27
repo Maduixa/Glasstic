@@ -79,7 +79,7 @@ struct HomeView: View {
                     store.updateTheme(to: theme)
                 }
                 .presentationDetents([.medium, .large])
-                .presentationBackground(.thinMaterial)
+                .presentationBackground(.clear)
             }
         }
         .tint(store.selectedTheme.accent)
@@ -135,24 +135,22 @@ struct HomeView: View {
             }
 
             Button(action: primaryAction) {
-                Text(store.activeSession == nil ? "Start Fast" : "End Fast")
-                    .font(.system(.headline, design: .rounded))
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 16)
-                    .background(
-                        RoundedRectangle(cornerRadius: 20, style: .continuous)
-                            .fill(store.selectedTheme.accent.gradient)
-                    )
-                    .foregroundStyle(Color.black.opacity(0.8))
-                    .shadow(color: store.selectedTheme.accent.opacity(0.6), radius: 16, x: 0, y: 12)
+                HStack(spacing: 8) {
+                    Image(systemName: store.activeSession == nil ? "play.fill" : "stop.fill")
+                    Text(store.activeSession == nil ? "Start Fast" : "End Fast")
+                }
+                .font(.system(.headline, design: .rounded))
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 16)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(.glassProminent)
+            .tint(store.selectedTheme.accent)
 
             Text(completedText)
                 .font(.footnote)
                 .foregroundStyle(.secondary)
         }
-        .glassCard(material: store.selectedTheme.materialBias.material)
+        .glassCard()
     }
 
     private var gaugeCard: some View {
@@ -162,7 +160,7 @@ struct HomeView: View {
             activeZone: store.activeZone,
             accent: store.selectedTheme.accent
         )
-        .glassCard(material: store.selectedTheme.materialBias.material)
+        .glassCard()
     }
 
     private var streakAndThemes: some View {
@@ -190,13 +188,13 @@ struct HomeView: View {
                 }
             }
         }
-        .glassCard(material: store.selectedTheme.materialBias.material)
+        .glassCard()
     }
 
     private var calendarCard: some View {
         CalendarPanelView(editingSession: $editingSession)
             .environmentObject(store)
-            .glassCard(material: store.selectedTheme.materialBias.material)
+            .glassCard()
     }
 
     private func primaryAction() {
