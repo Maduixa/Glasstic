@@ -26,7 +26,6 @@ public struct ContentView: View {
                 accentColor: accentColor,
                 height: bottomMenuHeight
             )
-                .frame(height: bottomMenuHeight)
         }
     }
 
@@ -94,25 +93,14 @@ public struct ContentView: View {
             .padding(.vertical, 14)
             .padding(.horizontal, 22)
             .frame(minWidth: 190)
-            .background(
-                Capsule(style: .circular)
-                    .fill(
-                        LinearGradient(
-                            colors: [
-                                actionColor.opacity(0.9),
-                                actionColor.opacity(0.7)
-                            ],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
-            )
         }
-        .shadow(color: actionColor.opacity(0.4), radius: 16, x: 0, y: 10)
+        .buttonStyle(.glassProminent)
+        .tint(actionColor)
         .padding(.top, 8)
     }
-
 }
+
+// MARK: - Settings Panel
 
 private struct SettingsPanel: View {
     @Environment(FastingStore.self) private var store
@@ -153,20 +141,13 @@ private struct SettingsPanel: View {
                     .foregroundStyle(.white.opacity(0.6))
             }
             .padding(16)
-            .background(
-                RoundedRectangle(cornerRadius: 22, style: .continuous)
-                    .fill(Color.white.opacity(0.08))
-                    .liquidGlass(
-                        .regular
-                            .tint(.white)
-                            .cornerRadius(22),
-                        in: RoundedRectangle(cornerRadius: 22, style: .continuous)
-                    )
-            )
+            .glassEffect(.regular, in: .rect(cornerRadius: 22))
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
+
+// MARK: - Placeholder Tab
 
 private struct PlaceholderTab: View {
     let title: String
@@ -185,6 +166,8 @@ private struct PlaceholderTab: View {
     }
 }
 
+// MARK: - Bottom Tab
+
 private enum BottomTab: String, CaseIterable, Identifiable {
     case session
     case insights
@@ -195,30 +178,273 @@ private enum BottomTab: String, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .session:
-            return "Session"
-        case .insights:
-            return "Insights"
-        case .rhythm:
-            return "Rhythm"
-        case .settings:
-            return "Settings"
+        case .session: return "Session"
+        case .insights: return "Insights"
+        case .rhythm: return "Rhythm"
+        case .settings: return "Settings"
         }
     }
 
     var iconName: String {
         switch self {
-        case .session:
-            return "flame.fill"
-        case .insights:
-            return "chart.bar.fill"
-        case .rhythm:
-            return "moon.stars.fill"
-        case .settings:
-            return "gearshape.fill"
+        case .session: return "flame.fill"
+        case .insights: return "chart.bar.fill"
+        case .rhythm: return "moon.stars.fill"
+        case .settings: return "gearshape.fill"
         }
     }
 }
+
+// MARK: - Bottom Pill Menu
+
+private struct BottomPillMenu: View {
+    @Binding var selectedTab: BottomTab
+    let accentColor: Color
+    let height: CGFloat
+    @Namespace private var tabAnimation
+    @State private var hoverTab: BottomTab?
+    @State private var dragLocation: CGPoint?
+    @State private var isDragging = false
+    @State private var tabFrames: [BottomTab: CGRect] = [:]
+
+    var body: some View {
+        let pillShape = Capsule()
+
+        TimelineView(.animation(minimumInterval: 1.0 / 60.0)) { timeline in
+            let time = timeline.date.timeIntervalSinceReferenceDate
+
+            ZStack {
+                // Main pill background with glass
+                pillShape
+                    .fill(.clear)
+                    .glassEffect(.regular, in: pillShape)
+                    .overlay {
+                        // Chromatic aberration on edges
+                        ChromaticEdge(intensity: isDragging ? 0.6 : 0.3)
+                            .clipShape(pillShape)
+                    }
+                    .overlay {
+                        // Refraction caustics
+                        RefractionLayer(time: time, intensity: isDragging ? 0.5 : 0.25)
+                            .clipShape(pillShape)
+                    }
+                    .overlay {
+                        // Rim highlight
+                        pillShape
+                            .stroke(
+                                AngularGradient(
+                                    colors: [
+                                        .white.opacity(0.4),
+                                        .clear,
+                                        .cyan.opacity(0.2),
+                                        .clear,
+                                        .white.opacity(0.3)
+                                    ],
+                                    center: .center
+                                ),
+                                lineWidth: 1
+                            )
+                            .blur(radius: 0.5)
+                    }
+
+                // Tab buttons inside
+                HStack(spacing: 0) {
+                    ForEach(BottomTab.allCases) { tab in
+                        Button {
+                            withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
+                                selectedTab = tab
+                            }
+                        } label: {
+                            VStack(spacing: 5) {
+                                Image(systemName: tab.iconName)
+                                    .font(.system(size: 19, weight: .semibold))
+                                    .symbolEffect(.bounce, value: selectedTab == tab)
+                                Text(tab.title)
+                                    .font(.system(size: 12.5, weight: .semibold))
+                            }
+                            .foregroundStyle(selectedTab == tab ? accentColor : .white.opacity(0.7))
+                            .shadow(color: selectedTab == tab ? accentColor.opacity(0.5) : .clear, radius: 8)
+                            .padding(.vertical, 10)
+                            .padding(.horizontal, 8)
+                            .frame(maxWidth: .infinity)
+                            .background {
+                                if selectedTab == tab {
+                                    Capsule()
+                                        .fill(.clear)
+                                        .glassEffect(.regular.tint(accentColor).interactive(), in: .capsule)
+                                        .matchedGeometryEffect(id: "selection", in: tabAnimation)
+                                }
+                            }
+                        }
+                        .buttonStyle(.plain)
+                        .background(
+                            GeometryReader { proxy in
+                                Color.clear.preference(
+                                    key: TabFrameKey.self,
+                                    value: [tab: proxy.frame(in: .named("pill"))]
+                                )
+                            }
+                        )
+                    }
+                }
+                .padding(.horizontal, 8)
+                .padding(.vertical, 4)
+            }
+            .frame(height: height)
+            .coordinateSpace(name: "pill")
+            .contentShape(pillShape)
+            .simultaneousGesture(dragGesture)
+            .onPreferenceChange(TabFrameKey.self) { tabFrames = $0 }
+            .shadow(color: .black.opacity(0.25), radius: 20, x: 0, y: 10)
+            .shadow(color: accentColor.opacity(0.15), radius: 16, x: 0, y: 5)
+        }
+        .padding(.horizontal, 16)
+        .padding(.bottom, 8)
+    }
+
+    private var dragGesture: some Gesture {
+        DragGesture(minimumDistance: 0, coordinateSpace: .named("pill"))
+            .onChanged { value in
+                if !isDragging {
+                    withAnimation(.spring(response: 0.25, dampingFraction: 0.7)) {
+                        isDragging = true
+                    }
+                }
+                dragLocation = value.location
+                if let nearest = nearestTab(to: value.location), hoverTab != nearest {
+                    withAnimation(.spring(response: 0.35, dampingFraction: 0.65)) {
+                        hoverTab = nearest
+                    }
+                }
+            }
+            .onEnded { _ in
+                if let hoverTab {
+                    withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
+                        selectedTab = hoverTab
+                    }
+                }
+                withAnimation(.spring(response: 0.4, dampingFraction: 0.65)) {
+                    isDragging = false
+                }
+                dragLocation = nil
+                hoverTab = nil
+            }
+    }
+
+    private func nearestTab(to location: CGPoint) -> BottomTab? {
+        tabFrames.min { abs($0.value.midX - location.x) < abs($1.value.midX - location.x) }?.key
+    }
+}
+
+private struct TabFrameKey: PreferenceKey {
+    static let defaultValue: [BottomTab: CGRect] = [:]
+    static func reduce(value: inout [BottomTab: CGRect], nextValue: () -> [BottomTab: CGRect]) {
+        value.merge(nextValue(), uniquingKeysWith: { $1 })
+    }
+}
+
+// MARK: - Chromatic Edge Effect
+
+private struct ChromaticEdge: View {
+    let intensity: CGFloat
+
+    var body: some View {
+        ZStack {
+            Capsule()
+                .stroke(Color.red.opacity(0.25 * intensity), lineWidth: 0.8)
+                .offset(x: -1.5 * intensity)
+                .blur(radius: 0.4)
+                .blendMode(.screen)
+
+            Capsule()
+                .stroke(Color.cyan.opacity(0.3 * intensity), lineWidth: 0.8)
+                .offset(x: 1.5 * intensity)
+                .blur(radius: 0.4)
+                .blendMode(.screen)
+
+            Capsule()
+                .stroke(Color.blue.opacity(0.2 * intensity), lineWidth: 0.6)
+                .offset(x: 1.0 * intensity, y: 0.5 * intensity)
+                .blur(radius: 0.3)
+                .blendMode(.screen)
+        }
+    }
+}
+
+// MARK: - Refraction Layer
+
+private struct RefractionLayer: View {
+    let time: TimeInterval
+    let intensity: CGFloat
+
+    var body: some View {
+        let phase = time * 0.4
+
+        ZStack {
+            // Moving caustic highlights
+            RadialGradient(
+                colors: [Color.white.opacity(0.35 * intensity), .clear],
+                center: UnitPoint(
+                    x: 0.2 + sin(phase * 0.6) * 0.1,
+                    y: 0.3 + cos(phase * 0.5) * 0.15
+                ),
+                startRadius: 0,
+                endRadius: 80
+            )
+            .blendMode(.plusLighter)
+
+            RadialGradient(
+                colors: [Color.cyan.opacity(0.25 * intensity), .clear],
+                center: UnitPoint(
+                    x: 0.8 - sin(phase * 0.5) * 0.08,
+                    y: 0.6 + cos(phase * 0.4) * 0.1
+                ),
+                startRadius: 0,
+                endRadius: 100
+            )
+            .blendMode(.plusLighter)
+
+            // Specular highlight
+            EllipticalGradient(
+                colors: [Color.white.opacity(0.4 * intensity), .clear],
+                center: UnitPoint(
+                    x: 0.25 + sin(phase * 0.3) * 0.05,
+                    y: 0.2 + cos(phase * 0.25) * 0.05
+                ),
+                startRadiusFraction: 0,
+                endRadiusFraction: 0.4
+            )
+            .blendMode(.plusLighter)
+            .blur(radius: 2)
+        }
+    }
+}
+
+// MARK: - Status Pill
+
+private struct StatusPill: View {
+    let isActive: Bool
+
+    var body: some View {
+        HStack(spacing: 6) {
+            Circle()
+                .fill(isActive ? Color.green : Color.orange)
+                .frame(width: 6, height: 6)
+
+            Text(isActive ? "Active" : "Ready")
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.white)
+        }
+        .padding(.vertical, 6)
+        .padding(.horizontal, 12)
+        .glassEffect(
+            .regular.tint(isActive ? .green : .orange),
+            in: .capsule
+        )
+    }
+}
+
+// MARK: - Liquid Background
 
 private struct LiquidBackground: View {
     @Environment(\.scenePhase) private var scenePhase
@@ -234,6 +460,7 @@ private struct LiquidBackground: View {
             let parallaxY = CGFloat(parallax.height) * 0.12
             let drift: CGFloat = 0.14
             let driftSmall: CGFloat = 0.08
+
             let x1 = CGFloat(0.84 + drift * sin(slow) + parallaxX)
             let y1 = CGFloat(0.14 + drift * cos(slow * 1.1) + parallaxY)
             let x2 = CGFloat(0.16 + drift * cos(mid) - parallaxX * 0.9)
@@ -260,8 +487,6 @@ private struct LiquidBackground: View {
                     startRadius: 36,
                     endRadius: 320
                 )
-                .blendMode(.screen)
-                .blur(radius: 12)
 
                 RadialGradient(
                     colors: [Color.cyan.opacity(0.24), .clear],
@@ -269,8 +494,6 @@ private struct LiquidBackground: View {
                     startRadius: 48,
                     endRadius: 300
                 )
-                .blendMode(.screen)
-                .blur(radius: 14)
             }
             .ignoresSafeArea()
         }
@@ -292,6 +515,8 @@ private struct LiquidBackground: View {
         min(max(value, 0.0), 1.0)
     }
 }
+
+// MARK: - Motion Provider
 
 @MainActor
 private final class MotionProvider: ObservableObject {
@@ -326,350 +551,5 @@ private final class MotionProvider: ObservableObject {
 
     private func clamp(_ value: Double) -> CGFloat {
         CGFloat(min(max(value, -1.0), 1.0))
-    }
-}
-
-private struct BottomPillMenu: View {
-    @Binding var selectedTab: BottomTab
-    let accentColor: Color
-    let height: CGFloat
-    @State private var tabFrames: [BottomTab: CGRect] = [:]
-    @State private var dragLocation: CGPoint?
-    @State private var hoverTab: BottomTab?
-    @State private var isDragging = false
-    @StateObject private var motion = MotionProvider()
-    @Namespace private var selectionNamespace
-
-    var body: some View {
-        let pillShape = Capsule()
-        let bubblePadding = EdgeInsets(top: 5, leading: 9, bottom: 5, trailing: 9)
-
-        GlassEffectContainer(spacing: 24) {
-            ZStack {
-                GlassPillSurface(
-                    shape: pillShape,
-                    glassStyle: .clear,
-                    tint: Color.black.opacity(0.02),
-                    strokeWidth: 0.55,
-                    highlightOpacity: 0.2,
-                    showHighlight: false,
-                    innerGlowOpacity: 0,
-                    isInteractive: false,
-                    shift: glassShift
-                )
-
-                HStack(spacing: 4) {
-                    ForEach(BottomTab.allCases) { tab in
-                        Button {
-                            withAnimation(.spring(response: 0.35, dampingFraction: 0.78)) {
-                                selectedTab = tab
-                            }
-                        } label: {
-                            let scale = magnification(for: tab)
-                            let lift = liftOffset(for: tab)
-                            let isActive = activeTab == tab
-                            VStack(spacing: 5) {
-                                Image(systemName: tab.iconName)
-                                    .font(.system(size: 19, weight: .semibold))
-                                Text(tab.title)
-                                    .font(.system(size: 12.5, weight: .semibold))
-                            }
-                            .foregroundStyle(isActive ? accentColor : .white.opacity(0.92))
-                            .shadow(color: isActive ? accentColor.opacity(0.12) : .clear, radius: 6, x: 0, y: 0)
-                            .shadow(color: .black.opacity(0.18), radius: 1, x: 0, y: 0.5)
-                            .padding(bubblePadding)
-                            .background(alignment: .center) {
-                                if isActive {
-                                    GlassPillSurface(
-                                        shape: pillShape,
-                                        glassStyle: .regular,
-                                        tint: Color.black.opacity(0.12),
-                                        strokeWidth: 0.7,
-                                        highlightOpacity: 0.48,
-                                        showHighlight: true,
-                                        innerGlowOpacity: 0.28,
-                                        isInteractive: true,
-                                        shift: glassShift
-                                    )
-                                    .matchedGeometryEffect(id: "pillSelection", in: selectionNamespace)
-                                }
-                            }
-                            .scaleEffect(scale)
-                            .offset(y: lift)
-                            .animation(.spring(response: 0.3, dampingFraction: 0.8), value: scale)
-                            .frame(maxWidth: .infinity)
-                            .background(
-                                GeometryReader { proxy in
-                                    Color.clear.preference(
-                                        key: TabFramePreferenceKey.self,
-                                        value: [tab: proxy.frame(in: .named("pill"))]
-                                    )
-                                }
-                            )
-                        }
-                        .buttonStyle(.plain)
-                    }
-                }
-                .padding(.vertical, 5)
-                .padding(.horizontal, 6)
-            }
-        }
-        .compositingGroup()
-        .clipShape(pillShape)
-        .shadow(color: .black.opacity(0.18), radius: 14, x: 0, y: 8)
-        .shadow(color: .black.opacity(0.08), radius: 4, x: 0, y: 2)
-        .frame(height: height)
-        .coordinateSpace(name: "pill")
-        .contentShape(Capsule())
-        .simultaneousGesture(dragGesture())
-        .onPreferenceChange(TabFramePreferenceKey.self) { frames in
-            tabFrames = frames
-        }
-        .onAppear { motion.start() }
-        .onDisappear { motion.stop() }
-        .padding(.horizontal, 12)
-        .padding(.bottom, 6)
-    }
-
-    private var activeTab: BottomTab {
-        if isDragging, let hoverTab {
-            return hoverTab
-        }
-        return selectedTab
-    }
-
-    private func dragGesture() -> some Gesture {
-        DragGesture(minimumDistance: 0, coordinateSpace: .named("pill"))
-            .onChanged { value in
-                if !isDragging {
-                    withAnimation(.spring(response: 0.3, dampingFraction: 0.78)) {
-                        isDragging = true
-                    }
-                }
-                let nearest = nearestTab(to: value.location)
-                let width = selectionWidth(for: nearest ?? activeTab)
-                dragLocation = clampedLocation(value.location, selectionWidth: width)
-                hoverTab = nearest
-            }
-            .onEnded { _ in
-                if let hoverTab {
-                    withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
-                        selectedTab = hoverTab
-                    }
-                }
-                withAnimation(.spring(response: 0.35, dampingFraction: 0.82)) {
-                    isDragging = false
-                }
-                dragLocation = nil
-                hoverTab = nil
-            }
-    }
-
-    private func magnification(for tab: BottomTab) -> CGFloat {
-        1.0
-    }
-
-    private func liftOffset(for tab: BottomTab) -> CGFloat {
-        0
-    }
-
-    private func nearestTab(to location: CGPoint) -> BottomTab? {
-        guard !tabFrames.isEmpty else { return nil }
-        return tabFrames.min { lhs, rhs in
-            abs(lhs.value.midX - location.x) < abs(rhs.value.midX - location.x)
-        }?.key
-    }
-
-    private var interactionCenterX: CGFloat? {
-        if let dragLocation {
-            return dragLocation.x
-        }
-        return tabFrames[activeTab]?.midX
-    }
-
-    private func selectionWidth(for tab: BottomTab) -> CGFloat {
-        guard let frame = tabFrames[tab] else {
-            return max(60, height * 0.9)
-        }
-        return max(frame.width, height * 1.2)
-    }
-
-    private func clampedLocation(_ location: CGPoint, selectionWidth: CGFloat) -> CGPoint {
-        guard !tabFrames.isEmpty else {
-            return CGPoint(x: location.x, y: height / 2)
-        }
-        let halfWidth = selectionWidth / 2
-        let minX = tabFrames.values.map(\.minX).min() ?? location.x
-        let maxX = tabFrames.values.map(\.maxX).max() ?? location.x
-        let clampedX = min(max(location.x, minX + halfWidth), maxX - halfWidth)
-        return CGPoint(x: clampedX, y: height / 2)
-    }
-
-    private var glassShift: CGSize {
-        let tilt = motion.normalizedTilt
-        let tiltShift = CGSize(width: tilt.width * 0.1, height: tilt.height * 0.1)
-        guard let bounds = pillBounds, let dragLocation else {
-            return tiltShift
-        }
-        let normalizedX = (dragLocation.x - bounds.midX) / max(bounds.width, 1)
-        let normalizedY = (dragLocation.y - bounds.midY) / max(bounds.height, 1)
-        let dragShift = CGSize(width: normalizedX * 0.22, height: normalizedY * 0.22)
-        return CGSize(width: tiltShift.width + dragShift.width, height: tiltShift.height + dragShift.height)
-    }
-
-    private var pillBounds: CGRect? {
-        guard !tabFrames.isEmpty else { return nil }
-        let minX = tabFrames.values.map(\.minX).min() ?? 0
-        let maxX = tabFrames.values.map(\.maxX).max() ?? 0
-        let minY = tabFrames.values.map(\.minY).min() ?? 0
-        let maxY = tabFrames.values.map(\.maxY).max() ?? 0
-        return CGRect(x: minX, y: minY, width: maxX - minX, height: maxY - minY)
-    }
-}
-
-private struct TabFramePreferenceKey: PreferenceKey {
-    static let defaultValue: [BottomTab: CGRect] = [:]
-
-    static func reduce(value: inout [BottomTab: CGRect], nextValue: () -> [BottomTab: CGRect]) {
-        value.merge(nextValue(), uniquingKeysWith: { $1 })
-    }
-}
-
-private struct GlassPillSurface<S: Shape>: View {
-    let shape: S
-    let glassStyle: Glass
-    let tint: Color
-    let strokeWidth: CGFloat
-    let highlightOpacity: Double
-    let showHighlight: Bool
-    let innerGlowOpacity: Double
-    let isInteractive: Bool
-    let shift: CGSize
-
-    var body: some View {
-        let glass = isInteractive
-        ? glassStyle.tint(tint).interactive()
-        : glassStyle.tint(tint)
-
-        shape
-            .fill(.clear)
-            .glassEffect(glass, in: shape)
-            .clipShape(shape)
-            .overlay(aberrationOverlay)
-            .overlay(causticsOverlay)
-            .overlay(highlightOverlay)
-            .overlay(innerGlowOverlay)
-    }
-
-    private var aberrationOverlay: some View {
-        ZStack {
-            shape
-                .stroke(Color.cyan.opacity(0.4), lineWidth: strokeWidth)
-                .offset(x: -1.4)
-                .blur(radius: 0.3)
-                .blendMode(.screen)
-
-            shape
-                .stroke(Color.pink.opacity(0.4), lineWidth: strokeWidth)
-                .offset(x: 1.4)
-                .blur(radius: 0.3)
-                .blendMode(.screen)
-        }
-    }
-
-    private var causticsOverlay: some View {
-        ZStack {
-            RadialGradient(
-                colors: [Color.white.opacity(0.32), .clear],
-                center: UnitPoint(
-                    x: clampedUnit(0.18 + shift.width),
-                    y: clampedUnit(0.14 + shift.height)
-                ),
-                startRadius: 0,
-                endRadius: 160
-            )
-
-            RadialGradient(
-                colors: [Color.cyan.opacity(0.3), .clear],
-                center: UnitPoint(
-                    x: clampedUnit(0.82 - shift.width * 0.8),
-                    y: clampedUnit(0.86 - shift.height * 0.6)
-                ),
-                startRadius: 0,
-                endRadius: 180
-            )
-
-            RadialGradient(
-                colors: [Color.blue.opacity(0.22), .clear],
-                center: UnitPoint(
-                    x: clampedUnit(0.35 + shift.width * 0.4),
-                    y: clampedUnit(0.85 - shift.height * 0.3)
-                ),
-                startRadius: 0,
-                endRadius: 200
-            )
-        }
-        .blendMode(.screen)
-        .blur(radius: 0.4)
-        .clipShape(shape)
-    }
-
-    @ViewBuilder
-    private var highlightOverlay: some View {
-        if showHighlight {
-            shape
-                .stroke(
-                    LinearGradient(
-                        colors: [
-                            .white.opacity(highlightOpacity),
-                            .white.opacity(highlightOpacity * 0.4),
-                            .clear
-                        ],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    ),
-                    lineWidth: strokeWidth
-                )
-                .blendMode(.screen)
-        }
-    }
-
-    @ViewBuilder
-    private var innerGlowOverlay: some View {
-        if innerGlowOpacity > 0 {
-            shape
-                .stroke(.white.opacity(innerGlowOpacity), lineWidth: strokeWidth)
-                .blur(radius: 6)
-                .blendMode(.screen)
-        }
-    }
-
-    private func clampedUnit(_ value: CGFloat) -> CGFloat {
-        min(max(value, 0.0), 1.0)
-    }
-}
-
-private struct StatusPill: View {
-    let isActive: Bool
-
-    var body: some View {
-        HStack(spacing: 6) {
-            Circle()
-                .fill(isActive ? Color.green : Color.orange)
-                .frame(width: 6, height: 6)
-
-            Text(isActive ? "Active" : "Ready")
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(.white)
-                .shadow(color: .black.opacity(0.35), radius: 2, x: 0, y: 1)
-        }
-        .padding(.vertical, 6)
-        .padding(.horizontal, 12)
-        .liquidGlass(
-            .regular
-                .tint(isActive ? .green : .orange)
-                .cornerRadius(999),
-            in: Capsule()
-        )
     }
 }
