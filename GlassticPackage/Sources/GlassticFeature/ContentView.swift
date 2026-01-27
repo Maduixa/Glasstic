@@ -209,94 +209,107 @@ private struct BottomPillMenu: View {
 
     var body: some View {
         let pillShape = Capsule()
+        let selectionTint = Color(hue: 0.52, saturation: 0.35, brightness: 0.95)
 
         TimelineView(.animation(minimumInterval: 1.0 / 60.0)) { timeline in
             let time = timeline.date.timeIntervalSinceReferenceDate
 
-            ZStack {
-                // Main pill background with glass
-                pillShape
-                    .fill(.clear)
-                    .glassEffect(.regular, in: pillShape)
-                    .overlay {
-                        // Chromatic aberration on edges
-                        ChromaticEdge(intensity: isDragging ? 0.6 : 0.3)
-                            .clipShape(pillShape)
-                    }
-                    .overlay {
-                        // Refraction caustics
-                        RefractionLayer(time: time, intensity: isDragging ? 0.5 : 0.25)
-                            .clipShape(pillShape)
-                    }
-                    .overlay {
-                        // Rim highlight
-                        pillShape
-                            .stroke(
-                                AngularGradient(
-                                    colors: [
-                                        .white.opacity(0.4),
-                                        .clear,
-                                        .cyan.opacity(0.2),
-                                        .clear,
-                                        .white.opacity(0.3)
-                                    ],
-                                    center: .center
-                                ),
-                                lineWidth: 1
-                            )
-                            .blur(radius: 0.5)
-                    }
+            GlassEffectContainer(spacing: 12) {
+                ZStack {
+                    // Main pill background with clear glass (less frosting)
+                    pillShape
+                        .fill(.clear)
+                        .glassEffect(.clear, in: pillShape)
+                        .allowsHitTesting(false)
 
-                // Tab buttons inside
-                HStack(spacing: 0) {
-                    ForEach(BottomTab.allCases) { tab in
-                        Button {
-                            withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
-                                selectedTab = tab
-                            }
-                        } label: {
-                            VStack(spacing: 5) {
-                                Image(systemName: tab.iconName)
-                                    .font(.system(size: 19, weight: .semibold))
-                                    .symbolEffect(.bounce, value: selectedTab == tab)
-                                Text(tab.title)
-                                    .font(.system(size: 12.5, weight: .semibold))
-                            }
-                            .foregroundStyle(selectedTab == tab ? accentColor : .white.opacity(0.7))
-                            .shadow(color: selectedTab == tab ? accentColor.opacity(0.5) : .clear, radius: 8)
-                            .padding(.vertical, 10)
-                            .padding(.horizontal, 8)
-                            .frame(maxWidth: .infinity)
-                            .background {
-                                if selectedTab == tab {
-                                    Capsule()
-                                        .fill(.clear)
-                                        .glassEffect(.regular.tint(accentColor).interactive(), in: .capsule)
-                                        .matchedGeometryEffect(id: "selection", in: tabAnimation)
+                    // Tab buttons inside - on top of glass background
+                    HStack(spacing: 0) {
+                        ForEach(BottomTab.allCases) { tab in
+                            let isSelected = selectedTab == tab
+                            let isHovered = hoverTab == tab
+                            let magnifyScale: CGFloat = isSelected ? 1.15 : (isHovered ? 1.08 : 1.0)
+
+                            Button {
+                                withAnimation(.spring(response: 0.35, dampingFraction: 0.65)) {
+                                    selectedTab = tab
+                                }
+                            } label: {
+                                VStack(spacing: 5) {
+                                    Image(systemName: tab.iconName)
+                                        .font(.system(size: 19, weight: .semibold))
+                                        .symbolEffect(.bounce, value: isSelected)
+                                    Text(tab.title)
+                                        .font(.system(size: 12.5, weight: .semibold))
+                                }
+                                .foregroundStyle(isSelected ? .white : .white.opacity(0.65))
+                                .shadow(color: isSelected ? selectionTint.opacity(0.6) : .clear, radius: 10)
+                                .padding(.vertical, 10)
+                                .padding(.horizontal, 8)
+                                .frame(maxWidth: .infinity)
+                                .scaleEffect(magnifyScale)
+                                .animation(.spring(response: 0.3, dampingFraction: 0.6), value: magnifyScale)
+                                .background {
+                                    if isSelected {
+                                        Capsule()
+                                            .fill(.clear)
+                                            .glassEffect(.regular.tint(selectionTint).interactive(), in: .capsule)
+                                            .glassEffectID("selectedTab", in: tabAnimation)
+                                    }
                                 }
                             }
+                            .buttonStyle(.plain)
+                            .zIndex(isSelected ? 1 : 0)
+                            .background(
+                                GeometryReader { proxy in
+                                    Color.clear.preference(
+                                        key: TabFrameKey.self,
+                                        value: [tab: proxy.frame(in: .named("pill"))]
+                                    )
+                                }
+                            )
                         }
-                        .buttonStyle(.plain)
-                        .background(
-                            GeometryReader { proxy in
-                                Color.clear.preference(
-                                    key: TabFrameKey.self,
-                                    value: [tab: proxy.frame(in: .named("pill"))]
-                                )
-                            }
-                        )
                     }
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+
+                    // Prismatic edge effects - on top but non-interactive
+                    PrismaticEdge(intensity: isDragging ? 1.0 : 0.6, time: time)
+                        .clipShape(pillShape)
+                        .allowsHitTesting(false)
+
+                    // Refraction caustics overlay
+                    RefractionLayer(time: time, intensity: isDragging ? 0.5 : 0.3)
+                        .clipShape(pillShape)
+                        .allowsHitTesting(false)
+
+                    // Prismatic rim highlight
+                    pillShape
+                        .stroke(
+                            AngularGradient(
+                                colors: [
+                                    .white.opacity(0.5),
+                                    Color(hue: 0.0, saturation: 0.4, brightness: 1.0).opacity(0.3),
+                                    .clear,
+                                    Color(hue: 0.15, saturation: 0.5, brightness: 1.0).opacity(0.25),
+                                    .clear,
+                                    Color(hue: 0.55, saturation: 0.4, brightness: 1.0).opacity(0.3),
+                                    .white.opacity(0.4)
+                                ],
+                                center: .center
+                            ),
+                            lineWidth: 1.5
+                        )
+                        .blur(radius: 0.3)
+                        .allowsHitTesting(false)
                 }
-                .padding(.horizontal, 8)
-                .padding(.vertical, 4)
+                .frame(height: height)
+                .coordinateSpace(name: "pill")
+                .contentShape(pillShape)
+                .simultaneousGesture(dragGesture)
+                .onPreferenceChange(TabFrameKey.self) { tabFrames = $0 }
             }
-            .frame(height: height)
-            .coordinateSpace(name: "pill")
-            .contentShape(pillShape)
-            .simultaneousGesture(dragGesture)
-            .onPreferenceChange(TabFrameKey.self) { tabFrames = $0 }
-            .shadow(color: .black.opacity(0.25), radius: 20, x: 0, y: 10)
-            .shadow(color: accentColor.opacity(0.15), radius: 16, x: 0, y: 5)
+            .shadow(color: .black.opacity(0.2), radius: 24, x: 0, y: 12)
+            .shadow(color: selectionTint.opacity(0.12), radius: 20, x: 0, y: 6)
         }
         .padding(.horizontal, 16)
         .padding(.bottom, 8)
@@ -343,30 +356,108 @@ private struct TabFrameKey: PreferenceKey {
     }
 }
 
-// MARK: - Chromatic Edge Effect
+// MARK: - Prismatic Edge Refraction
 
-private struct ChromaticEdge: View {
+private struct PrismaticEdge: View {
     let intensity: CGFloat
+    let time: TimeInterval
 
     var body: some View {
+        let phase = time * 0.3
+
         ZStack {
+            // Red channel - outer left edge
             Capsule()
-                .stroke(Color.red.opacity(0.25 * intensity), lineWidth: 0.8)
-                .offset(x: -1.5 * intensity)
-                .blur(radius: 0.4)
-                .blendMode(.screen)
+                .stroke(
+                    LinearGradient(
+                        colors: [
+                            Color.red.opacity(0.4 * intensity),
+                            Color.red.opacity(0.15 * intensity),
+                            .clear
+                        ],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    ),
+                    lineWidth: 2.5
+                )
+                .offset(x: -2.0 * intensity + sin(phase) * 0.3)
+                .blur(radius: 1.0)
+                .blendMode(.plusLighter)
 
+            // Orange/yellow - inner left
             Capsule()
-                .stroke(Color.cyan.opacity(0.3 * intensity), lineWidth: 0.8)
-                .offset(x: 1.5 * intensity)
-                .blur(radius: 0.4)
-                .blendMode(.screen)
+                .stroke(
+                    LinearGradient(
+                        colors: [
+                            Color.orange.opacity(0.3 * intensity),
+                            .clear,
+                            Color.yellow.opacity(0.2 * intensity)
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    ),
+                    lineWidth: 1.8
+                )
+                .offset(x: -1.0 * intensity, y: 0.5 * intensity)
+                .blur(radius: 0.6)
+                .blendMode(.plusLighter)
 
+            // Cyan channel - outer right edge
             Capsule()
-                .stroke(Color.blue.opacity(0.2 * intensity), lineWidth: 0.6)
-                .offset(x: 1.0 * intensity, y: 0.5 * intensity)
-                .blur(radius: 0.3)
-                .blendMode(.screen)
+                .stroke(
+                    LinearGradient(
+                        colors: [
+                            .clear,
+                            Color.cyan.opacity(0.15 * intensity),
+                            Color.cyan.opacity(0.45 * intensity)
+                        ],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    ),
+                    lineWidth: 2.5
+                )
+                .offset(x: 2.0 * intensity - sin(phase) * 0.3)
+                .blur(radius: 1.0)
+                .blendMode(.plusLighter)
+
+            // Blue/violet - inner right
+            Capsule()
+                .stroke(
+                    LinearGradient(
+                        colors: [
+                            Color.purple.opacity(0.2 * intensity),
+                            .clear,
+                            Color.blue.opacity(0.3 * intensity)
+                        ],
+                        startPoint: .bottomLeading,
+                        endPoint: .topTrailing
+                    ),
+                    lineWidth: 1.8
+                )
+                .offset(x: 1.2 * intensity, y: -0.5 * intensity)
+                .blur(radius: 0.6)
+                .blendMode(.plusLighter)
+
+            // Top specular rainbow band
+            Capsule()
+                .stroke(
+                    AngularGradient(
+                        colors: [
+                            Color.red.opacity(0.25 * intensity),
+                            Color.orange.opacity(0.2 * intensity),
+                            Color.yellow.opacity(0.2 * intensity),
+                            Color.green.opacity(0.15 * intensity),
+                            Color.cyan.opacity(0.2 * intensity),
+                            Color.blue.opacity(0.2 * intensity),
+                            Color.purple.opacity(0.2 * intensity),
+                            Color.red.opacity(0.25 * intensity)
+                        ],
+                        center: UnitPoint(x: 0.5 + sin(phase * 0.5) * 0.1, y: 0.3)
+                    ),
+                    lineWidth: 1.2
+                )
+                .blur(radius: 0.4)
+                .blendMode(.plusLighter)
         }
     }
 }
