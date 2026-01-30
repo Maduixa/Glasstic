@@ -195,6 +195,8 @@ private enum BottomTab: String, CaseIterable, Identifiable {
     }
 }
 
+// MARK: - Selection Background (removed - using glass effect directly)
+
 // MARK: - Bottom Pill Menu
 
 private struct BottomPillMenu: View {
@@ -208,122 +210,117 @@ private struct BottomPillMenu: View {
     @State private var tabFrames: [BottomTab: CGRect] = [:]
 
     var body: some View {
-        let pillShape = Capsule()
-
-        TimelineView(.animation(minimumInterval: 1.0 / 60.0)) { timeline in
-            let time = timeline.date.timeIntervalSinceReferenceDate
-
-            ZStack {
-                // Main pill background with glass
-                pillShape
-                    .fill(.clear)
-                    .glassEffect(.regular, in: pillShape)
-                    .overlay {
-                        // Chromatic aberration on edges
-                        ChromaticEdge(intensity: isDragging ? 0.6 : 0.3)
-                            .clipShape(pillShape)
-                    }
-                    .overlay {
-                        // Refraction caustics
-                        RefractionLayer(time: time, intensity: isDragging ? 0.5 : 0.25)
-                            .clipShape(pillShape)
-                    }
-                    .overlay {
-                        // Rim highlight
-                        pillShape
-                            .stroke(
-                                AngularGradient(
-                                    colors: [
-                                        .white.opacity(0.4),
-                                        .clear,
-                                        .cyan.opacity(0.2),
-                                        .clear,
-                                        .white.opacity(0.3)
-                                    ],
-                                    center: .center
-                                ),
-                                lineWidth: 1
-                            )
-                            .blur(radius: 0.5)
-                    }
-
-                // Tab buttons inside
-                HStack(spacing: 0) {
-                    ForEach(BottomTab.allCases) { tab in
-                        Button {
-                            withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
-                                selectedTab = tab
-                            }
-                        } label: {
-                            VStack(spacing: 5) {
-                                Image(systemName: tab.iconName)
-                                    .font(.system(size: 19, weight: .semibold))
-                                    .symbolEffect(.bounce, value: selectedTab == tab)
-                                Text(tab.title)
-                                    .font(.system(size: 12.5, weight: .semibold))
-                            }
-                            .foregroundStyle(selectedTab == tab ? accentColor : .white.opacity(0.7))
-                            .shadow(color: selectedTab == tab ? accentColor.opacity(0.5) : .clear, radius: 8)
-                            .padding(.vertical, 10)
-                            .padding(.horizontal, 8)
-                            .frame(maxWidth: .infinity)
-                            .background {
-                                if selectedTab == tab {
-                                    Capsule()
-                                        .fill(.clear)
-                                        .glassEffect(.regular.tint(accentColor).interactive(), in: .capsule)
-                                        .matchedGeometryEffect(id: "selection", in: tabAnimation)
-                                }
-                            }
-                        }
-                        .buttonStyle(.plain)
-                        .background(
-                            GeometryReader { proxy in
-                                Color.clear.preference(
-                                    key: TabFrameKey.self,
-                                    value: [tab: proxy.frame(in: .named("pill"))]
-                                )
-                            }
-                        )
-                    }
-                }
-                .padding(.horizontal, 8)
-                .padding(.vertical, 4)
+        HStack(spacing: 0) {
+            ForEach(BottomTab.allCases) { tab in
+                tabButton(for: tab)
             }
-            .frame(height: height)
-            .coordinateSpace(name: "pill")
-            .contentShape(pillShape)
-            .simultaneousGesture(dragGesture)
-            .onPreferenceChange(TabFrameKey.self) { tabFrames = $0 }
-            .shadow(color: .black.opacity(0.25), radius: 20, x: 0, y: 10)
-            .shadow(color: accentColor.opacity(0.15), radius: 16, x: 0, y: 5)
         }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
+        .frame(height: height)
+        .background {
+            TransparentGlassPill(accentColor: accentColor)
+        }
+        .coordinateSpace(name: "pill")
+        .contentShape(Capsule())
+        .simultaneousGesture(dragGesture)
+        .onPreferenceChange(TabFrameKey.self) { tabFrames = $0 }
+        .shadow(color: .black.opacity(0.4), radius: 20, x: 0, y: 10)
+        .shadow(color: accentColor.opacity(0.15), radius: 30, x: 0, y: 5)
         .padding(.horizontal, 16)
         .padding(.bottom, 8)
+    }
+    
+    @ViewBuilder
+    private func tabButton(for tab: BottomTab) -> some View {
+        let isSelected = selectedTab == tab
+        let isHovered = hoverTab == tab
+        let magnifyScale: CGFloat = isSelected ? 1.08 : (isHovered ? 1.03 : 1.0)
+        
+        Button {
+            withAnimation(.bouncy(duration: 0.4)) {
+                selectedTab = tab
+            }
+        } label: {
+            VStack(spacing: 4) {
+                Image(systemName: tab.iconName)
+                    .font(.system(size: 22, weight: .semibold))
+                    .symbolEffect(.bounce, value: isSelected)
+                Text(tab.title)
+                    .font(.system(size: 10, weight: .semibold))
+            }
+            .foregroundStyle(isSelected ? accentColor : .white.opacity(0.55))
+            .shadow(color: isSelected ? accentColor.opacity(0.9) : .clear, radius: 12, x: 0, y: 0)
+            .shadow(color: isSelected ? accentColor.opacity(0.5) : .clear, radius: 4, x: 0, y: 0)
+            .padding(.vertical, 8)
+            .padding(.horizontal, 10)
+            .background {
+                if isSelected {
+                    ZStack {
+                        Capsule()
+                            .fill(accentColor.opacity(0.18))
+                            .background {
+                                Capsule()
+                                    .fill(.ultraThinMaterial)
+                                    .opacity(0.3)
+                            }
+                        
+                        Capsule()
+                            .stroke(
+                                LinearGradient(
+                                    colors: [
+                                        accentColor.opacity(0.7),
+                                        accentColor.opacity(0.3),
+                                        accentColor.opacity(0.5)
+                                    ],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                ),
+                                lineWidth: 1.5
+                            )
+                    }
+                    .clipShape(Capsule())
+                    .matchedGeometryEffect(id: "selection", in: tabAnimation)
+                }
+            }
+            .scaleEffect(magnifyScale)
+            .animation(.bouncy(duration: 0.3), value: magnifyScale)
+        }
+        .frame(maxWidth: .infinity)
+        .buttonStyle(.plain)
+        .zIndex(isSelected ? 1 : 0)
+        .background(
+            GeometryReader { proxy in
+                Color.clear.preference(
+                    key: TabFrameKey.self,
+                    value: [tab: proxy.frame(in: .named("pill"))]
+                )
+            }
+        )
     }
 
     private var dragGesture: some Gesture {
         DragGesture(minimumDistance: 0, coordinateSpace: .named("pill"))
             .onChanged { value in
                 if !isDragging {
-                    withAnimation(.spring(response: 0.25, dampingFraction: 0.7)) {
+                    withAnimation(.bouncy(duration: 0.25)) {
                         isDragging = true
                     }
                 }
                 dragLocation = value.location
                 if let nearest = nearestTab(to: value.location), hoverTab != nearest {
-                    withAnimation(.spring(response: 0.35, dampingFraction: 0.65)) {
+                    withAnimation(.bouncy(duration: 0.35)) {
                         hoverTab = nearest
                     }
                 }
             }
             .onEnded { _ in
                 if let hoverTab {
-                    withAnimation(.spring(response: 0.4, dampingFraction: 0.7)) {
+                    withAnimation(.bouncy(duration: 0.4)) {
                         selectedTab = hoverTab
                     }
                 }
-                withAnimation(.spring(response: 0.4, dampingFraction: 0.65)) {
+                withAnimation(.bouncy(duration: 0.35)) {
                     isDragging = false
                 }
                 dragLocation = nil
@@ -343,82 +340,95 @@ private struct TabFrameKey: PreferenceKey {
     }
 }
 
-// MARK: - Chromatic Edge Effect
+// MARK: - Transparent Glass Pill
 
-private struct ChromaticEdge: View {
-    let intensity: CGFloat
-
+private struct TransparentGlassPill: View {
+    let accentColor: Color
+    
     var body: some View {
         ZStack {
+            // Base: very transparent dark with blur
             Capsule()
-                .stroke(Color.red.opacity(0.25 * intensity), lineWidth: 0.8)
-                .offset(x: -1.5 * intensity)
-                .blur(radius: 0.4)
-                .blendMode(.screen)
-
+                .fill(.black.opacity(0.25))
+                .background {
+                    Capsule()
+                        .fill(.ultraThinMaterial)
+                        .opacity(0.3)
+                }
+            
+            // Top edge highlight (light refraction)
             Capsule()
-                .stroke(Color.cyan.opacity(0.3 * intensity), lineWidth: 0.8)
-                .offset(x: 1.5 * intensity)
-                .blur(radius: 0.4)
-                .blendMode(.screen)
-
+                .trim(from: 0.05, to: 0.45)
+                .stroke(
+                    LinearGradient(
+                        colors: [
+                            .clear,
+                            .white.opacity(0.4),
+                            .white.opacity(0.6),
+                            .white.opacity(0.4),
+                            .clear
+                        ],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    ),
+                    lineWidth: 1
+                )
+                .blur(radius: 0.5)
+            
+            // Bottom edge shadow (depth)
             Capsule()
-                .stroke(Color.blue.opacity(0.2 * intensity), lineWidth: 0.6)
-                .offset(x: 1.0 * intensity, y: 0.5 * intensity)
-                .blur(radius: 0.3)
-                .blendMode(.screen)
+                .trim(from: 0.55, to: 0.95)
+                .stroke(
+                    LinearGradient(
+                        colors: [
+                            .clear,
+                            .black.opacity(0.3),
+                            .black.opacity(0.4),
+                            .black.opacity(0.3),
+                            .clear
+                        ],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    ),
+                    lineWidth: 1.5
+                )
+                .offset(y: 1)
+            
+            // Inner glow
+            Capsule()
+                .strokeBorder(
+                    LinearGradient(
+                        colors: [
+                            .white.opacity(0.2),
+                            .white.opacity(0.05),
+                            .clear,
+                            .white.opacity(0.05),
+                            .white.opacity(0.15)
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    ),
+                    lineWidth: 1
+                )
+            
+            // Subtle accent glow at bottom
+            Capsule()
+                .fill(
+                    LinearGradient(
+                        colors: [.clear, accentColor.opacity(0.1), .clear],
+                        startPoint: .leading,
+                        endPoint: .trailing
+                    )
+                )
+                .frame(height: 2)
+                .offset(y: 25)
+                .blur(radius: 4)
         }
+        .clipShape(Capsule())
     }
 }
 
-// MARK: - Refraction Layer
 
-private struct RefractionLayer: View {
-    let time: TimeInterval
-    let intensity: CGFloat
-
-    var body: some View {
-        let phase = time * 0.4
-
-        ZStack {
-            // Moving caustic highlights
-            RadialGradient(
-                colors: [Color.white.opacity(0.35 * intensity), .clear],
-                center: UnitPoint(
-                    x: 0.2 + sin(phase * 0.6) * 0.1,
-                    y: 0.3 + cos(phase * 0.5) * 0.15
-                ),
-                startRadius: 0,
-                endRadius: 80
-            )
-            .blendMode(.plusLighter)
-
-            RadialGradient(
-                colors: [Color.cyan.opacity(0.25 * intensity), .clear],
-                center: UnitPoint(
-                    x: 0.8 - sin(phase * 0.5) * 0.08,
-                    y: 0.6 + cos(phase * 0.4) * 0.1
-                ),
-                startRadius: 0,
-                endRadius: 100
-            )
-            .blendMode(.plusLighter)
-
-            // Specular highlight
-            EllipticalGradient(
-                colors: [Color.white.opacity(0.4 * intensity), .clear],
-                center: UnitPoint(
-                    x: 0.25 + sin(phase * 0.3) * 0.05,
-                    y: 0.2 + cos(phase * 0.25) * 0.05
-                ),
-                startRadiusFraction: 0,
-                endRadiusFraction: 0.4
-            )
-            .blendMode(.plusLighter)
-            .blur(radius: 2)
-        }
-    }
-}
 
 // MARK: - Status Pill
 
