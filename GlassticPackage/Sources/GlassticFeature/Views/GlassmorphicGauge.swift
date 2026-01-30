@@ -7,6 +7,9 @@ public struct GlassmorphicGauge: View {
     let goal: TimeInterval
     let isActive: Bool
     let accentColor: Color
+    
+    @StateObject private var motion = MotionProvider()
+    @Environment(\.scenePhase) private var scenePhase
 
     public init(
         progress: Double,
@@ -25,161 +28,131 @@ public struct GlassmorphicGauge: View {
     }
 
     public var body: some View {
-        TimelineView(.animation(minimumInterval: 1.0 / 30.0)) { timeline in
-            let time = timeline.date.timeIntervalSinceReferenceDate
-
-            GeometryReader { proxy in
-                let size = min(proxy.size.width, proxy.size.height)
-                let ringDiameter = size * 0.94
-                let ringWidth = max(size * 0.085, 20)
-                let innerSize = size * 0.78
-
-                ZStack {
-                    // Track ring with glass highlight
-                    Circle()
-                        .stroke(
-                            Color.white.opacity(0.12),
-                            style: StrokeStyle(lineWidth: ringWidth, lineCap: .round)
-                        )
-                        .frame(width: ringDiameter, height: ringDiameter)
-
-                    // Glass highlight on track
-                    Circle()
-                        .trim(from: 0.05, to: 0.35)
-                        .stroke(
-                            LinearGradient(
-                                colors: [.white.opacity(0.3), .white.opacity(0.05)],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            ),
-                            style: StrokeStyle(lineWidth: ringWidth * 0.6, lineCap: .round)
-                        )
-                        .frame(width: ringDiameter, height: ringDiameter)
-                        .rotationEffect(.degrees(-90))
-                        .blendMode(.plusLighter)
-
-                    // Progress ring
-                    Circle()
-                        .trim(from: 0, to: clampedProgress)
-                        .stroke(
-                            progressGradient,
-                            style: StrokeStyle(lineWidth: ringWidth, lineCap: .round)
-                        )
-                        .frame(width: ringDiameter, height: ringDiameter)
-                        .rotationEffect(.degrees(-90))
-                        .shadow(color: accentColor.opacity(0.4), radius: 12, x: 0, y: 6)
-                        .animation(.easeInOut(duration: 0.45), value: clampedProgress)
-
-                    // Progress ring highlight
-                    if clampedProgress > 0.02 {
-                        Circle()
-                            .trim(from: 0, to: clampedProgress)
-                            .stroke(
-                                Color.white.opacity(0.4),
-                                style: StrokeStyle(lineWidth: ringWidth * 0.35, lineCap: .round)
-                            )
-                            .frame(width: ringDiameter, height: ringDiameter)
-                            .rotationEffect(.degrees(-90))
-                            .blendMode(.plusLighter)
-                    }
-
-                    // Knob at progress end
-                    if clampedProgress > 0 {
-                        knobView(ringDiameter: ringDiameter, ringWidth: ringWidth, size: size)
-                    }
-
-                    // Center content with glass effect and refraction
-                    centerContent(innerSize: innerSize, containerSize: size, time: time)
+        GeometryReader { proxy in
+            let size = min(proxy.size.width, proxy.size.height)
+            let ringDiameter = size * 0.92
+            let ringWidth = max(size * 0.075, 18)
+            let innerSize = size * 0.72
+            
+            ZStack {
+                // Glass ring track with parallax highlight
+                GlassRingTrack(
+                    diameter: ringDiameter,
+                    lineWidth: ringWidth,
+                    tilt: motion.normalizedTilt
+                )
+                
+                // Prismatic edge on ring
+                PrismaticEdge(
+                    diameter: ringDiameter + ringWidth,
+                    lineWidth: 1.5,
+                    intensity: 0.08
+                )
+                
+                // Inner prismatic edge
+                PrismaticEdge(
+                    diameter: ringDiameter - ringWidth,
+                    lineWidth: 1,
+                    intensity: 0.06
+                )
+                
+                // Glowing progress ring
+                GlowingProgressRing(
+                    progress: clampedProgress,
+                    diameter: ringDiameter,
+                    lineWidth: ringWidth,
+                    accentColor: accentColor
+                )
+                
+                // Knob at progress end
+                if clampedProgress > 0.01 {
+                    progressKnob(
+                        ringDiameter: ringDiameter,
+                        ringWidth: ringWidth,
+                        containerSize: size
+                    )
                 }
-                .frame(width: size, height: size)
+                
+                // Glass center disc with caustics and content
+                GlassCenterDisc(
+                    size: innerSize,
+                    accentColor: accentColor,
+                    tilt: motion.normalizedTilt
+                ) {
+                    centerContent(containerSize: size)
+                }
             }
+            .frame(width: size, height: size)
         }
         .aspectRatio(1, contentMode: .fit)
         .frame(maxWidth: 360)
-    }
-
-    private func knobView(ringDiameter: CGFloat, ringWidth: CGFloat, size: CGFloat) -> some View {
-        let angle = clampedProgress * 360 - 90
-        let radius = ringDiameter / 2
-        let capPoint = CGPoint(
-            x: size / 2 + CGFloat(cos(angle * .pi / 180)) * radius,
-            y: size / 2 + CGFloat(sin(angle * .pi / 180)) * radius
-        )
-
-        return Text(zoneEmoji)
-            .font(.system(size: ringWidth * 0.7))
-            .frame(width: ringWidth * 1.3, height: ringWidth * 1.3)
-            .background(.white, in: .circle)
-            .overlay(Circle().stroke(accentColor.opacity(0.4), lineWidth: 2))
-            .shadow(color: accentColor.opacity(0.3), radius: 4, x: 0, y: 2)
-            .position(capPoint)
-    }
-
-    private func centerContent(innerSize: CGFloat, containerSize: CGFloat, time: TimeInterval) -> some View {
-        let phase = time * 0.3
-
-        return ZStack {
-            // Glass base
-            Circle()
-                .fill(.clear)
-                .frame(width: innerSize, height: innerSize)
-                .glassEffect(.regular, in: .circle)
-
-            // Refraction caustics inside
-            ZStack {
-                RadialGradient(
-                    colors: [Color.white.opacity(0.35), .clear],
-                    center: UnitPoint(
-                        x: 0.25 + sin(phase * 0.5) * 0.08,
-                        y: 0.2 + cos(phase * 0.4) * 0.06
-                    ),
-                    startRadius: 0,
-                    endRadius: innerSize * 0.4
-                )
-
-                RadialGradient(
-                    colors: [accentColor.opacity(0.2), .clear],
-                    center: UnitPoint(
-                        x: 0.75 - sin(phase * 0.4) * 0.06,
-                        y: 0.7 + cos(phase * 0.35) * 0.05
-                    ),
-                    startRadius: 0,
-                    endRadius: innerSize * 0.35
-                )
-            }
-            .frame(width: innerSize, height: innerSize)
-            .clipShape(Circle())
-            .blendMode(.plusLighter)
-
-            // Content
-            VStack(spacing: 10) {
-                Text("Elapsed (\(progressPercent)%)")
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(.secondary)
-
-                Text(timeString(from: elapsedSeconds))
-                    .font(.system(size: containerSize * 0.16, weight: .semibold, design: .rounded))
-                    .foregroundStyle(accentColor)
-                    .monospacedDigit()
-                    .contentTransition(.numericText())
-                    .animation(.smooth(duration: 0.4), value: elapsedSeconds)
-                    .shadow(color: accentColor.opacity(0.3), radius: 8)
-
-                StatusPill(title: statusLabel, tint: accentColor)
+        .onAppear { motion.start() }
+        .onDisappear { motion.stop() }
+        .onChange(of: scenePhase) { _, phase in
+            switch phase {
+            case .active: motion.start()
+            case .inactive, .background: motion.stop()
+            @unknown default: motion.stop()
             }
         }
     }
-
-    private var progressGradient: AngularGradient {
-        AngularGradient(
-            colors: [
-                accentColor.opacity(0.6),
-                accentColor,
-                accentColor.opacity(0.8)
-            ],
-            center: .center
+    
+    // MARK: - Progress Knob
+    
+    private func progressKnob(ringDiameter: CGFloat, ringWidth: CGFloat, containerSize: CGFloat) -> some View {
+        let angle = clampedProgress * 360 - 90
+        let radius = ringDiameter / 2
+        let position = CGPoint(
+            x: containerSize / 2 + cos(angle * .pi / 180) * radius,
+            y: containerSize / 2 + sin(angle * .pi / 180) * radius
         )
+        
+        return ZStack {
+            // Glow behind knob
+            Circle()
+                .fill(accentColor.opacity(0.5))
+                .frame(width: ringWidth * 1.8, height: ringWidth * 1.8)
+                .blur(radius: 8)
+            
+            // Knob with emoji
+            Text(zoneEmoji)
+                .font(.system(size: ringWidth * 0.65))
+                .frame(width: ringWidth * 1.25, height: ringWidth * 1.25)
+                .background {
+                    Circle()
+                        .fill(.white)
+                        .shadow(color: .black.opacity(0.2), radius: 4, y: 2)
+                }
+                .overlay {
+                    Circle()
+                        .stroke(accentColor.opacity(0.5), lineWidth: 2)
+                }
+        }
+        .position(position)
     }
+    
+    // MARK: - Center Content
+    
+    private func centerContent(containerSize: CGFloat) -> some View {
+        VStack(spacing: 8) {
+            Text("Elapsed (\(progressPercent)%)")
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(.secondary)
+
+            Text(timeString(from: elapsedSeconds))
+                .font(.system(size: containerSize * 0.14, weight: .bold, design: .rounded))
+                .foregroundStyle(accentColor)
+                .monospacedDigit()
+                .contentTransition(.numericText())
+                .animation(.smooth(duration: 0.4), value: elapsedSeconds)
+                .shadow(color: accentColor.opacity(0.4), radius: 10)
+                .shadow(color: accentColor.opacity(0.2), radius: 4)
+
+            StatusPill(title: statusLabel, tint: accentColor)
+        }
+    }
+    
+    // MARK: - Computed Properties
 
     private var clampedProgress: Double {
         min(max(progress, 0), 1)
@@ -240,6 +213,8 @@ public struct GlassmorphicGauge: View {
         }
     }
 }
+
+// MARK: - Status Pill
 
 private struct StatusPill: View {
     let title: String
