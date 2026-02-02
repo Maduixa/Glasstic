@@ -23,11 +23,12 @@ Config/                # xcconfigs and entitlements
 ## Current UI
 - Glassy progress ring showing elapsed time vs target (target is adjustable in Settings)
 - Zone-aware knob uses the fasting emoji and the counter uses smooth numeric transitions
-- CTA below the gauge (cyan for start, muted red for end) aligned above the glass pill nav
-- Bottom glass pill navigation with four tabs (Session, Insights, Rhythm, Settings) plus a drag-to-focus magnifying effect
+- CTA below the gauge (cyan for start, muted red for end) aligned above the refractive glass pill nav
+- Bottom glass pill navigation with four tabs (Session, Insights, Rhythm, Settings) plus a drag-to-focus magnifying effect and shader-augmented refraction
 
 ## Notes for contributors
 - Keep feature work in `GlassticPackage/Sources/GlassticFeature/`
 - Package manifest is `// swift-tools-version: 6.2` with `.iOS(.v26)`
 - If you add assets, prefer SPM resources under the package
 - Follow the Liquid Glass theme (cyan accent on a dark glass background) unless intentionally changing the palette
+- Refractive glass helpers live in `GlassticPackage/Sources/GlassticFeature/Utilities/RefractiveGlass.swift` and the Metal shader in `GlassticPackage/Sources/GlassticFeature/Shaders/LiquidGlass.metal`
