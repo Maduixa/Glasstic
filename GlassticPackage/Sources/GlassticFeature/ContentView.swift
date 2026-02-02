@@ -223,7 +223,6 @@ private struct BottomPillMenu: View {
     @Binding var selectedTab: BottomTab
     let accentColor: Color
     let height: CGFloat
-    @Namespace private var tabAnimation
     @State private var hoverTab: BottomTab?
     @State private var dragLocation: CGPoint?
     @State private var isDragging = false
@@ -291,11 +290,9 @@ private struct BottomPillMenu: View {
         if isSelected {
             base
                 .refractiveGlass(tint: accentColor, interactive: true, in: .capsule)
-                .glassEffectID(tab.id, in: tabAnimation)
         } else {
             base
                 .glassEffect(.identity, in: .capsule)
-                .glassEffectID(tab.id, in: tabAnimation)
         }
     }
 

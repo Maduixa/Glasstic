@@ -21,6 +21,7 @@ private struct RefractiveGlassModifier<S: Shape>: ViewModifier {
         } else {
             base.layerEffect(
                 Shader(
+                    // References `liquidGlassAdvanced` in Shaders/LiquidGlass.metal.
                     function: ShaderLibrary.liquidGlassAdvanced,
                     arguments: shaderArguments()
                 ),
