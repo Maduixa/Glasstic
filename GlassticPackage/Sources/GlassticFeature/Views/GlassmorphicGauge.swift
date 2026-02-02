@@ -121,9 +121,21 @@ public struct GlassmorphicGauge: View {
         return ZStack {
             // Glass base
             Circle()
-                .fill(.clear)
+                .fill(
+                    LinearGradient(
+                        colors: [
+                            Color.white.opacity(0.08),
+                            Color.white.opacity(0.02)
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    )
+                )
                 .frame(width: innerSize, height: innerSize)
-                .glassEffect(.regular, in: .circle)
+                .overlay(
+                    Circle()
+                        .stroke(Color.white.opacity(0.15), lineWidth: 1)
+                )
 
             // Refraction caustics inside
             ZStack {
@@ -257,6 +269,13 @@ private struct StatusPill: View {
         }
         .padding(.vertical, 6)
         .padding(.horizontal, 12)
-        .glassEffect(.regular.tint(tint), in: .capsule)
+        .background(
+            Capsule(style: .continuous)
+                .fill(tint.opacity(0.18))
+        )
+        .overlay(
+            Capsule(style: .continuous)
+                .stroke(tint.opacity(0.45), lineWidth: 1)
+        )
     }
 }
