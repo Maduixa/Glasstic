@@ -13,12 +13,11 @@ private struct RefractiveGlassModifier<S: Shape>: ViewModifier {
     let maxSampleOffset: CGSize
 
     func body(content: Content) -> some View {
-        let glass = configuredGlass()
-        let base = content.glassEffect(glass, in: shape)
-
         if reduceTransparency {
-            base
+            content.glassEffect(.identity, in: shape)
         } else {
+            let glass = configuredGlass()
+            let base = content.glassEffect(glass, in: shape)
             base.layerEffect(
                 Shader(
                     // References `liquidGlassAdvanced` in Shaders/LiquidGlass.metal.
