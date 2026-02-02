@@ -43,3 +43,11 @@ On watchOS:
 - Avoid glass as a full-screen background (performance + legibility risk).
 - Group adjacent glass with `GlassEffectContainer`.
 - Avoid stacking multiple translucent layers.
+
+## Refractive shader augmentation (iOS 26+)
+For high-fidelity refraction, this project augments `glassEffect` with a lightweight Metal shader.
+Use the `refractiveGlass(...)` modifier in `GlassticPackage/Sources/GlassticFeature/Utilities/RefractiveGlass.swift`, which applies:
+- `glassEffect(.regular)` with optional tint and `.interactive()`
+- `layerEffect` using the shader in `GlassticPackage/Sources/GlassticFeature/Shaders/LiquidGlass.metal`
+
+When Reduce Transparency is enabled, the shader is automatically disabled.

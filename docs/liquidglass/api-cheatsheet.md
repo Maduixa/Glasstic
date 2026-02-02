@@ -23,6 +23,9 @@
 
 // Combined
 .glassEffect(.regular.tint(.blue).interactive())
+
+// Shader-augmented glass (project helper)
+.refractiveGlass(tint: .cyan, interactive: true, in: .capsule)
 ```
 
 ## Glass Variants
@@ -83,3 +86,4 @@ if #available(iOS 26.0, *) {
 - Group adjacent glass in `GlassEffectContainer`
 - Reserve tinting for primary actions
 - Never stack glass on glass
+- Prefer `.refractiveGlass(...)` for primary controls to add refraction
