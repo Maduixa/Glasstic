@@ -223,41 +223,195 @@ private struct BottomPillMenu: View {
     @Binding var selectedTab: BottomTab
     let accentColor: Color
     let height: CGFloat
+    
     @State private var hoverTab: BottomTab?
     @State private var dragLocation: CGPoint?
     @State private var isDragging = false
     @State private var tabFrames: [BottomTab: CGRect] = [:]
+    @State private var containerFrame: CGRect = .zero
+    @State private var selectionOffset: CGFloat = 0
+    @State private var targetSelectionOffset: CGFloat = 0
+    @State private var selectionVelocity: CGFloat = 0
+    @State private var wobblePhase: CGFloat = 0
+    @State private var wobbleAmplitude: CGFloat = 0
+    @State private var time: CGFloat = 0
+    @State private var pressedTab: BottomTab?
+    @State private var blobScales: [BottomTab: CGFloat] = [:]
 
     var body: some View {
-        GlassEffectContainer(spacing: 40) {
-            HStack(spacing: 0) {
-                ForEach(BottomTab.allCases) { tab in
-                    tabButton(for: tab)
+        TimelineView(.animation(minimumInterval: 1.0 / 60.0)) { timeline in
+            let _ = updateAnimation(timeline.date)
+            
+            GlassEffectContainer(spacing: 40) {
+                ZStack {
+                    selectionBlobLayer
+                    
+                    HStack(spacing: 0) {
+                        ForEach(BottomTab.allCases) { tab in
+                            tabButton(for: tab)
+                        }
+                    }
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
                 }
+                .frame(height: height)
+                .background {
+                    pillBackground
+                }
+                .background(
+                    GeometryReader { proxy in
+                        Color.clear.preference(
+                            key: ContainerFrameKey.self,
+                            value: proxy.frame(in: .named("pill"))
+                        )
+                    }
+                )
             }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 8)
-            .frame(height: height)
+            .coordinateSpace(name: "pill")
+            .contentShape(Capsule())
+            .simultaneousGesture(dragGesture)
+            .onPreferenceChange(TabFrameKey.self) { frames in
+                tabFrames = frames
+                updateSelectionTarget()
+            }
+            .onPreferenceChange(ContainerFrameKey.self) { frame in
+                containerFrame = frame
+                updateSelectionTarget()
+            }
+            .shadow(color: .black.opacity(0.5), radius: 24, x: 0, y: 12)
+            .shadow(color: accentColor.opacity(0.2), radius: 40, x: 0, y: 8)
+            .padding(.horizontal, 16)
+            .padding(.bottom, 8)
         }
-        .coordinateSpace(name: "pill")
-        .contentShape(Capsule())
-        .simultaneousGesture(dragGesture)
-        .onPreferenceChange(TabFrameKey.self) { tabFrames = $0 }
-        .shadow(color: .black.opacity(0.4), radius: 20, x: 0, y: 10)
-        .shadow(color: accentColor.opacity(0.15), radius: 30, x: 0, y: 5)
-        .padding(.horizontal, 16)
-        .padding(.bottom, 8)
+    }
+    
+    private func updateAnimation(_ date: Date) {
+        let dt: CGFloat = 1.0 / 60.0
+        time = CGFloat(date.timeIntervalSinceReferenceDate)
+        
+        wobblePhase += 8.0 * dt
+        if wobblePhase > .pi * 2 { wobblePhase -= .pi * 2 }
+        
+        wobbleAmplitude *= 0.92
+        if wobbleAmplitude < 0.001 { wobbleAmplitude = 0 }
+        
+        let displacement = selectionOffset - targetSelectionOffset
+        let springForce = -220.0 * displacement
+        let dampingForce = -0.7 * 220.0 * 2 * selectionVelocity
+        let acceleration = springForce + dampingForce
+        
+        selectionVelocity += acceleration * dt
+        selectionOffset += selectionVelocity * dt
+        
+        if abs(selectionVelocity) < 0.1 && abs(displacement) < 0.5 {
+            selectionOffset = targetSelectionOffset
+            selectionVelocity = 0
+        }
+    }
+    
+    private func updateSelectionTarget() {
+        guard let frame = tabFrames[selectedTab] else { return }
+        let newTarget = frame.midX
+        if abs(targetSelectionOffset - newTarget) > 1 {
+            wobbleAmplitude = min(wobbleAmplitude + 0.03, 0.06)
+        }
+        targetSelectionOffset = newTarget
+    }
+    
+    @ViewBuilder
+    private var selectionBlobLayer: some View {
+        if let frame = tabFrames[selectedTab] {
+            let stretchFactor = 1.0 + min(abs(selectionVelocity) * 0.0008, 0.15)
+            let wobbleX = sin(wobblePhase) * wobbleAmplitude * 8
+            let wobbleScaleX = 1.0 + cos(wobblePhase * 1.3) * wobbleAmplitude * 0.3
+            let wobbleScaleY = 1.0 + sin(wobblePhase * 0.9) * wobbleAmplitude * 0.2
+            
+            Capsule(style: .continuous)
+                .fill(
+                    RadialGradient(
+                        colors: [
+                            accentColor.opacity(0.4),
+                            accentColor.opacity(0.15),
+                            Color.clear
+                        ],
+                        center: .center,
+                        startRadius: 0,
+                        endRadius: frame.width * 0.7
+                    )
+                )
+                .overlay(
+                    Capsule(style: .continuous)
+                        .stroke(
+                            LinearGradient(
+                                colors: [
+                                    Color.white.opacity(0.4),
+                                    Color.white.opacity(0.1),
+                                    accentColor.opacity(0.3)
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 1.5
+                        )
+                )
+                .frame(width: frame.width * stretchFactor * wobbleScaleX, height: frame.height * wobbleScaleY)
+                .position(x: selectionOffset + wobbleX, y: containerFrame.midY)
+                .blur(radius: 1)
+                .blendMode(.plusLighter)
+        }
+    }
+    
+    private var pillBackground: some View {
+        ZStack {
+            AnimatedCausticBackdrop(time: time, accentColor: accentColor)
+                .clipShape(Capsule(style: .continuous))
+            
+            Capsule(style: .continuous)
+                .fill(Color.white.opacity(0.03))
+                .clearLiquidGlass(
+                    cornerRadius: 0.15,
+                    refraction: 0.28,
+                    chromaticSpread: 0.07,
+                    edgeHighlight: 0.6,
+                    causticIntensity: 0.4,
+                    wobbleAmount: 0.015 + wobbleAmplitude * 0.6,
+                    wobbleFreq: 5.0,
+                    time: time,
+                    maxSampleOffset: CGSize(width: 120, height: 120)
+                )
+                .overlay(
+                    Capsule(style: .continuous)
+                        .stroke(
+                            LinearGradient(
+                                colors: [
+                                    Color.white.opacity(0.5),
+                                    Color.white.opacity(0.1),
+                                    Color.white.opacity(0.3)
+                                ],
+                                startPoint: .topLeading,
+                                endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 1.5
+                        )
+                )
+        }
     }
     
     @ViewBuilder
     private func tabButton(for tab: BottomTab) -> some View {
         let isSelected = selectedTab == tab
         let isHovered = hoverTab == tab
-        let magnifyScale: CGFloat = isSelected ? 1.08 : (isHovered ? 1.03 : 1.0)
+        let isPressed = pressedTab == tab
+        let blobScale = blobScales[tab] ?? 1.0
+        
+        let baseScale: CGFloat = isSelected ? 1.1 : (isHovered ? 1.05 : 1.0)
+        let pressScale: CGFloat = isPressed ? 0.92 : 1.0
+        let finalScale = baseScale * pressScale * blobScale
 
-        let base = Button {
+        Button {
             withAnimation(.bouncy(duration: 0.4)) {
                 selectedTab = tab
+                wobbleAmplitude = 0.05
             }
         } label: {
             VStack(spacing: 4) {
@@ -267,13 +421,13 @@ private struct BottomPillMenu: View {
                 Text(tab.title)
                     .font(.system(size: 10, weight: .semibold))
             }
-            .foregroundStyle(isSelected ? Color.white : .white.opacity(0.6))
-            .shadow(color: isSelected ? accentColor.opacity(0.9) : .clear, radius: 12, x: 0, y: 0)
-            .shadow(color: isSelected ? accentColor.opacity(0.5) : .clear, radius: 4, x: 0, y: 0)
+            .foregroundStyle(isSelected ? Color.white : .white.opacity(0.55))
+            .shadow(color: isSelected ? accentColor : .clear, radius: 16, x: 0, y: 0)
+            .shadow(color: isSelected ? accentColor.opacity(0.6) : .clear, radius: 6, x: 0, y: 0)
             .padding(.vertical, 8)
             .padding(.horizontal, 10)
-            .scaleEffect(magnifyScale)
-            .animation(.bouncy(duration: 0.3), value: magnifyScale)
+            .scaleEffect(finalScale)
+            .animation(.bouncy(duration: 0.25), value: finalScale)
         }
         .frame(maxWidth: .infinity)
         .buttonStyle(.plain)
@@ -286,13 +440,27 @@ private struct BottomPillMenu: View {
                 )
             }
         )
+        .simultaneousGesture(
+            DragGesture(minimumDistance: 0)
+                .onChanged { _ in
+                    if pressedTab != tab {
+                        pressedTab = tab
+                        withAnimation(.bouncy(duration: 0.15)) {
+                            blobScales[tab] = 0.95
+                        }
+                    }
+                }
+                .onEnded { _ in
+                    pressedTab = nil
+                    withAnimation(.bouncy(duration: 0.4)) {
+                        blobScales[tab] = 1.0
+                    }
+                    wobbleAmplitude = min(wobbleAmplitude + 0.02, 0.06)
+                }
+        )
 
         if isSelected {
-            base
-                .refractiveGlass(tint: accentColor, interactive: true, in: .capsule)
-        } else {
-            base
-                .glassEffect(.identity, in: .capsule)
+            EmptyView()
         }
     }
 
@@ -300,13 +468,14 @@ private struct BottomPillMenu: View {
         DragGesture(minimumDistance: 0, coordinateSpace: .named("pill"))
             .onChanged { value in
                 if !isDragging {
-                    withAnimation(.bouncy(duration: 0.25)) {
+                    withAnimation(.bouncy(duration: 0.2)) {
                         isDragging = true
                     }
+                    wobbleAmplitude = 0.03
                 }
                 dragLocation = value.location
                 if let nearest = nearestTab(to: value.location), hoverTab != nearest {
-                    withAnimation(.bouncy(duration: 0.35)) {
+                    withAnimation(.bouncy(duration: 0.3)) {
                         hoverTab = nearest
                     }
                 }
@@ -316,8 +485,9 @@ private struct BottomPillMenu: View {
                     withAnimation(.bouncy(duration: 0.4)) {
                         selectedTab = hoverTab
                     }
+                    wobbleAmplitude = 0.05
                 }
-                withAnimation(.bouncy(duration: 0.35)) {
+                withAnimation(.bouncy(duration: 0.3)) {
                     isDragging = false
                 }
                 dragLocation = nil
@@ -330,10 +500,160 @@ private struct BottomPillMenu: View {
     }
 }
 
+private struct ContainerFrameKey: PreferenceKey {
+    static let defaultValue: CGRect = .zero
+    static func reduce(value: inout CGRect, nextValue: () -> CGRect) {
+        value = nextValue()
+    }
+}
+
 private struct TabFrameKey: PreferenceKey {
     static let defaultValue: [BottomTab: CGRect] = [:]
     static func reduce(value: inout [BottomTab: CGRect], nextValue: () -> [BottomTab: CGRect]) {
         value.merge(nextValue(), uniquingKeysWith: { $1 })
+    }
+}
+
+private struct AnimatedCausticBackdrop: View {
+    let time: CGFloat
+    let accentColor: Color
+    
+    var body: some View {
+        let slow = time * 0.08
+        let mid = time * 0.12
+        let fast = time * 0.18
+        
+        Canvas { context, size in
+            let w = size.width
+            let h = size.height
+            
+            let caustic1Center = CGPoint(
+                x: w * (0.2 + 0.15 * sin(slow)),
+                y: h * (0.3 + 0.2 * cos(slow * 1.1))
+            )
+            let caustic2Center = CGPoint(
+                x: w * (0.75 + 0.12 * cos(mid)),
+                y: h * (0.6 + 0.15 * sin(mid * 0.9))
+            )
+            let caustic3Center = CGPoint(
+                x: w * (0.5 + 0.1 * sin(fast)),
+                y: h * (0.5 + 0.1 * cos(fast * 1.2))
+            )
+            
+            context.drawLayer { ctx in
+                let gradient1 = Gradient(colors: [
+                    Color.white.opacity(0.25),
+                    Color.white.opacity(0.08),
+                    Color.clear
+                ])
+                ctx.fill(
+                    Path(ellipseIn: CGRect(
+                        x: caustic1Center.x - 80,
+                        y: caustic1Center.y - 40,
+                        width: 160,
+                        height: 80
+                    )),
+                    with: .radialGradient(
+                        gradient1,
+                        center: caustic1Center,
+                        startRadius: 0,
+                        endRadius: 90
+                    )
+                )
+            }
+            
+            context.drawLayer { ctx in
+                let gradient2 = Gradient(colors: [
+                    accentColor.opacity(0.3),
+                    accentColor.opacity(0.1),
+                    Color.clear
+                ])
+                ctx.fill(
+                    Path(ellipseIn: CGRect(
+                        x: caustic2Center.x - 70,
+                        y: caustic2Center.y - 35,
+                        width: 140,
+                        height: 70
+                    )),
+                    with: .radialGradient(
+                        gradient2,
+                        center: caustic2Center,
+                        startRadius: 0,
+                        endRadius: 80
+                    )
+                )
+            }
+            
+            context.drawLayer { ctx in
+                let gradient3 = Gradient(colors: [
+                    Color.white.opacity(0.15),
+                    Color.clear
+                ])
+                ctx.fill(
+                    Path(ellipseIn: CGRect(
+                        x: caustic3Center.x - 50,
+                        y: caustic3Center.y - 25,
+                        width: 100,
+                        height: 50
+                    )),
+                    with: .radialGradient(
+                        gradient3,
+                        center: caustic3Center,
+                        startRadius: 0,
+                        endRadius: 60
+                    )
+                )
+            }
+            
+            for i in 0..<5 {
+                let phase = time * 0.15 + Double(i) * 0.7
+                let sparkleX = w * (0.1 + 0.8 * (Double(i) / 5.0) + 0.05 * sin(phase))
+                let sparkleY = h * (0.3 + 0.4 * cos(phase * 0.8 + Double(i)))
+                let sparkleAlpha = 0.3 + 0.4 * (0.5 + 0.5 * sin(phase * 2))
+                
+                context.drawLayer { ctx in
+                    ctx.fill(
+                        Path(ellipseIn: CGRect(x: sparkleX - 3, y: sparkleY - 3, width: 6, height: 6)),
+                        with: .color(Color.white.opacity(sparkleAlpha))
+                    )
+                }
+            }
+        }
+        .blendMode(.plusLighter)
+    }
+}
+
+// Subtle moving caustics so refraction reads against a flat background.
+private struct CausticPillBackdrop: View {
+    var body: some View {
+        TimelineView(.animation(minimumInterval: 1.0 / 30.0)) { timeline in
+            let t = timeline.date.timeIntervalSinceReferenceDate
+            let slow = t * 0.12
+            let mid = t * 0.18
+
+            ZStack {
+                RadialGradient(
+                    colors: [
+                        Color.white.opacity(0.18),
+                        Color.clear
+                    ],
+                    center: UnitPoint(x: 0.2 + 0.12 * sin(slow), y: 0.3 + 0.1 * cos(slow)),
+                    startRadius: 0,
+                    endRadius: 140
+                )
+                RadialGradient(
+                    colors: [
+                        Color.cyan.opacity(0.2),
+                        Color.clear
+                    ],
+                    center: UnitPoint(x: 0.8 + 0.1 * cos(mid), y: 0.7 + 0.08 * sin(mid)),
+                    startRadius: 0,
+                    endRadius: 120
+                )
+            }
+            .blendMode(.plusLighter)
+            .opacity(0.5)
+        }
     }
 }
 
@@ -473,4 +793,8 @@ private final class MotionProvider: ObservableObject {
     private func clamp(_ value: Double) -> CGFloat {
         CGFloat(min(max(value, -1.0), 1.0))
     }
+}
+#Preview("ContentView") {
+    ContentView()
+        .environment(FastingStore())
 }
