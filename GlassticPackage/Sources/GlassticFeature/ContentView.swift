@@ -95,9 +95,8 @@ public struct ContentView: View {
             .frame(minWidth: 190)
         }
         .buttonStyle(.plain)
-        .refractiveGlass(
-            tint: actionColor,
-            interactive: true,
+        .glassEffect(
+            .regular.tint(actionColor).interactive(),
             in: .rect(cornerRadius: 22)
         )
         .padding(.top, 8)
