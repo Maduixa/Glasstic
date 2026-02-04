@@ -26,6 +26,18 @@ struct AppTheme: Identifiable, Codable, Hashable {
         Color(hexString: accentHex) ?? .white
     }
 
+    static var defaultTheme: AppTheme {
+        AppTheme(
+            name: "Cool Blue",
+            gradientColors: [
+                Color(hex: 0x060B26),
+                Color(hex: 0x1B2C68),
+                Color(hex: 0x4F7BFB)
+            ],
+            accent: Color(hex: 0x8BD3FF)
+        )
+    }
+    
     static var allThemes: [AppTheme] {
         [
             AppTheme(
