@@ -89,9 +89,25 @@ struct HomeView: View {
         VStack(alignment: .leading, spacing: 18) {
             HStack {
                 VStack(alignment: .leading, spacing: 6) {
-                    Text(store.activeSession == nil ? "Ready to fast" : "Time elapsed")
-                        .font(.caption.smallCaps())
-                        .foregroundStyle(.secondary)
+                    HStack(spacing: 6) {
+                        Text(store.activeSession == nil ? "Ready to fast" : "Time elapsed")
+                            .font(.caption.smallCaps())
+                            .foregroundStyle(.secondary)
+
+                        if store.activeSession != nil {
+                            Button {
+                                if let session = store.activeSession {
+                                    editingSession = SessionEditorContext(session: session, isNew: false)
+                                }
+                            } label: {
+                                Image(systemName: "pencil.circle.fill")
+                                    .font(.caption)
+                                    .foregroundStyle(store.selectedTheme.accent)
+                            }
+                            .buttonStyle(.plain)
+                            .accessibilityLabel("Edit fast start time")
+                        }
+                    }
 
                     Text(store.activeSession == nil ? "--:--" : elapsedText)
                         .font(.system(size: 48, weight: .semibold, design: .rounded))

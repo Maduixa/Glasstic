@@ -470,49 +470,48 @@ float metaballSDF(float2 p, float2 center, float radius) {
     float2 localPos = position - bounds.xy;
     float2 uv = localPos / size;
     float2 centeredUV = uv - 0.5;
-    
-    float2 absUV = abs(centeredUV);
-    float aspect = size.x / size.y;
-    
-    float pillHalfWidth = 0.5 - cornerRadius / aspect;
-    float pillHalfHeight = 0.5 - cornerRadius;
-    
-    float2 q = absUV - float2(pillHalfWidth, pillHalfHeight);
-    q = max(q, 0.0);
-    float distToEdge = length(q) - cornerRadius;
-    
-    // Soft falloff zone - no hard cutoff to avoid edge artifacts
-    float normalizedDist = saturate(1.0 - distToEdge / 0.15);
-    
-    // Blend factor for smooth edge transition (avoids hard artifact boundary)
-    float edgeBlend = smoothstep(0.05, -0.02, distToEdge);
-    
-    // Early out only for pixels clearly outside with margin for chromatic sampling
-    if (distToEdge > 0.08) {
+
+    // Correct signed distance for a rounded-rect in normalized [-0.5, 0.5] space.
+    // This keeps edge math stable and prevents "all-edge" artifacts across the pill.
+    float r = clamp(cornerRadius, 0.01, 0.5);
+    float2 halfSize = float2(0.5, 0.5);
+    float2 q = abs(centeredUV) - (halfSize - r);
+    float distToEdge = length(max(q, 0.0)) + min(max(q.x, q.y), 0.0) - r;
+
+    // 0 at center, 1 at boundary/outside.
+    float normalizedDist = smoothstep(-0.5, 0.0, distToEdge);
+
+    // Blend factor for smooth transition across the shape boundary.
+    float edgeBlend = smoothstep(0.03, -0.02, distToEdge);
+
+    // Early out for pixels safely outside the influence radius.
+    if (distToEdge > 0.06) {
         return layer.sample(position);
     }
     
     float wobble1 = sin(uv.x * wobbleFreq * 2.0 + time * 3.0) * wobbleAmount;
     float wobble2 = cos(uv.y * wobbleFreq * 2.5 + time * 2.5) * wobbleAmount;
     float wobble3 = sin((uv.x + uv.y) * wobbleFreq * 1.5 + time * 2.0) * wobbleAmount * 0.5;
-    float2 wobbleOffset = float2(wobble1 + wobble3, wobble2 + wobble3) * normalizedDist;
+    float2 wobbleOffset = float2(wobble1 + wobble3, wobble2 + wobble3) * (1.0 - normalizedDist);
     
     float2 deformedPos = position + wobbleOffset * size;
     
     // edgeFactor: 0 at center, 1 at edges - mimics real glass light bending at boundaries
-    float edgeFactor = smoothstep(0.4, 0.95, normalizedDist);
+    float edgeFactor = smoothstep(0.35, 0.95, normalizedDist);
     
     float2 normal = normalize(centeredUV + 0.0001);
     
-    float bendStrength = refraction * edgeFactor * (1.0 + 0.15 * sin(time * 2.0));
+    float bendStrength = refraction * edgeFactor * (1.0 + 0.08 * sin(time * 1.8));
     float2 refractionDir = -normal * bendStrength;
     
     float2 baseOffset = refractionDir * size + wobbleOffset * size;
     
     float chromaticEdge = edgeFactor * chromaticSpread;
-    float2 redPos = deformedPos + baseOffset * (1.0 - chromaticEdge * 0.8);
-    float2 greenPos = deformedPos + baseOffset;
-    float2 bluePos = deformedPos + baseOffset * (1.0 + chromaticEdge * 1.2);
+    float2 minPos = bounds.xy + float2(0.5, 0.5);
+    float2 maxPos = bounds.xy + size - float2(0.5, 0.5);
+    float2 redPos = clamp(deformedPos + baseOffset * (1.0 - chromaticEdge * 0.6), minPos, maxPos);
+    float2 greenPos = clamp(deformedPos + baseOffset, minPos, maxPos);
+    float2 bluePos = clamp(deformedPos + baseOffset * (1.0 + chromaticEdge), minPos, maxPos);
     
     half redChannel = layer.sample(redPos).r;
     half greenChannel = layer.sample(greenPos).g;
@@ -525,7 +524,7 @@ float metaballSDF(float2 p, float2 center, float radius) {
     float caustic1 = fbm(causticUV + float2(time * 0.3, time * 0.2), 3);
     float causticPattern = pow(caustic1, 2.0);
     
-    float causticMask = edgeFactor * 0.3;
+    float causticMask = edgeFactor * 0.2;
     float causticValue = causticPattern * causticMask * causticIntensity;
     
     half3 causticColor = half3(1.1, 1.08, 1.05);
@@ -557,11 +556,11 @@ float metaballSDF(float2 p, float2 center, float radius) {
     float innerLight = (1.0 - normalizedDist) * 0.08;
     result.rgb += innerLight * half3(0.9, 0.95, 1.0);
     
-    float edgeLine = smoothstep(0.025, 0.0, abs(distToEdge));
-    float edgeGlow = smoothstep(0.06, 0.0, abs(distToEdge)) * 0.4;
+    float edgeLine = smoothstep(0.02, 0.0, abs(distToEdge));
+    float edgeGlow = smoothstep(0.05, 0.0, abs(distToEdge)) * 0.3;
     result.rgb += (edgeLine * 0.35 + edgeGlow) * half3(1.0, 1.0, 1.1);
     
-    float softVignette = 1.0 - pow(1.0 - normalizedDist, 3.0) * 0.1;
+    float softVignette = 1.0 - pow(1.0 - normalizedDist, 3.0) * 0.06;
     result.rgb *= softVignette;
     
     // Blend with original sample at edges to avoid hard artifact boundaries

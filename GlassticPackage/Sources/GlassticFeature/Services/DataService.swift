@@ -85,7 +85,7 @@ public final class DataService {
         save()
     }
     
-    private func save() {
+    func save() {
         do {
             try modelContext.save()
         } catch {

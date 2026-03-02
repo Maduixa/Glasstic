@@ -44,6 +44,13 @@ public final class FastingStore {
         elapsed = 0
     }
 
+    public func updateStartDate(_ newStart: Date) {
+        guard let session = activeSession else { return }
+        session.startDate = newStart
+        elapsed = session.duration
+        dataService.save()
+    }
+
     public func updateTargetDuration(hours: Double) {
         let clamped = min(max(hours, 8), 24)
         targetDuration = clamped * 3600

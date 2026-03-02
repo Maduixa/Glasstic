@@ -193,6 +193,7 @@ private struct ClearLiquidGlassModifier: ViewModifier {
                     ),
                     maxSampleOffset: maxSampleOffset
                 )
+                .clipShape(Capsule(style: .continuous))
         }
     }
     

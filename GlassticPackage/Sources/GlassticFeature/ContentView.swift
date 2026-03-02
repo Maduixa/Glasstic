@@ -3,7 +3,10 @@ import SwiftUI
 
 public struct ContentView: View {
     @Environment(FastingStore.self) private var store
+    @Environment(AppTheme.self) private var theme
     @State private var selectedTab: BottomTab = .session
+    @State private var isEditingStartTime = false
+    @State private var editedStartDate = Date()
 
     public init() {}
 
@@ -23,17 +26,15 @@ public struct ContentView: View {
         .safeAreaInset(edge: .bottom) {
             BottomPillMenu(
                 selectedTab: $selectedTab,
-                accentColor: accentColor,
                 height: bottomMenuHeight
             )
         }
     }
 
-    private var accentColor: Color { .cyan }
     private var actionColor: Color {
         store.isActive
-        ? Color(red: 0.93, green: 0.32, blue: 0.32)
-        : accentColor
+        ? theme.destructive
+        : theme.accent
     }
 
     @ViewBuilder
@@ -57,19 +58,100 @@ public struct ContentView: View {
                 elapsed: store.elapsed,
                 remaining: max(store.targetDuration - store.elapsed, 0),
                 goal: store.targetDuration,
-                isActive: store.isActive,
-                accentColor: accentColor
+                isActive: store.isActive
             )
+
+            if store.isActive {
+                Button {
+                    editedStartDate = store.activeSession?.startDate ?? Date()
+                    isEditingStartTime = true
+                } label: {
+                    HStack(spacing: 12) {
+                        Image(systemName: "clock.fill")
+                            .font(.body.weight(.medium))
+                            .foregroundStyle(theme.accent)
+
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Started at")
+                                .font(.caption.weight(.medium))
+                                .foregroundStyle(.white.opacity(0.55))
+                            Text(
+                                (store.activeSession?.startDate ?? Date())
+                                    .formatted(date: .omitted, time: .shortened)
+                            )
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(.white)
+                        }
+
+                        Spacer()
+
+                        Image(systemName: "chevron.right")
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(.white.opacity(0.35))
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 12)
+                    .background {
+                        RoundedRectangle(cornerRadius: 16, style: .continuous)
+                            .fill(
+                                LinearGradient(
+                                    colors: [
+                                        Color.white.opacity(0.08),
+                                        Color.white.opacity(0.02)
+                                    ],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                            )
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                    .stroke(Color.white.opacity(0.12), lineWidth: 1)
+                            )
+                    }
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Edit fast start time")
+                .transition(.opacity.combined(with: .scale(scale: 0.95)))
+            }
 
             actionButton
 
             Spacer(minLength: 0)
         }
+        .animation(.smooth(duration: 0.25), value: store.isActive)
+        .sheet(isPresented: $isEditingStartTime) {
+            NavigationStack {
+                Form {
+                    DatePicker(
+                        "Start time",
+                        selection: $editedStartDate,
+                        in: ...Date(),
+                        displayedComponents: [.date, .hourAndMinute]
+                    )
+                }
+                .navigationTitle("Edit Start Time")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button("Cancel") {
+                            isEditingStartTime = false
+                        }
+                    }
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button("Save") {
+                            store.updateStartDate(editedStartDate)
+                            isEditingStartTime = false
+                        }
+                    }
+                }
+            }
+            .presentationDetents([.medium])
+        }
     }
 
     private var settingsTab: some View {
         VStack(spacing: 18) {
-            SettingsPanel(accentColor: accentColor)
+            SettingsPanel()
             Spacer(minLength: 0)
         }
     }
@@ -107,7 +189,7 @@ public struct ContentView: View {
 
 private struct SettingsPanel: View {
     @Environment(FastingStore.self) private var store
-    let accentColor: Color
+    @Environment(AppTheme.self) private var theme
 
     private var goalHours: Binding<Double> {
         Binding(
@@ -122,27 +204,98 @@ private struct SettingsPanel: View {
                 .font(.title2.weight(.semibold))
                 .foregroundStyle(.white)
 
-            VStack(alignment: .leading, spacing: 12) {
-                HStack {
-                    Text("Goal duration")
+            // MARK: Appearance / Theme Picker
+            settingsCard {
+                VStack(alignment: .leading, spacing: 14) {
+                    Text("Appearance")
                         .font(.subheadline.weight(.semibold))
                         .foregroundStyle(.white.opacity(0.85))
-                    Spacer()
-                    Text("\(Int(goalHours.wrappedValue))h")
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(.white)
-                        .monospacedDigit()
-                        .contentTransition(.numericText())
-                        .animation(.smooth(duration: 0.25), value: goalHours.wrappedValue)
+
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 16) {
+                            ForEach(AppThemeStyle.allCases) { style in
+                                themeSwatch(for: style)
+                            }
+                        }
+                        .padding(.horizontal, 2)
+                        .padding(.vertical, 4)
+                    }
                 }
-
-                Slider(value: goalHours, in: 8...24, step: 1)
-                    .tint(accentColor)
-
-                Text("Used for progress and remaining time.")
-                    .font(.caption)
-                    .foregroundStyle(.white.opacity(0.6))
             }
+
+            // MARK: Goal Duration
+            settingsCard {
+                VStack(alignment: .leading, spacing: 12) {
+                    HStack {
+                        Text("Goal duration")
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(.white.opacity(0.85))
+                        Spacer()
+                        Text("\(Int(goalHours.wrappedValue))h")
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(.white)
+                            .monospacedDigit()
+                            .contentTransition(.numericText())
+                            .animation(.smooth(duration: 0.25), value: goalHours.wrappedValue)
+                    }
+
+                    Slider(value: goalHours, in: 8...24, step: 1)
+                        .tint(theme.accent)
+
+                    Text("Used for progress and remaining time.")
+                        .font(.caption)
+                        .foregroundStyle(.white.opacity(0.6))
+                }
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    // MARK: - Theme Swatch
+
+    @ViewBuilder
+    private func themeSwatch(for style: AppThemeStyle) -> some View {
+        let isSelected = theme.current == style
+        let colors = style.palette.swatchColors
+
+        Button {
+            withAnimation(.smooth(duration: 0.3)) {
+                theme.select(style)
+            }
+        } label: {
+            VStack(spacing: 8) {
+                ZStack {
+                    Circle()
+                        .fill(
+                            AngularGradient(
+                                colors: colors + [colors.first ?? .clear],
+                                center: .center
+                            )
+                        )
+                        .frame(width: 56, height: 56)
+
+                    if isSelected {
+                        Circle()
+                            .stroke(Color.white, lineWidth: 3)
+                            .frame(width: 60, height: 60)
+                    }
+                }
+                .scaleEffect(isSelected ? 1.08 : 1.0)
+                .animation(.bouncy(duration: 0.3), value: isSelected)
+
+                Text(style.displayName)
+                    .font(.caption2.weight(.medium))
+                    .foregroundStyle(isSelected ? .white : .white.opacity(0.55))
+            }
+        }
+        .buttonStyle(.plain)
+    }
+
+    // MARK: - Settings Card
+
+    @ViewBuilder
+    private func settingsCard<Content: View>(@ViewBuilder content: () -> Content) -> some View {
+        content()
             .padding(16)
             .background {
                 RoundedRectangle(cornerRadius: 22, style: .continuous)
@@ -161,8 +314,6 @@ private struct SettingsPanel: View {
                             .stroke(Color.white.opacity(0.12), lineWidth: 1)
                     )
             }
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
 
@@ -220,7 +371,7 @@ private enum BottomTab: String, CaseIterable, Identifiable {
 
 private struct BottomPillMenu: View {
     @Binding var selectedTab: BottomTab
-    let accentColor: Color
+    @Environment(AppTheme.self) private var theme
     let height: CGFloat
     
     @State private var hoverTab: BottomTab?
@@ -338,14 +489,14 @@ private struct BottomPillMenu: View {
                 .frame(width: bubbleWidth, height: bubbleHeight)
                 .clearLiquidGlass(
                     cornerRadius: 0.5,
-                    refraction: 0.25,
-                    chromaticSpread: 0.08,
-                    edgeHighlight: 0.8,
-                    causticIntensity: 0.15,
-                    wobbleAmount: 0.008 + wobbleAmplitude * 0.3,
-                    wobbleFreq: 4.0,
+                    refraction: 0.14,
+                    chromaticSpread: 0.03,
+                    edgeHighlight: 0.55,
+                    causticIntensity: 0.08,
+                    wobbleAmount: 0.004 + wobbleAmplitude * 0.16,
+                    wobbleFreq: 3.2,
                     time: time,
-                    maxSampleOffset: CGSize(width: 40, height: 40)
+                    maxSampleOffset: CGSize(width: 24, height: 24)
                 )
                 .overlay(
                     Capsule(style: .continuous)
@@ -373,17 +524,17 @@ private struct BottomPillMenu: View {
                 .clipShape(Capsule(style: .continuous))
             
             Capsule(style: .continuous)
-                .fill(Color.white.opacity(0.03))
+                .fill(Color.white.opacity(0.02))
                 .clearLiquidGlass(
                     cornerRadius: 0.15,
-                    refraction: 0.18,
-                    chromaticSpread: 0.05,
-                    edgeHighlight: 0.6,
-                    causticIntensity: 0.35,
-                    wobbleAmount: 0.012 + wobbleAmplitude * 0.5,
-                    wobbleFreq: 5.0,
+                    refraction: 0.11,
+                    chromaticSpread: 0.02,
+                    edgeHighlight: 0.45,
+                    causticIntensity: 0.16,
+                    wobbleAmount: 0.005 + wobbleAmplitude * 0.2,
+                    wobbleFreq: 3.6,
                     time: time,
-                    maxSampleOffset: CGSize(width: 50, height: 50)
+                    maxSampleOffset: CGSize(width: 28, height: 28)
                 )
                 .overlay(
                     Capsule(style: .continuous)
@@ -410,7 +561,7 @@ private struct BottomPillMenu: View {
         let isPressed = pressedTab == tab
         let blobScale = blobScales[tab] ?? 1.0
         
-        let baseScale: CGFloat = isSelected ? 1.1 : (isHovered ? 1.05 : 1.0)
+        let baseScale: CGFloat = (isHovered && !isSelected) ? 1.04 : 1.0
         let pressScale: CGFloat = isPressed ? 0.92 : 1.0
         let finalScale = baseScale * pressScale * blobScale
 
@@ -611,19 +762,7 @@ private struct AnimatedCausticBackdrop: View {
                 )
             }
             
-            for i in 0..<5 {
-                let phase = time * 0.15 + Double(i) * 0.7
-                let sparkleX = w * (0.1 + 0.8 * (Double(i) / 5.0) + 0.05 * sin(phase))
-                let sparkleY = h * (0.3 + 0.4 * cos(phase * 0.8 + Double(i)))
-                let sparkleAlpha = 0.3 + 0.4 * (0.5 + 0.5 * sin(phase * 2))
-                
-                context.drawLayer { ctx in
-                    ctx.fill(
-                        Path(ellipseIn: CGRect(x: sparkleX - 3, y: sparkleY - 3, width: 6, height: 6)),
-                        with: .color(Color.white.opacity(sparkleAlpha))
-                    )
-                }
-            }
+            // Keep caustics smooth; tiny sparkles tend to read as artifacts on moving glass.
         }
         .blendMode(.plusLighter)
     }
