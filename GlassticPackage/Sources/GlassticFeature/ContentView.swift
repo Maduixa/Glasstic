@@ -3,10 +3,8 @@ import SwiftUI
 
 public struct ContentView: View {
     @Environment(FastingStore.self) private var store
-    @Environment(AppTheme.self) private var theme
     @State private var selectedTab: BottomTab = .session
-    @State private var isEditingStartTime = false
-    @State private var editedStartDate = Date()
+    @State private var showProtocolPicker = false
 
     public init() {}
 
@@ -14,7 +12,7 @@ public struct ContentView: View {
 
     public var body: some View {
         ZStack {
-            LiquidBackground()
+            LiquidBackground(accentColor: store.accentColor)
 
             VStack(spacing: 18) {
                 tabContent
@@ -26,15 +24,22 @@ public struct ContentView: View {
         .safeAreaInset(edge: .bottom) {
             BottomPillMenu(
                 selectedTab: $selectedTab,
+                accentColor: store.accentColor,
                 height: bottomMenuHeight
             )
+            .frame(height: bottomMenuHeight)
+        }
+        .sheet(isPresented: $showProtocolPicker) {
+            ProtocolPickerSheet()
         }
     }
 
+    private var accentColor: Color { store.accentColor }
+
     private var actionColor: Color {
         store.isActive
-        ? theme.destructive
-        : theme.accent
+            ? Color(red: 0.93, green: 0.32, blue: 0.32)
+            : accentColor
     }
 
     @ViewBuilder
@@ -45,116 +50,104 @@ public struct ContentView: View {
         case .settings:
             settingsTab
         case .insights:
-            PlaceholderTab(title: "Insights")
+            insightsTab
         case .rhythm:
-            PlaceholderTab(title: "Rhythm")
+            rhythmTab
         }
     }
+
+    // MARK: - Session Tab
 
     private var sessionTab: some View {
-        VStack(spacing: 18) {
-            GlassmorphicGauge(
-                progress: store.progress,
-                elapsed: store.elapsed,
-                remaining: max(store.targetDuration - store.elapsed, 0),
-                goal: store.targetDuration,
-                isActive: store.isActive
-            )
+        ScrollView {
+            VStack(spacing: 18) {
+                GlassmorphicGauge(
+                    progress: store.progress,
+                    elapsed: store.elapsed,
+                    remaining: store.remainingTime,
+                    goal: store.targetDuration,
+                    isActive: store.isActive,
+                    currentZone: store.currentZone,
+                    estimatedCalories: store.estimatedCalories
+                )
 
-            if store.isActive {
-                Button {
-                    editedStartDate = store.activeSession?.startDate ?? Date()
-                    isEditingStartTime = true
-                } label: {
-                    HStack(spacing: 12) {
-                        Image(systemName: "clock.fill")
-                            .font(.body.weight(.medium))
-                            .foregroundStyle(theme.accent)
-
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("Started at")
-                                .font(.caption.weight(.medium))
-                                .foregroundStyle(.white.opacity(0.55))
-                            Text(
-                                (store.activeSession?.startDate ?? Date())
-                                    .formatted(date: .omitted, time: .shortened)
-                            )
-                            .font(.subheadline.weight(.semibold))
-                            .foregroundStyle(.white)
-                        }
-
-                        Spacer()
-
-                        Image(systemName: "chevron.right")
-                            .font(.caption.weight(.semibold))
-                            .foregroundStyle(.white.opacity(0.35))
-                    }
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 12)
-                    .background {
-                        RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .fill(
-                                LinearGradient(
-                                    colors: [
-                                        Color.white.opacity(0.08),
-                                        Color.white.opacity(0.02)
-                                    ],
-                                    startPoint: .topLeading,
-                                    endPoint: .bottomTrailing
-                                )
-                            )
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                    .stroke(Color.white.opacity(0.12), lineWidth: 1)
-                            )
-                    }
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel("Edit fast start time")
-                .transition(.opacity.combined(with: .scale(scale: 0.95)))
-            }
-
-            actionButton
-
-            Spacer(minLength: 0)
-        }
-        .animation(.smooth(duration: 0.25), value: store.isActive)
-        .sheet(isPresented: $isEditingStartTime) {
-            NavigationStack {
-                Form {
-                    DatePicker(
-                        "Start time",
-                        selection: $editedStartDate,
-                        in: ...Date(),
-                        displayedComponents: [.date, .hourAndMinute]
+                // Zone progress card when active
+                if store.isActive {
+                    ZoneProgressCard(
+                        currentZone: store.currentZone,
+                        zoneProgress: store.zoneProgress,
+                        timeToNextZone: store.timeToNextZone
                     )
                 }
-                .navigationTitle("Edit Start Time")
-                .navigationBarTitleDisplayMode(.inline)
-                .toolbar {
-                    ToolbarItem(placement: .cancellationAction) {
-                        Button("Cancel") {
-                            isEditingStartTime = false
-                        }
-                    }
-                    ToolbarItem(placement: .confirmationAction) {
-                        Button("Save") {
-                            store.updateStartDate(editedStartDate)
-                            isEditingStartTime = false
-                        }
-                    }
+
+                actionButton
+
+                // Protocol selector when not active
+                if !store.isActive {
+                    protocolSelector
                 }
+
+                Spacer(minLength: 0)
             }
-            .presentationDetents([.medium])
         }
+        .scrollIndicators(.hidden)
     }
 
-    private var settingsTab: some View {
+    // MARK: - Insights Tab
+
+    private var insightsTab: some View {
+        ScrollView {
+            VStack(spacing: 18) {
+                Text("Insights")
+                    .font(.title2.weight(.semibold))
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+
+                // Stats cards
+                StatsCard()
+
+                // Zones overview
+                ZonesOverviewCard(
+                    currentZone: store.currentZone,
+                    elapsed: store.elapsed
+                )
+
+                Spacer(minLength: 0)
+            }
+        }
+        .scrollIndicators(.hidden)
+    }
+
+    // MARK: - Rhythm Tab
+
+    private var rhythmTab: some View {
         VStack(spacing: 18) {
-            SettingsPanel()
+            Text("Rhythm")
+                .font(.title2.weight(.semibold))
+                .foregroundStyle(.white)
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+            Text("Calendar and history coming soon")
+                .font(.subheadline)
+                .foregroundStyle(.white.opacity(0.6))
+
             Spacer(minLength: 0)
         }
     }
+
+    // MARK: - Settings Tab
+
+    private var settingsTab: some View {
+        ScrollView {
+            VStack(spacing: 18) {
+                SettingsPanel(accentColor: accentColor)
+                Spacer(minLength: 0)
+            }
+        }
+        .scrollIndicators(.hidden)
+    }
+
+    // MARK: - Components
 
     private var actionButton: some View {
         Button(action: {
@@ -175,13 +168,150 @@ public struct ContentView: View {
             .padding(.vertical, 14)
             .padding(.horizontal, 22)
             .frame(minWidth: 190)
+            .background(
+                Capsule(style: .circular)
+                    .fill(
+                        LinearGradient(
+                            colors: [
+                                actionColor.opacity(0.9),
+                                actionColor.opacity(0.7)
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        )
+                    )
+            )
+        }
+        .shadow(color: actionColor.opacity(0.4), radius: 16, x: 0, y: 10)
+        .padding(.top, 8)
+    }
+
+    private var protocolSelector: some View {
+        Button(action: { showProtocolPicker = true }) {
+            HStack {
+                Image(systemName: store.selectedProtocol.iconName)
+                    .foregroundStyle(accentColor)
+                Text(store.selectedProtocol.name)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(.white)
+                Spacer()
+                Text("\(Int(store.targetDuration / 3600))h goal")
+                    .font(.caption)
+                    .foregroundStyle(.white.opacity(0.6))
+                Image(systemName: "chevron.right")
+                    .font(.caption)
+                    .foregroundStyle(.white.opacity(0.4))
+            }
+            .padding(16)
+            .background(
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .fill(Color.white.opacity(0.08))
+                    .liquidGlass(
+                        .regular
+                            .tint(.white)
+                            .cornerRadius(16),
+                        in: RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    )
+            )
         }
         .buttonStyle(.plain)
-        .glassEffect(
-            .regular.tint(actionColor).interactive(),
-            in: .rect(cornerRadius: 22)
+    }
+}
+
+// MARK: - Stats Card
+
+private struct StatsCard: View {
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("This Week")
+                .font(.headline.weight(.semibold))
+                .foregroundStyle(.white)
+
+            HStack(spacing: 16) {
+                StatItem(value: "3", label: "Fasts", icon: "flame.fill")
+                StatItem(value: "48h", label: "Total", icon: "clock.fill")
+                StatItem(value: "16h", label: "Average", icon: "chart.bar.fill")
+            }
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: 22, style: .continuous)
+                .fill(Color.white.opacity(0.08))
+                .liquidGlass(
+                    .regular
+                        .tint(.white)
+                        .cornerRadius(22),
+                    in: RoundedRectangle(cornerRadius: 22, style: .continuous)
+                )
         )
-        .padding(.top, 8)
+    }
+}
+
+private struct StatItem: View {
+    let value: String
+    let label: String
+    let icon: String
+
+    var body: some View {
+        VStack(spacing: 4) {
+            Image(systemName: icon)
+                .font(.title3)
+                .foregroundStyle(.white.opacity(0.6))
+            Text(value)
+                .font(.title2.weight(.bold))
+                .foregroundStyle(.white)
+            Text(label)
+                .font(.caption)
+                .foregroundStyle(.white.opacity(0.5))
+        }
+        .frame(maxWidth: .infinity)
+    }
+}
+
+// MARK: - Protocol Picker Sheet
+
+private struct ProtocolPickerSheet: View {
+    @Environment(FastingStore.self) private var store
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationStack {
+            List {
+                ForEach(FastingProtocol.allCases) { fastingProtocol in
+                    Button(action: {
+                        store.selectProtocol(fastingProtocol)
+                        dismiss()
+                    }) {
+                        HStack {
+                            Image(systemName: fastingProtocol.iconName)
+                                .foregroundStyle(.cyan)
+                                .frame(width: 30)
+                            VStack(alignment: .leading) {
+                                Text(fastingProtocol.name)
+                                    .font(.headline)
+                                Text(fastingProtocol.description)
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                            Spacer()
+                            if store.selectedProtocol == fastingProtocol {
+                                Image(systemName: "checkmark")
+                                    .foregroundStyle(.cyan)
+                            }
+                        }
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .navigationTitle("Fasting Protocol")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Done") { dismiss() }
+                }
+            }
+        }
     }
 }
 
@@ -189,12 +319,38 @@ public struct ContentView: View {
 
 private struct SettingsPanel: View {
     @Environment(FastingStore.self) private var store
-    @Environment(AppTheme.self) private var theme
+    let accentColor: Color
 
     private var goalHours: Binding<Double> {
         Binding(
             get: { store.targetDuration / 3600 },
             set: { store.updateTargetDuration(hours: $0) }
+        )
+    }
+    
+    private var notificationsBinding: Binding<Bool> {
+        Binding(
+            get: { store.notificationsEnabled },
+            set: { newValue in
+                if newValue && !store.notificationsAuthorized {
+                    Task { await store.requestNotificationAuthorization() }
+                } else {
+                    store.notificationsEnabled = newValue
+                }
+            }
+        )
+    }
+    
+    private var healthKitBinding: Binding<Bool> {
+        Binding(
+            get: { store.healthKitEnabled },
+            set: { newValue in
+                if newValue && !store.healthKitAuthorized {
+                    Task { await store.requestHealthKitAuthorization() }
+                } else {
+                    store.healthKitEnabled = newValue
+                }
+            }
         )
     }
 
@@ -204,139 +360,252 @@ private struct SettingsPanel: View {
                 .font(.title2.weight(.semibold))
                 .foregroundStyle(.white)
 
-            // MARK: Appearance / Theme Picker
-            settingsCard {
-                VStack(alignment: .leading, spacing: 14) {
-                    Text("Appearance")
+            // Goal duration
+            VStack(alignment: .leading, spacing: 12) {
+                HStack {
+                    Text("Goal duration")
                         .font(.subheadline.weight(.semibold))
                         .foregroundStyle(.white.opacity(0.85))
+                    Spacer()
+                    Text("\(Int(goalHours.wrappedValue))h")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(.white)
+                        .monospacedDigit()
+                        .contentTransition(.numericText())
+                        .animation(.smooth(duration: 0.25), value: goalHours.wrappedValue)
+                }
 
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 16) {
-                            ForEach(AppThemeStyle.allCases) { style in
-                                themeSwatch(for: style)
-                            }
-                        }
-                        .padding(.horizontal, 2)
-                        .padding(.vertical, 4)
+                Slider(value: goalHours, in: 1...72, step: 1)
+                    .tint(accentColor)
+
+                Text("Adjust your fasting goal duration.")
+                    .font(.caption)
+                    .foregroundStyle(.white.opacity(0.6))
+            }
+            .padding(16)
+            .background(
+                RoundedRectangle(cornerRadius: 22, style: .continuous)
+                    .fill(Color.white.opacity(0.08))
+                    .liquidGlass(
+                        .regular
+                            .tint(.white)
+                            .cornerRadius(22),
+                        in: RoundedRectangle(cornerRadius: 22, style: .continuous)
+                    )
+            )
+
+            // Current protocol info
+            VStack(alignment: .leading, spacing: 8) {
+                HStack {
+                    Image(systemName: store.selectedProtocol.iconName)
+                        .foregroundStyle(accentColor)
+                    Text("Current Protocol")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(.white.opacity(0.85))
+                    Spacer()
+                    Text(store.selectedProtocol.name)
+                        .font(.subheadline)
+                        .foregroundStyle(.white)
+                }
+                Text(store.selectedProtocol.description)
+                    .font(.caption)
+                    .foregroundStyle(.white.opacity(0.6))
+            }
+            .padding(16)
+            .background(
+                RoundedRectangle(cornerRadius: 22, style: .continuous)
+                    .fill(Color.white.opacity(0.08))
+                    .liquidGlass(
+                        .regular
+                            .tint(.white)
+                            .cornerRadius(22),
+                        in: RoundedRectangle(cornerRadius: 22, style: .continuous)
+                    )
+            )
+            
+            // Notifications section
+            SettingsSection(title: "Notifications", icon: "bell.fill", accentColor: accentColor) {
+                SettingsToggleRow(
+                    title: "Notifications",
+                    subtitle: store.notificationsAuthorized ? "Enabled" : "Tap to enable",
+                    icon: "bell.badge.fill",
+                    isOn: notificationsBinding,
+                    accentColor: accentColor
+                )
+                
+                if store.notificationsEnabled {
+                    SettingsInfoRow(
+                        title: "Zone Alerts",
+                        value: "On",
+                        icon: "flame.fill"
+                    )
+                    SettingsInfoRow(
+                        title: "Goal Reminders",
+                        value: "On",
+                        icon: "target"
+                    )
+                    SettingsInfoRow(
+                        title: "Hydration Reminders",
+                        value: "Every 2h",
+                        icon: "drop.fill"
+                    )
+                }
+            }
+            
+            // HealthKit section
+            SettingsSection(title: "Health", icon: "heart.fill", accentColor: accentColor) {
+                SettingsToggleRow(
+                    title: "Apple Health",
+                    subtitle: store.healthKitAuthorized ? "Connected" : "Tap to connect",
+                    icon: "heart.text.square.fill",
+                    isOn: healthKitBinding,
+                    accentColor: accentColor
+                )
+                
+                if store.healthKitEnabled, let profile = store.userProfile {
+                    if let weight = profile.weightKg {
+                        SettingsInfoRow(
+                            title: "Weight",
+                            value: String(format: "%.1f kg", weight),
+                            icon: "scalemass.fill"
+                        )
+                    }
+                    if let height = profile.heightCm {
+                        SettingsInfoRow(
+                            title: "Height",
+                            value: String(format: "%.0f cm", height),
+                            icon: "ruler.fill"
+                        )
+                    }
+                    if let bmr = profile.calculatedBMR ?? profile.estimatedBMR {
+                        SettingsInfoRow(
+                            title: "Est. BMR",
+                            value: String(format: "%.0f kcal", bmr),
+                            icon: "flame.fill"
+                        )
                     }
                 }
             }
-
-            // MARK: Goal Duration
-            settingsCard {
-                VStack(alignment: .leading, spacing: 12) {
-                    HStack {
-                        Text("Goal duration")
-                            .font(.subheadline.weight(.semibold))
-                            .foregroundStyle(.white.opacity(0.85))
-                        Spacer()
-                        Text("\(Int(goalHours.wrappedValue))h")
-                            .font(.subheadline.weight(.semibold))
-                            .foregroundStyle(.white)
-                            .monospacedDigit()
-                            .contentTransition(.numericText())
-                            .animation(.smooth(duration: 0.25), value: goalHours.wrappedValue)
-                    }
-
-                    Slider(value: goalHours, in: 8...24, step: 1)
-                        .tint(theme.accent)
-
-                    Text("Used for progress and remaining time.")
-                        .font(.caption)
-                        .foregroundStyle(.white.opacity(0.6))
-                }
+            
+            // About section
+            SettingsSection(title: "About", icon: "info.circle.fill", accentColor: accentColor) {
+                SettingsInfoRow(
+                    title: "Version",
+                    value: "1.0.0",
+                    icon: "app.badge.fill"
+                )
+                SettingsInfoRow(
+                    title: "Build",
+                    value: "1",
+                    icon: "hammer.fill"
+                )
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
+}
 
-    // MARK: - Theme Swatch
+// MARK: - Settings Section
 
-    @ViewBuilder
-    private func themeSwatch(for style: AppThemeStyle) -> some View {
-        let isSelected = theme.current == style
-        let colors = style.palette.swatchColors
-
-        Button {
-            withAnimation(.smooth(duration: 0.3)) {
-                theme.select(style)
+private struct SettingsSection<Content: View>: View {
+    let title: String
+    let icon: String
+    let accentColor: Color
+    @ViewBuilder let content: Content
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 8) {
+                Image(systemName: icon)
+                    .foregroundStyle(accentColor)
+                    .font(.subheadline)
+                Text(title)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(.white.opacity(0.85))
             }
-        } label: {
-            VStack(spacing: 8) {
-                ZStack {
-                    Circle()
-                        .fill(
-                            AngularGradient(
-                                colors: colors + [colors.first ?? .clear],
-                                center: .center
-                            )
-                        )
-                        .frame(width: 56, height: 56)
-
-                    if isSelected {
-                        Circle()
-                            .stroke(Color.white, lineWidth: 3)
-                            .frame(width: 60, height: 60)
-                    }
-                }
-                .scaleEffect(isSelected ? 1.08 : 1.0)
-                .animation(.bouncy(duration: 0.3), value: isSelected)
-
-                Text(style.displayName)
-                    .font(.caption2.weight(.medium))
-                    .foregroundStyle(isSelected ? .white : .white.opacity(0.55))
+            
+            VStack(spacing: 0) {
+                content
             }
         }
-        .buttonStyle(.plain)
-    }
-
-    // MARK: - Settings Card
-
-    @ViewBuilder
-    private func settingsCard<Content: View>(@ViewBuilder content: () -> Content) -> some View {
-        content()
-            .padding(16)
-            .background {
-                RoundedRectangle(cornerRadius: 22, style: .continuous)
-                    .fill(
-                        LinearGradient(
-                            colors: [
-                                Color.white.opacity(0.08),
-                                Color.white.opacity(0.02)
-                            ],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 22, style: .continuous)
-                            .stroke(Color.white.opacity(0.12), lineWidth: 1)
-                    )
-            }
+        .padding(16)
+        .background(
+            RoundedRectangle(cornerRadius: 22, style: .continuous)
+                .fill(Color.white.opacity(0.08))
+                .liquidGlass(
+                    .regular
+                        .tint(.white)
+                        .cornerRadius(22),
+                    in: RoundedRectangle(cornerRadius: 22, style: .continuous)
+                )
+        )
     }
 }
 
-// MARK: - Placeholder Tab
+// MARK: - Settings Toggle Row
 
-private struct PlaceholderTab: View {
+private struct SettingsToggleRow: View {
     let title: String
-
+    let subtitle: String
+    let icon: String
+    @Binding var isOn: Bool
+    let accentColor: Color
+    
     var body: some View {
-        VStack(spacing: 12) {
+        HStack(spacing: 12) {
+            Image(systemName: icon)
+                .font(.title3)
+                .foregroundStyle(isOn ? accentColor : .white.opacity(0.5))
+                .frame(width: 28)
+            
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(.subheadline.weight(.medium))
+                    .foregroundStyle(.white)
+                Text(subtitle)
+                    .font(.caption)
+                    .foregroundStyle(.white.opacity(0.6))
+            }
+            
+            Spacer()
+            
+            Toggle("", isOn: $isOn)
+                .labelsHidden()
+                .tint(accentColor)
+        }
+        .padding(.vertical, 8)
+    }
+}
+
+// MARK: - Settings Info Row
+
+private struct SettingsInfoRow: View {
+    let title: String
+    let value: String
+    let icon: String
+    
+    var body: some View {
+        HStack(spacing: 12) {
+            Image(systemName: icon)
+                .font(.subheadline)
+                .foregroundStyle(.white.opacity(0.5))
+                .frame(width: 28)
+            
             Text(title)
-                .font(.title2.weight(.semibold))
-                .foregroundStyle(.white)
-            Text("Coming soon")
+                .font(.subheadline)
+                .foregroundStyle(.white.opacity(0.8))
+            
+            Spacer()
+            
+            Text(value)
                 .font(.subheadline)
                 .foregroundStyle(.white.opacity(0.6))
-            Spacer(minLength: 0)
         }
-        .frame(maxWidth: .infinity)
+        .padding(.vertical, 6)
     }
 }
 
-// MARK: - Bottom Tab
+// MARK: - Bottom Tab Enum
 
 private enum BottomTab: String, CaseIterable, Identifiable {
     case session
@@ -365,474 +634,10 @@ private enum BottomTab: String, CaseIterable, Identifiable {
     }
 }
 
-// MARK: - Selection Background (removed - using glass effect directly)
-
-// MARK: - Bottom Pill Menu
-
-private struct BottomPillMenu: View {
-    @Binding var selectedTab: BottomTab
-    @Environment(AppTheme.self) private var theme
-    let height: CGFloat
-    
-    @State private var hoverTab: BottomTab?
-    @State private var dragLocation: CGPoint?
-    @State private var isDragging = false
-    @State private var tabFrames: [BottomTab: CGRect] = [:]
-    @State private var containerFrame: CGRect = .zero
-    @State private var selectionOffset: CGFloat = 0
-    @State private var targetSelectionOffset: CGFloat = 0
-    @State private var selectionVelocity: CGFloat = 0
-    @State private var wobblePhase: CGFloat = 0
-    @State private var wobbleAmplitude: CGFloat = 0
-    @State private var time: CGFloat = 0
-    @State private var pressedTab: BottomTab?
-    @State private var blobScales: [BottomTab: CGFloat] = [:]
-
-    var body: some View {
-        TimelineView(.animation(minimumInterval: 1.0 / 60.0)) { timeline in
-            let _ = updateAnimation(timeline.date)
-            
-            GlassEffectContainer(spacing: 40) {
-                HStack(spacing: 0) {
-                    ForEach(BottomTab.allCases) { tab in
-                        tabButton(for: tab)
-                    }
-                }
-                .padding(.horizontal, 12)
-                .padding(.vertical, 8)
-                .frame(height: height)
-                .background {
-                    pillBackground
-                }
-                .background(
-                    GeometryReader { proxy in
-                        Color.clear.preference(
-                            key: ContainerFrameKey.self,
-                            value: proxy.frame(in: .named("pill"))
-                        )
-                    }
-                )
-                .overlay {
-                    GeometryReader { geo in
-                        selectionBlobLayer(in: geo.size)
-                    }
-                }
-            }
-            .coordinateSpace(name: "pill")
-            .contentShape(Capsule())
-            .simultaneousGesture(dragGesture)
-            .onPreferenceChange(TabFrameKey.self) { frames in
-                tabFrames = frames
-                updateSelectionTarget()
-            }
-            .onPreferenceChange(ContainerFrameKey.self) { frame in
-                containerFrame = frame
-                updateSelectionTarget()
-            }
-            .shadow(color: .black.opacity(0.5), radius: 24, x: 0, y: 12)
-            .shadow(color: accentColor.opacity(0.2), radius: 40, x: 0, y: 8)
-            .padding(.horizontal, 16)
-            .padding(.bottom, 8)
-        }
-    }
-    
-    private func updateAnimation(_ date: Date) {
-        let dt: CGFloat = 1.0 / 60.0
-        time = CGFloat(date.timeIntervalSinceReferenceDate)
-        
-        wobblePhase += 8.0 * dt
-        if wobblePhase > .pi * 2 { wobblePhase -= .pi * 2 }
-        
-        wobbleAmplitude *= 0.92
-        if wobbleAmplitude < 0.001 { wobbleAmplitude = 0 }
-        
-        let displacement = selectionOffset - targetSelectionOffset
-        let springForce = -220.0 * displacement
-        let dampingForce = -0.7 * 220.0 * 2 * selectionVelocity
-        let acceleration = springForce + dampingForce
-        
-        selectionVelocity += acceleration * dt
-        selectionOffset += selectionVelocity * dt
-        
-        if abs(selectionVelocity) < 0.1 && abs(displacement) < 0.5 {
-            selectionOffset = targetSelectionOffset
-            selectionVelocity = 0
-        }
-    }
-    
-    private func updateSelectionTarget() {
-        guard let frame = tabFrames[selectedTab] else { return }
-        let newTarget = frame.midX
-        if abs(targetSelectionOffset - newTarget) > 1 {
-            wobbleAmplitude = min(wobbleAmplitude + 0.03, 0.06)
-        }
-        targetSelectionOffset = newTarget
-    }
-    
-    @ViewBuilder
-    private func selectionBlobLayer(in containerSize: CGSize) -> some View {
-        if let frame = tabFrames[selectedTab] {
-            let stretchFactor = 1.0 + min(abs(selectionVelocity) * 0.001, 0.2)
-            let squashFactor = 1.0 - min(abs(selectionVelocity) * 0.0003, 0.1)
-            let wobbleX = sin(wobblePhase) * wobbleAmplitude * 12
-            let wobbleScaleX = 1.0 + cos(wobblePhase * 1.3) * wobbleAmplitude * 0.4
-            let wobbleScaleY = 1.0 + sin(wobblePhase * 0.9) * wobbleAmplitude * 0.3
-            
-            let magnifyScale: CGFloat = 1.08
-            let bubbleWidth = frame.width * magnifyScale * stretchFactor * wobbleScaleX
-            let bubbleHeight = frame.height * magnifyScale * squashFactor * wobbleScaleY
-            
-            let localX = (frame.midX - containerFrame.minX) + wobbleX
-            
-            Capsule(style: .continuous)
-                .fill(Color.white.opacity(0.02))
-                .frame(width: bubbleWidth, height: bubbleHeight)
-                .clearLiquidGlass(
-                    cornerRadius: 0.5,
-                    refraction: 0.14,
-                    chromaticSpread: 0.03,
-                    edgeHighlight: 0.55,
-                    causticIntensity: 0.08,
-                    wobbleAmount: 0.004 + wobbleAmplitude * 0.16,
-                    wobbleFreq: 3.2,
-                    time: time,
-                    maxSampleOffset: CGSize(width: 24, height: 24)
-                )
-                .overlay(
-                    Capsule(style: .continuous)
-                        .stroke(
-                            LinearGradient(
-                                colors: [
-                                    Color.white.opacity(0.6),
-                                    Color.white.opacity(0.15),
-                                    Color.white.opacity(0.1),
-                                    Color.white.opacity(0.25)
-                                ],
-                                startPoint: .top,
-                                endPoint: .bottom
-                            ),
-                            lineWidth: 1.5
-                        )
-                )
-                .position(x: localX, y: containerSize.height / 2)
-        }
-    }
-    
-    private var pillBackground: some View {
-        ZStack {
-            AnimatedCausticBackdrop(time: time, accentColor: accentColor)
-                .clipShape(Capsule(style: .continuous))
-            
-            Capsule(style: .continuous)
-                .fill(Color.white.opacity(0.02))
-                .clearLiquidGlass(
-                    cornerRadius: 0.15,
-                    refraction: 0.11,
-                    chromaticSpread: 0.02,
-                    edgeHighlight: 0.45,
-                    causticIntensity: 0.16,
-                    wobbleAmount: 0.005 + wobbleAmplitude * 0.2,
-                    wobbleFreq: 3.6,
-                    time: time,
-                    maxSampleOffset: CGSize(width: 28, height: 28)
-                )
-                .overlay(
-                    Capsule(style: .continuous)
-                        .stroke(
-                            LinearGradient(
-                                colors: [
-                                    Color.white.opacity(0.5),
-                                    Color.white.opacity(0.1),
-                                    Color.white.opacity(0.3)
-                                ],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            ),
-                            lineWidth: 1.5
-                        )
-                )
-        }
-    }
-    
-    @ViewBuilder
-    private func tabButton(for tab: BottomTab) -> some View {
-        let isSelected = selectedTab == tab
-        let isHovered = hoverTab == tab
-        let isPressed = pressedTab == tab
-        let blobScale = blobScales[tab] ?? 1.0
-        
-        let baseScale: CGFloat = (isHovered && !isSelected) ? 1.04 : 1.0
-        let pressScale: CGFloat = isPressed ? 0.92 : 1.0
-        let finalScale = baseScale * pressScale * blobScale
-
-        Button {
-            withAnimation(.bouncy(duration: 0.4)) {
-                selectedTab = tab
-                wobbleAmplitude = 0.05
-            }
-        } label: {
-            VStack(spacing: 4) {
-                Image(systemName: tab.iconName)
-                    .font(.system(size: 22, weight: .semibold))
-                    .symbolEffect(.bounce, value: isSelected)
-                Text(tab.title)
-                    .font(.system(size: 10, weight: .semibold))
-            }
-            .foregroundStyle(isSelected ? accentColor : .white.opacity(0.55))
-            .shadow(color: isSelected ? accentColor : .clear, radius: 16, x: 0, y: 0)
-            .shadow(color: isSelected ? accentColor.opacity(0.6) : .clear, radius: 6, x: 0, y: 0)
-            .padding(.vertical, 8)
-            .padding(.horizontal, 10)
-            .scaleEffect(finalScale)
-            .animation(.bouncy(duration: 0.25), value: finalScale)
-        }
-        .frame(maxWidth: .infinity)
-        .buttonStyle(.plain)
-        .zIndex(isSelected ? 1 : 0)
-        .background(
-            GeometryReader { proxy in
-                Color.clear.preference(
-                    key: TabFrameKey.self,
-                    value: [tab: proxy.frame(in: .named("pill"))]
-                )
-            }
-        )
-        .simultaneousGesture(
-            DragGesture(minimumDistance: 0)
-                .onChanged { _ in
-                    if pressedTab != tab {
-                        pressedTab = tab
-                        withAnimation(.bouncy(duration: 0.15)) {
-                            blobScales[tab] = 0.95
-                        }
-                    }
-                }
-                .onEnded { _ in
-                    pressedTab = nil
-                    withAnimation(.bouncy(duration: 0.4)) {
-                        blobScales[tab] = 1.0
-                    }
-                    wobbleAmplitude = min(wobbleAmplitude + 0.02, 0.06)
-                }
-        )
-
-        if isSelected {
-            EmptyView()
-        }
-    }
-
-    private var dragGesture: some Gesture {
-        DragGesture(minimumDistance: 0, coordinateSpace: .named("pill"))
-            .onChanged { value in
-                if !isDragging {
-                    withAnimation(.bouncy(duration: 0.2)) {
-                        isDragging = true
-                    }
-                    wobbleAmplitude = 0.03
-                }
-                dragLocation = value.location
-                if let nearest = nearestTab(to: value.location), hoverTab != nearest {
-                    withAnimation(.bouncy(duration: 0.3)) {
-                        hoverTab = nearest
-                    }
-                }
-            }
-            .onEnded { _ in
-                if let hoverTab {
-                    withAnimation(.bouncy(duration: 0.4)) {
-                        selectedTab = hoverTab
-                    }
-                    wobbleAmplitude = 0.05
-                }
-                withAnimation(.bouncy(duration: 0.3)) {
-                    isDragging = false
-                }
-                dragLocation = nil
-                hoverTab = nil
-            }
-    }
-
-    private func nearestTab(to location: CGPoint) -> BottomTab? {
-        tabFrames.min { abs($0.value.midX - location.x) < abs($1.value.midX - location.x) }?.key
-    }
-}
-
-private struct ContainerFrameKey: PreferenceKey {
-    static let defaultValue: CGRect = .zero
-    static func reduce(value: inout CGRect, nextValue: () -> CGRect) {
-        value = nextValue()
-    }
-}
-
-private struct TabFrameKey: PreferenceKey {
-    static let defaultValue: [BottomTab: CGRect] = [:]
-    static func reduce(value: inout [BottomTab: CGRect], nextValue: () -> [BottomTab: CGRect]) {
-        value.merge(nextValue(), uniquingKeysWith: { $1 })
-    }
-}
-
-private struct AnimatedCausticBackdrop: View {
-    let time: CGFloat
-    let accentColor: Color
-    
-    var body: some View {
-        let slow = time * 0.08
-        let mid = time * 0.12
-        let fast = time * 0.18
-        
-        Canvas { context, size in
-            let w = size.width
-            let h = size.height
-            
-            let caustic1Center = CGPoint(
-                x: w * (0.2 + 0.15 * sin(slow)),
-                y: h * (0.3 + 0.2 * cos(slow * 1.1))
-            )
-            let caustic2Center = CGPoint(
-                x: w * (0.75 + 0.12 * cos(mid)),
-                y: h * (0.6 + 0.15 * sin(mid * 0.9))
-            )
-            let caustic3Center = CGPoint(
-                x: w * (0.5 + 0.1 * sin(fast)),
-                y: h * (0.5 + 0.1 * cos(fast * 1.2))
-            )
-            
-            context.drawLayer { ctx in
-                let gradient1 = Gradient(colors: [
-                    Color.white.opacity(0.25),
-                    Color.white.opacity(0.08),
-                    Color.clear
-                ])
-                ctx.fill(
-                    Path(ellipseIn: CGRect(
-                        x: caustic1Center.x - 80,
-                        y: caustic1Center.y - 40,
-                        width: 160,
-                        height: 80
-                    )),
-                    with: .radialGradient(
-                        gradient1,
-                        center: caustic1Center,
-                        startRadius: 0,
-                        endRadius: 90
-                    )
-                )
-            }
-            
-            context.drawLayer { ctx in
-                let gradient2 = Gradient(colors: [
-                    accentColor.opacity(0.3),
-                    accentColor.opacity(0.1),
-                    Color.clear
-                ])
-                ctx.fill(
-                    Path(ellipseIn: CGRect(
-                        x: caustic2Center.x - 70,
-                        y: caustic2Center.y - 35,
-                        width: 140,
-                        height: 70
-                    )),
-                    with: .radialGradient(
-                        gradient2,
-                        center: caustic2Center,
-                        startRadius: 0,
-                        endRadius: 80
-                    )
-                )
-            }
-            
-            context.drawLayer { ctx in
-                let gradient3 = Gradient(colors: [
-                    Color.white.opacity(0.15),
-                    Color.clear
-                ])
-                ctx.fill(
-                    Path(ellipseIn: CGRect(
-                        x: caustic3Center.x - 50,
-                        y: caustic3Center.y - 25,
-                        width: 100,
-                        height: 50
-                    )),
-                    with: .radialGradient(
-                        gradient3,
-                        center: caustic3Center,
-                        startRadius: 0,
-                        endRadius: 60
-                    )
-                )
-            }
-            
-            // Keep caustics smooth; tiny sparkles tend to read as artifacts on moving glass.
-        }
-        .blendMode(.plusLighter)
-    }
-}
-
-// Subtle moving caustics so refraction reads against a flat background.
-private struct CausticPillBackdrop: View {
-    var body: some View {
-        TimelineView(.animation(minimumInterval: 1.0 / 30.0)) { timeline in
-            let t = timeline.date.timeIntervalSinceReferenceDate
-            let slow = t * 0.12
-            let mid = t * 0.18
-
-            ZStack {
-                RadialGradient(
-                    colors: [
-                        Color.white.opacity(0.18),
-                        Color.clear
-                    ],
-                    center: UnitPoint(x: 0.2 + 0.12 * sin(slow), y: 0.3 + 0.1 * cos(slow)),
-                    startRadius: 0,
-                    endRadius: 140
-                )
-                RadialGradient(
-                    colors: [
-                        Color.cyan.opacity(0.2),
-                        Color.clear
-                    ],
-                    center: UnitPoint(x: 0.8 + 0.1 * cos(mid), y: 0.7 + 0.08 * sin(mid)),
-                    startRadius: 0,
-                    endRadius: 120
-                )
-            }
-            .blendMode(.plusLighter)
-            .opacity(0.5)
-        }
-    }
-}
-
-// MARK: - Transparent Glass Pill (removed - replaced by refractive tab glass)
-
-
-
-// MARK: - Status Pill
-
-private struct StatusPill: View {
-    let isActive: Bool
-
-    var body: some View {
-        HStack(spacing: 6) {
-            Circle()
-                .fill(isActive ? Color.green : Color.orange)
-                .frame(width: 6, height: 6)
-
-            Text(isActive ? "Active" : "Ready")
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(.white)
-        }
-        .padding(.vertical, 6)
-        .padding(.horizontal, 12)
-        .glassEffect(
-            .regular.tint(isActive ? .green : .orange),
-            in: .capsule
-        )
-    }
-}
-
 // MARK: - Liquid Background
 
 private struct LiquidBackground: View {
+    let accentColor: Color
     @Environment(\.scenePhase) private var scenePhase
     @StateObject private var motion = MotionProvider()
 
@@ -846,7 +651,6 @@ private struct LiquidBackground: View {
             let parallaxY = CGFloat(parallax.height) * 0.12
             let drift: CGFloat = 0.14
             let driftSmall: CGFloat = 0.08
-
             let x1 = CGFloat(0.84 + drift * sin(slow) + parallaxX)
             let y1 = CGFloat(0.14 + drift * cos(slow * 1.1) + parallaxY)
             let x2 = CGFloat(0.16 + drift * cos(mid) - parallaxX * 0.9)
@@ -867,19 +671,25 @@ private struct LiquidBackground: View {
                     endPoint: UnitPoint(x: clampedUnit(endX), y: clampedUnit(endY))
                 )
 
+                // Primary accent glow
                 RadialGradient(
-                    colors: [Color.cyan.opacity(0.36), .clear],
+                    colors: [accentColor.opacity(0.36), .clear],
                     center: UnitPoint(x: clampedUnit(x1), y: clampedUnit(y1)),
                     startRadius: 36,
                     endRadius: 320
                 )
+                .blendMode(.screen)
+                .blur(radius: 12)
 
+                // Secondary accent glow
                 RadialGradient(
-                    colors: [Color.cyan.opacity(0.24), .clear],
+                    colors: [accentColor.opacity(0.24), .clear],
                     center: UnitPoint(x: clampedUnit(x2), y: clampedUnit(y2)),
                     startRadius: 48,
                     endRadius: 300
                 )
+                .blendMode(.screen)
+                .blur(radius: 14)
             }
             .ignoresSafeArea()
         }
@@ -902,9 +712,310 @@ private struct LiquidBackground: View {
     }
 }
 
-// MotionProvider moved to Utilities/MotionProvider.swift
+// MotionProvider is defined in Utilities/MotionProvider.swift
 
-#Preview("ContentView") {
-    ContentView()
-        .environment(FastingStore())
+// MARK: - Bottom Pill Menu
+
+private struct BottomPillMenu: View {
+    @Binding var selectedTab: BottomTab
+    let accentColor: Color
+    let height: CGFloat
+    @State private var tabFrames: [BottomTab: CGRect] = [:]
+    @State private var dragLocation: CGPoint?
+    @State private var hoverTab: BottomTab?
+    @State private var isDragging = false
+    @StateObject private var motion = MotionProvider()
+    @Namespace private var selectionNamespace
+
+    var body: some View {
+        let pillShape = Capsule()
+        let bubblePadding = EdgeInsets(top: 5, leading: 9, bottom: 5, trailing: 9)
+
+        GlassEffectContainer(spacing: 24) {
+            ZStack {
+                GlassPillSurface(
+                    shape: pillShape,
+                    glassStyle: .clear,
+                    tint: Color.black.opacity(0.02),
+                    strokeWidth: 0.55,
+                    highlightOpacity: 0.2,
+                    showHighlight: false,
+                    innerGlowOpacity: 0,
+                    isInteractive: false,
+                    shift: glassShift
+                )
+
+                HStack(spacing: 4) {
+                    ForEach(BottomTab.allCases) { tab in
+                        Button {
+                            withAnimation(.spring(response: 0.35, dampingFraction: 0.78)) {
+                                selectedTab = tab
+                            }
+                        } label: {
+                            let isActive = activeTab == tab
+                            VStack(spacing: 5) {
+                                Image(systemName: tab.iconName)
+                                    .font(.system(size: 19, weight: .semibold))
+                                Text(tab.title)
+                                    .font(.system(size: 12.5, weight: .semibold))
+                            }
+                            .foregroundStyle(isActive ? accentColor : .white.opacity(0.92))
+                            .shadow(color: isActive ? accentColor.opacity(0.12) : .clear, radius: 6, x: 0, y: 0)
+                            .shadow(color: .black.opacity(0.18), radius: 1, x: 0, y: 0.5)
+                            .padding(bubblePadding)
+                            .background(alignment: .center) {
+                                if isActive {
+                                    GlassPillSurface(
+                                        shape: pillShape,
+                                        glassStyle: .regular,
+                                        tint: Color.black.opacity(0.12),
+                                        strokeWidth: 0.7,
+                                        highlightOpacity: 0.48,
+                                        showHighlight: true,
+                                        innerGlowOpacity: 0.28,
+                                        isInteractive: true,
+                                        shift: glassShift
+                                    )
+                                    .matchedGeometryEffect(id: "pillSelection", in: selectionNamespace)
+                                }
+                            }
+                            .frame(maxWidth: .infinity)
+                            .background(
+                                GeometryReader { proxy in
+                                    Color.clear.preference(
+                                        key: TabFramePreferenceKey.self,
+                                        value: [tab: proxy.frame(in: .named("pill"))]
+                                    )
+                                }
+                            )
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                .padding(.vertical, 5)
+                .padding(.horizontal, 6)
+            }
+        }
+        .compositingGroup()
+        .clipShape(pillShape)
+        .shadow(color: .black.opacity(0.18), radius: 14, x: 0, y: 8)
+        .shadow(color: .black.opacity(0.08), radius: 4, x: 0, y: 2)
+        .frame(height: height)
+        .coordinateSpace(name: "pill")
+        .contentShape(Capsule())
+        .simultaneousGesture(dragGesture())
+        .onPreferenceChange(TabFramePreferenceKey.self) { frames in
+            tabFrames = frames
+        }
+        .onAppear { motion.start() }
+        .onDisappear { motion.stop() }
+        .padding(.horizontal, 12)
+        .padding(.bottom, 6)
+    }
+
+    private var activeTab: BottomTab {
+        if isDragging, let hoverTab {
+            return hoverTab
+        }
+        return selectedTab
+    }
+
+    private func dragGesture() -> some Gesture {
+        DragGesture(minimumDistance: 0, coordinateSpace: .named("pill"))
+            .onChanged { value in
+                if !isDragging {
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.78)) {
+                        isDragging = true
+                    }
+                }
+                let nearest = nearestTab(to: value.location)
+                let width = selectionWidth(for: nearest ?? activeTab)
+                dragLocation = clampedLocation(value.location, selectionWidth: width)
+                hoverTab = nearest
+            }
+            .onEnded { _ in
+                if let hoverTab {
+                    withAnimation(.spring(response: 0.35, dampingFraction: 0.8)) {
+                        selectedTab = hoverTab
+                    }
+                }
+                withAnimation(.spring(response: 0.35, dampingFraction: 0.82)) {
+                    isDragging = false
+                }
+                dragLocation = nil
+                hoverTab = nil
+            }
+    }
+
+    private func nearestTab(to location: CGPoint) -> BottomTab? {
+        guard !tabFrames.isEmpty else { return nil }
+        return tabFrames.min { lhs, rhs in
+            abs(lhs.value.midX - location.x) < abs(rhs.value.midX - location.x)
+        }?.key
+    }
+
+    private func selectionWidth(for tab: BottomTab) -> CGFloat {
+        guard let frame = tabFrames[tab] else {
+            return max(60, height * 0.9)
+        }
+        return max(frame.width, height * 1.2)
+    }
+
+    private func clampedLocation(_ location: CGPoint, selectionWidth: CGFloat) -> CGPoint {
+        guard !tabFrames.isEmpty else {
+            return CGPoint(x: location.x, y: height / 2)
+        }
+        let halfWidth = selectionWidth / 2
+        let minX = tabFrames.values.map(\.minX).min() ?? location.x
+        let maxX = tabFrames.values.map(\.maxX).max() ?? location.x
+        let clampedX = min(max(location.x, minX + halfWidth), maxX - halfWidth)
+        return CGPoint(x: clampedX, y: height / 2)
+    }
+
+    private var glassShift: CGSize {
+        let tilt = motion.normalizedTilt
+        let tiltShift = CGSize(width: tilt.width * 0.1, height: tilt.height * 0.1)
+        guard let bounds = pillBounds, let dragLocation else {
+            return tiltShift
+        }
+        let normalizedX = (dragLocation.x - bounds.midX) / max(bounds.width, 1)
+        let normalizedY = (dragLocation.y - bounds.midY) / max(bounds.height, 1)
+        let dragShift = CGSize(width: normalizedX * 0.22, height: normalizedY * 0.22)
+        return CGSize(width: tiltShift.width + dragShift.width, height: tiltShift.height + dragShift.height)
+    }
+
+    private var pillBounds: CGRect? {
+        guard !tabFrames.isEmpty else { return nil }
+        let minX = tabFrames.values.map(\.minX).min() ?? 0
+        let maxX = tabFrames.values.map(\.maxX).max() ?? 0
+        let minY = tabFrames.values.map(\.minY).min() ?? 0
+        let maxY = tabFrames.values.map(\.maxY).max() ?? 0
+        return CGRect(x: minX, y: minY, width: maxX - minX, height: maxY - minY)
+    }
+}
+
+// MARK: - Tab Frame Preference Key
+
+private struct TabFramePreferenceKey: PreferenceKey {
+    static let defaultValue: [BottomTab: CGRect] = [:]
+
+    static func reduce(value: inout [BottomTab: CGRect], nextValue: () -> [BottomTab: CGRect]) {
+        value.merge(nextValue(), uniquingKeysWith: { $1 })
+    }
+}
+
+// MARK: - Glass Pill Surface
+
+private struct GlassPillSurface<S: Shape>: View {
+    let shape: S
+    let glassStyle: Glass
+    let tint: Color
+    let strokeWidth: CGFloat
+    let highlightOpacity: Double
+    let showHighlight: Bool
+    let innerGlowOpacity: Double
+    let isInteractive: Bool
+    let shift: CGSize
+
+    var body: some View {
+        let glass = isInteractive
+            ? glassStyle.tint(tint).interactive()
+            : glassStyle.tint(tint)
+
+        shape
+            .fill(.clear)
+            .glassEffect(glass, in: shape)
+            .clipShape(shape)
+            .overlay(aberrationOverlay)
+            .overlay(causticsOverlay)
+            .overlay(highlightOverlay)
+            .overlay(innerGlowOverlay)
+    }
+
+    private var aberrationOverlay: some View {
+        ZStack {
+            shape
+                .stroke(Color.cyan.opacity(0.4), lineWidth: strokeWidth)
+                .offset(x: -1.4)
+                .blur(radius: 0.3)
+                .blendMode(.screen)
+
+            shape
+                .stroke(Color.pink.opacity(0.4), lineWidth: strokeWidth)
+                .offset(x: 1.4)
+                .blur(radius: 0.3)
+                .blendMode(.screen)
+        }
+    }
+
+    private var causticsOverlay: some View {
+        ZStack {
+            RadialGradient(
+                colors: [Color.white.opacity(0.32), .clear],
+                center: UnitPoint(
+                    x: clampedUnit(0.18 + shift.width),
+                    y: clampedUnit(0.14 + shift.height)
+                ),
+                startRadius: 0,
+                endRadius: 160
+            )
+
+            RadialGradient(
+                colors: [Color.cyan.opacity(0.3), .clear],
+                center: UnitPoint(
+                    x: clampedUnit(0.82 - shift.width * 0.8),
+                    y: clampedUnit(0.86 - shift.height * 0.6)
+                ),
+                startRadius: 0,
+                endRadius: 180
+            )
+
+            RadialGradient(
+                colors: [Color.blue.opacity(0.22), .clear],
+                center: UnitPoint(
+                    x: clampedUnit(0.35 + shift.width * 0.4),
+                    y: clampedUnit(0.85 - shift.height * 0.3)
+                ),
+                startRadius: 0,
+                endRadius: 200
+            )
+        }
+        .blendMode(.screen)
+        .blur(radius: 0.4)
+        .clipShape(shape)
+    }
+
+    @ViewBuilder
+    private var highlightOverlay: some View {
+        if showHighlight {
+            shape
+                .stroke(
+                    LinearGradient(
+                        colors: [
+                            .white.opacity(highlightOpacity),
+                            .white.opacity(highlightOpacity * 0.4),
+                            .clear
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    ),
+                    lineWidth: strokeWidth
+                )
+                .blendMode(.screen)
+        }
+    }
+
+    @ViewBuilder
+    private var innerGlowOverlay: some View {
+        if innerGlowOpacity > 0 {
+            shape
+                .stroke(.white.opacity(innerGlowOpacity), lineWidth: strokeWidth)
+                .blur(radius: 6)
+                .blendMode(.screen)
+        }
+    }
+
+    private func clampedUnit(_ value: CGFloat) -> CGFloat {
+        min(max(value, 0.0), 1.0)
+    }
 }

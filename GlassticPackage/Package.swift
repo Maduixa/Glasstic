@@ -18,7 +18,10 @@ let package = Package(
         // Targets can depend on other targets in this package and products from dependencies.
         .target(
             name: "GlassticFeature",
-            exclude: ["CLAUDE.md", "Glasstic", "GlassticPackage"]
+            exclude: ["CLAUDE.md", "Views/CLAUDE.md", "ViewModels/CLAUDE.md"],
+            resources: [
+                .process("Rendering/Shaders")
+            ]
         ),
         .testTarget(
             name: "GlassticFeatureTests",
