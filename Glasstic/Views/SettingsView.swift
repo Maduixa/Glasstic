@@ -83,7 +83,7 @@ struct SettingsView: View {
     }
 
     private var currentTheme: AppTheme {
-        themes.first(where: { $0.id == selectedThemeID }) ?? themes.first!
+        themes.first(where: { $0.id == selectedThemeID }) ?? AppTheme.allThemes[0]
     }
 
     private func thresholdControl(

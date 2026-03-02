@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct CalendarPanelView: View {
-    @EnvironmentObject private var store: FastingStore
+    @Environment(FastingStore.self) private var store
     @Binding var editingSession: SessionEditorContext?
 
     private let monthOffsets = Array(-6...6)
@@ -56,7 +56,8 @@ struct CalendarPanelView: View {
 
             TabView(selection: $currentIndex) {
                 ForEach(Array(monthOffsets.enumerated()), id: \.offset) { index, offset in
-                    let monthDate = calendar.date(byAdding: .month, value: offset, to: Date())?.startOfMonth ?? Date().startOfMonth
+                    let monthDate = calendar.date(byAdding: .month, value: offset, to: Date())?
+                        .startOfMonth ?? Date().startOfMonth
                     MonthGridView(
                         month: monthDate,
                         sessions: store.sessions,
@@ -79,7 +80,7 @@ struct CalendarPanelView: View {
             guard day <= Date() else { return }
             let start = calendar.date(bySettingHour: 18, minute: 0, second: 0, of: day) ?? day
             let end = calendar.date(byAdding: .hour, value: 16, to: start) ?? start.addingTimeInterval(16 * 3600)
-            let newSession = FastingSession(
+            let newSession = FastingSessionData(
                 startDate: start,
                 endDate: end,
                 note: "Manual entry",
@@ -92,7 +93,7 @@ struct CalendarPanelView: View {
 
 private struct MonthGridView: View {
     var month: Date
-    var sessions: [FastingSession]
+    var sessions: [FastingSessionData]
     var accent: Color
     var onSelect: (Date) -> Void
 
@@ -120,7 +121,7 @@ private struct MonthGridView: View {
                         .foregroundStyle(.secondary)
                         .frame(maxWidth: .infinity)
                 }
-                ForEach(Array(days.enumerated()), id: \.offset) { index, date in
+                ForEach(Array(days.enumerated()), id: \.offset) { _, date in
                     if let date {
                         let status = dayStatus(for: date)
                         DayCell(

@@ -7,18 +7,18 @@ struct SessionEditorView: View {
     @State private var endDate: Date
     @State private var note: String
 
-    private let originalSession: FastingSession
+    private let originalSession: FastingSessionData
     let thresholds: FastingThresholds
     let isNewEntry: Bool
-    var onSave: (FastingSession) -> Void
-    var onDelete: (FastingSession) -> Void
+    var onSave: (FastingSessionData) -> Void
+    var onDelete: (FastingSessionData) -> Void
 
     init(
-        session: FastingSession,
+        session: FastingSessionData,
         thresholds: FastingThresholds,
         isNewEntry: Bool,
-        onSave: @escaping (FastingSession) -> Void,
-        onDelete: @escaping (FastingSession) -> Void
+        onSave: @escaping (FastingSessionData) -> Void,
+        onDelete: @escaping (FastingSessionData) -> Void
     ) {
         _startDate = State(initialValue: session.startDate)
         _endDate = State(initialValue: session.endDate ?? session.startDate.addingTimeInterval(16 * 3600))
@@ -47,7 +47,12 @@ struct SessionEditorView: View {
             Form {
                 Section("Timeline") {
                     DatePicker("Start", selection: $startDate, displayedComponents: [.date, .hourAndMinute])
-                    DatePicker("End", selection: $endDate, in: startDate..., displayedComponents: [.date, .hourAndMinute])
+                    DatePicker(
+                        "End",
+                        selection: $endDate,
+                        in: startDate...,
+                        displayedComponents: [.date, .hourAndMinute]
+                    )
 
                     VStack(alignment: .leading, spacing: 8) {
                         HStack {
@@ -85,12 +90,11 @@ struct SessionEditorView: View {
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") {
-                        var edited = originalSession
-                        edited.startDate = startDate
-                        edited.endDate = endDate
-                        edited.note = note
-                        edited.editedDuration = duration
-                        onSave(edited)
+                        originalSession.startDate = startDate
+                        originalSession.endDate = endDate
+                        originalSession.note = note
+                        originalSession.editedDuration = duration
+                        onSave(originalSession)
                         dismiss()
                     }
                     .disabled(duration <= 0)

@@ -13,8 +13,9 @@ struct JSONFileStore<Value: Codable> {
 
     init(fileName: String, directoryName: String = "Glasstic") {
         let fileManager = FileManager.default
-        let baseURL = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
-            ?? fileManager.urls(for: .documentDirectory, in: .userDomainMask).first!
+        let supportURLs = fileManager.urls(for: .applicationSupportDirectory, in: .userDomainMask)
+        let documentURLs = fileManager.urls(for: .documentDirectory, in: .userDomainMask)
+        let baseURL = supportURLs.first ?? documentURLs.first ?? URL(fileURLWithPath: NSTemporaryDirectory())
         let directoryURL = baseURL.appendingPathComponent(directoryName, isDirectory: true)
         if !fileManager.fileExists(atPath: directoryURL.path) {
             try? fileManager.createDirectory(at: directoryURL, withIntermediateDirectories: true)
@@ -40,7 +41,7 @@ struct JSONFileStore<Value: Codable> {
             try data.write(to: fileURL, options: .atomic)
         } catch {
             #if DEBUG
-            print("Failed to persist \(fileURL.lastPathComponent): \(error)")
+            NSLog("Failed to persist \(fileURL.lastPathComponent): \(error.localizedDescription)")
             #endif
         }
     }

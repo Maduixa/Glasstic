@@ -1,0 +1,179 @@
+# SwiftLint Configuration for Glasstic
+# Version: 0.63.0
+
+# Included paths
+included:
+  - Glasstic
+
+# Excluded paths
+excluded:
+  - Pods
+  - Carthage
+  - .build
+  - DerivedData
+  - Glasstic.xcodeproj
+  - Glasstic.xcworkspace
+
+# Disabled rules
+disabled_rules:
+  - trailing_comma # Allow trailing commas in arrays/dicts
+
+# Opt-in rules (enable additional rules)
+opt_in_rules:
+  - empty_count
+  - explicit_init
+  - first_where
+  - sorted_first_last
+  - closure_spacing
+  - contains_over_first_not_nil
+  - empty_string
+  - empty_xctest_method
+  - fallthrough
+  - fatal_error_message
+  - file_header
+  - force_unwrapping
+  - implicitly_unwrapped_optional
+  - joined_default_parameter
+  - let_var_whitespace
+  - lower_acl_than_parent
+  - nimble_operator
+  - operator_usage_whitespace
+  - overridden_super_call
+  - override_in_extension
+  - pattern_matching_keywords
+  - private_action
+  - private_outlet
+  - prohibited_super_call
+  - redundant_nil_coalescing
+  - redundant_type_annotation
+  - single_test_class
+  - static_operator
+  - unavailable_function
+  - unneeded_parentheses_in_closure_argument
+  - vertical_parameter_alignment_on_call
+  - yoda_condition
+
+# Analyzer rules (run with 'swiftlint analyze')
+analyzer_rules:
+  - explicit_self
+
+# Rule configurations
+
+# Line length: Allow up to 120 characters per line
+line_length:
+  warning: 120
+  error: 150
+  ignores_comments: true
+  ignores_urls: true
+  ignores_function_declarations: true
+  ignores_interpolated_strings: true
+
+# File length: Reasonable limits for maintainability
+file_length:
+  warning: 500
+  error: 1000
+  ignore_comment_only_lines: true
+
+# Function body length
+function_body_length:
+  warning: 50
+  error: 100
+
+# Function parameter count
+function_parameter_count:
+  warning: 6
+  error: 8
+
+# Type body length
+type_body_length:
+  warning: 300
+  error: 500
+
+# Type name: PascalCase with length limits
+type_name:
+  min_length: 3
+  max_length: 40
+  excluded:
+    - ID
+    - URL
+
+# Identifier name: camelCase with length limits
+identifier_name:
+  min_length: 2
+  max_length: 40
+  excluded:
+    - id
+    - x
+    - y
+    - z
+    - i
+    - j
+    - k
+    - db
+    - vm
+    - ui
+    - r
+    - g
+    - b
+
+# Nesting: Reasonable depth limits
+nesting:
+  type_level: 2
+
+# Cyclomatic complexity
+cyclomatic_complexity:
+  warning: 15
+  error: 25
+
+# Force unwrapping (warning only since opt-in)
+force_unwrapping: warning
+
+# Force cast (warning only)
+force_cast: warning
+
+# Force try (warning only)
+force_try: warning
+
+# Trailing whitespace
+trailing_whitespace:
+  ignores_empty_lines: true
+  ignores_comments: false
+
+# Large tuple: Maximum elements in tuples
+large_tuple:
+  warning: 3
+  error: 4
+
+# Multiple closures with trailing closure
+multiple_closures_with_trailing_closure: warning
+
+# Closure parameter position
+closure_parameter_position: error
+
+# Custom rules
+custom_rules:
+  # Ensure print statements are not committed (use logger instead)
+  no_print:
+    name: "Print Statement"
+    regex: '(^\s*print\()'
+    match_kinds:
+      - identifier
+    message: "Use proper logging instead of print() statements"
+    severity: warning
+
+  # Prefer modern async/await over completion handlers
+  prefer_async_await:
+    name: "Prefer Async/Await"
+    regex: '@escaping.*\(\s*\)\s*->\s*Void'
+    message: "Consider using async/await instead of completion handlers where possible"
+    severity: warning
+
+  # Ensure TODO/FIXME comments have context
+  todo_fixme_context:
+    name: "TODO/FIXME Context"
+    regex: '(TODO|FIXME):(?!\s+\w+)'
+    message: "TODO/FIXME must be followed by context"
+    severity: warning
+
+# Reporter type (xcode, json, csv, checkstyle, html, emoji, sonarqube)
+reporter: "xcode"

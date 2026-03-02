@@ -1,7 +1,9 @@
 import Foundation
+import SwiftData
 
-struct FastingSession: Identifiable, Codable, Equatable {
-    let id: UUID
+@Model
+final class FastingSessionData {
+    var id: UUID
     var startDate: Date
     var endDate: Date?
     var note: String
@@ -45,15 +47,18 @@ struct FastingSession: Identifiable, Codable, Equatable {
     }
 
     var calendarDay: Date {
-        Calendar.current.startOfDay(for: startDate)
+        startDate.startOfDay
+    }
+}
+
+extension Date {
+    var startOfDay: Date {
+        Calendar.current.startOfDay(for: self)
     }
 
-    func updated(endDate: Date, note: String? = nil) -> FastingSession {
-        var copy = self
-        copy.endDate = endDate
-        if let note {
-            copy.note = note
-        }
-        return copy
+    var startOfMonth: Date {
+        let calendar = Calendar.current
+        let components = calendar.dateComponents([.year, .month], from: self)
+        return calendar.date(from: components) ?? self
     }
 }
