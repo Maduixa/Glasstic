@@ -13,11 +13,12 @@ private struct RefractiveGlassModifier<S: Shape>: ViewModifier {
     let maxSampleOffset: CGSize
 
     func body(content: Content) -> some View {
+        let glass = configuredGlass()
+        let base = content.glassEffect(glass, in: shape)
+
         if reduceTransparency {
-            content.glassEffect(.identity, in: shape)
+            base
         } else {
-            let glass = configuredGlass()
-            let base = content.glassEffect(glass, in: shape)
             base.layerEffect(
                 Shader(
                     function: ShaderLibrary.liquidGlassAdvanced,
@@ -192,6 +193,7 @@ private struct ClearLiquidGlassModifier: ViewModifier {
                     ),
                     maxSampleOffset: maxSampleOffset
                 )
+                .clipShape(Capsule(style: .continuous))
         }
     }
     

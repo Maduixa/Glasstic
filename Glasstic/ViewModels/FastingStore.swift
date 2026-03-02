@@ -28,7 +28,7 @@ final class FastingStore: ObservableObject {
                 selectedThemeID: AppTheme.allThemes.first?.id
             )
         )
-        let theme = AppTheme.allThemes.first { $0.id == state.selectedThemeID } ?? AppTheme.allThemes.first!
+        let theme = AppTheme.allThemes.first { $0.id == state.selectedThemeID } ?? AppTheme.allThemes.first ?? AppTheme.defaultTheme
         self.sessions = state.sessions.sorted { $0.startDate > $1.startDate }
         self.thresholds = state.thresholds
         self.selectedTheme = theme
